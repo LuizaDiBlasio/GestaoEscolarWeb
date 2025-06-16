@@ -1,17 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using GestaoEscolarWeb.Data;
+using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 
 namespace GestaoEscolarWeb
 {
@@ -19,7 +17,7 @@ namespace GestaoEscolarWeb
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            Configuration = configuration; 
         }
 
         public IConfiguration Configuration { get; }
@@ -27,18 +25,60 @@ namespace GestaoEscolarWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddIdentity<User, IdentityRole>(cfg => //adicionar serviço de Identiy para ter o user e configurar o serviço
+            {
+                //configurações inseguras para poder fazer testes, mas em cenário déprodução deve ser o oposto
+                cfg.User.RequireUniqueEmail = true;
+                cfg.Password.RequireDigit = false;
+                cfg.Password.RequiredUniqueChars = 0;
+                cfg.Password.RequireLowercase = false;
+                cfg.Password.RequireUppercase = false;
+                cfg.Password.RequireNonAlphanumeric = false;
+                cfg.Password.RequiredLength = 6;
+
+            }).AddEntityFrameworkStores<DataContext>() //Depois do serviço implementado continua a usar o DataContext, aplicar o serviço criado à BD
+              .AddDefaultTokenProviders();
+
+            //TODO quando criar a API
+            //adicionar servico de autentificação do Token e configurar os parâmetros
+            //vai ser utilizado na autenticação do user quando for usar a API dos produtos
+            //services.AddAuthentication().AddCookie().AddJwtBearer(cfg =>
+            //{
+            //    //mandar configurações do token
+            //    cfg.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidIssuer = this.Configuration["Tokens:Issuer"],
+            //        ValidAudience = this.Configuration["Tokens:Audience"],
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Configuration["Tokens:Key"]))
+            //    };
+            //});
+
             services.AddDbContext<DataContext>(cfg =>
             {
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
 
-            services.AddControllersWithViews();
+            services.AddTransient<SeedDb>();
+
+            services.AddScoped<IUserHelper, UserHelper>();
 
             services.AddScoped<ISubjectRepository, SubjectRepository>();
 
             services.AddScoped<ICourseRepository, CourseRepository>();
 
             services.AddScoped<IConverterHelper, ConverterHelper>();
+
+            services.AddScoped<IMailHelper, MailHelper>();
+
+            //anula o ReturnUrl no Login (AccountController)
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/NotAuthorized"; //ao invés de aparecer página do login, executar a action de NotAuthorized
+                options.AccessDeniedPath = "/Account/NotAuthorized";
+            });
+
+            services.AddControllersWithViews();
 
         }
 
@@ -55,10 +95,16 @@ namespace GestaoEscolarWeb
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
+
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GestaoEscolarWeb.Data;
 using GestaoEscolarWeb.Data.Entities;
+using AspNetCoreGeneratedDocument;
+using GestaoEscolarWeb.Helpers;
 
 namespace GestaoEscolarWeb.Controllers
 {
@@ -14,15 +16,33 @@ namespace GestaoEscolarWeb.Controllers
     {
         private readonly DataContext _context;
 
-        public StudentsController(DataContext context)
+        private readonly IUserHelper _userHelper;
+        public StudentsController(DataContext context, IUserHelper userHelper)
         {
             _context = context;
+            _userHelper = userHelper;
         }
 
         // GET: Students
         public async Task<IActionResult> Index()
         {
             return View(await _context.Students.ToListAsync());
+        }
+
+        //TODO build error está aqui ou na view MyProfile
+        public async Task<IActionResult> MyProfile()
+        {
+            var username = this.User.Identity.Name; //pegar o username
+
+            var user = await _userHelper.GetUserByEmailAsync(username);
+
+            if (user == null)
+            {
+                return NotFound();  
+            }
+
+
+            return View(user);
         }
 
         // GET: Students/Details/5

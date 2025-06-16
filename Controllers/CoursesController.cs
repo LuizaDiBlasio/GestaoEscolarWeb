@@ -37,7 +37,7 @@ namespace GestaoEscolarWeb.Controllers
         // GET: Courses
         public async Task<IActionResult> Index()
         {
-            return View(_courseRepository.GetAll().OrderBy(c => c.Name));
+            return  View(_courseRepository.GetAll().OrderBy(c => c.Name));
         }
 
         // GET: Courses/Details/5

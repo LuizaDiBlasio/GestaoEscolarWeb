@@ -24,21 +24,70 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Students" asp-action="Index">Students</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Evaluations" asp-action="Index">Evaluations</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+
+                        @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Admin")) //se user está autenticado é é o admin
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin</a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li> <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Register">Users and roles</a> </li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a></li>
+                                </ul>
+                            </li>
+                        }
+
+                        @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Employee")) //se user está autenticado é é o employee
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Employee</a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Students" asp-action="Index">Students</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Evaluations" asp-action="Index">Evaluations</a></li>
+                                </ul>
+                            </li>
+                        }
+
+                        @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Student")) //se user está autenticado é é o student
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Student</a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Students" asp-action="MyProfile">My Profile</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Evaluations" asp-action="Index">Check grades</a></li>
+                                </ul>
+                            </li>
+                        }
+
+                        @if (!this.User.Identity.IsAuthenticated) //se user for anonimo
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a>
+                            </li>
+
+                        }
+
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        @if (this.User.Identity.IsAuthenticated && (this.User.IsInRole("Employee") || this.User.IsInRole("Admin") || this.User.IsInRole("Student"))) @*se estiver autenticado, mostrar username (tem a possibilidade de mudar clicando em cima do username ou de fazer logout)*@
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ChangeUser">@this.User.Identity.Name</a> @*fazer action ChangeUser com o utilizador corrente*@
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a> @*Botão de logout*@
+                            </li>
+                        }
+    
+                        @if (!this.User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a> @*link de login*@
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
