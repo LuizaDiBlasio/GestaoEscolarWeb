@@ -18,12 +18,12 @@ namespace GestaoEscolarWeb.Data.Repositories
         {
             await _context.Set<T>().AddAsync(entity); //adicionar à tabela 
 
-            await SaveAllAsync(); //método da classe mas que não está no interface 
+            await SaveAllAsync(); //salvar
         }
 
         public async Task DeleteAsync(T entity)
         {
-            _context.Set<T>().Remove(entity); //não é async
+            _context.Set<T>().Remove(entity); 
 
             await SaveAllAsync();
         }

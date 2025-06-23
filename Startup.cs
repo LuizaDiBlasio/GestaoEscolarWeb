@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Vereyon.Web;
 
 
 namespace GestaoEscolarWeb
@@ -28,7 +29,6 @@ namespace GestaoEscolarWeb
 
             services.AddIdentity<User, IdentityRole>(cfg => //adicionar serviço de Identiy para ter o user e configurar o serviço
             {
-                //configurações inseguras para poder fazer testes, mas em cenário déprodução deve ser o oposto
                 cfg.User.RequireUniqueEmail = true;
                 cfg.Password.RequireDigit = false;
                 cfg.Password.RequiredUniqueChars = 0;
@@ -59,22 +59,31 @@ namespace GestaoEscolarWeb
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            services.AddFlashMessage();
+
             services.AddTransient<SeedDb>();
 
             services.AddScoped<IUserHelper, UserHelper>();
 
+            services.AddScoped<IStudentRepository, StudentRepository>();    
+
             services.AddScoped<ISubjectRepository, SubjectRepository>();
+
+            services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
 
             services.AddScoped<ICourseRepository, CourseRepository>();
 
             services.AddScoped<IConverterHelper, ConverterHelper>();
 
+            services.AddScoped<IBlobHelper, BlobHelper>();
+
             services.AddScoped<IMailHelper, MailHelper>();
 
+            //TODO ver NotAuthorized isso vai servir
             //anula o ReturnUrl no Login (AccountController)
             services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/Account/NotAuthorized"; //ao invés de aparecer página do login, executar a action de NotAuthorized
+                options.LoginPath = "/Account/NotAuthorized"; 
                 options.AccessDeniedPath = "/Account/NotAuthorized";
             });
 

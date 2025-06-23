@@ -18,8 +18,13 @@ namespace GestaoEscolarWeb.Data.Entities
         public string Address { get; set; }
 
 
-        [Display(Name = "Image")]
+        [Display(Name = "User Image")]
         public Guid? ImageId { get; set; }
+
+
+        public string ImageFullPath => ImageId == Guid.Empty
+              ? $"/imagens/noImage.jpg" // caminho relativo à raiz da aplicação!
+    : $"https://gestaoescolar.blob.core.windows.net/imagens/{ImageId}";
 
 
         //propriedade de leitura

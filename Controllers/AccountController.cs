@@ -1,26 +1,30 @@
-﻿using GestaoEscolarWeb.Data.Entities;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using GestaoEscolarWeb.Data.Entities;
+using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+
 
 namespace GestaoEscolarWeb.Controllers
 {
     public class AccountController : Controller
     {
-        IMailHelper _mailHelper;
-        IUserHelper _userHelper;
+        private readonly IMailHelper _mailHelper;
+        private readonly IUserHelper _userHelper;
+        private readonly IBlobHelper _blobHelper;
+        private readonly IStudentRepository _studentRepository;
 
-        public AccountController(IUserHelper userHelper, IMailHelper mailHelper)
+        public AccountController(IUserHelper userHelper, IMailHelper mailHelper, IBlobHelper blobHelper,
+            IStudentRepository studentRepository)
         {
             _userHelper = userHelper;
             _mailHelper = mailHelper;
+            _blobHelper = blobHelper;
+            _studentRepository = studentRepository;
 
             //_countryRepository = countryRepository;
 
@@ -83,7 +87,7 @@ namespace GestaoEscolarWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterNewUserViewModel model) // registra o user
         {
-            if (ModelState.IsValid ) //ver se modelo é válido
+            if (ModelState.IsValid) //ver se modelo é válido
             {
                 if (model.SelectedRole == "0") // Se a opção "Select a role..." foi selecionada
                 {
@@ -96,9 +100,15 @@ namespace GestaoEscolarWeb.Controllers
 
                 var user = await _userHelper.GetUserByEmailAsync(model.Username); //buscar user  
 
-                if (user == null ) // caso user não exista, registrá-lo
+                if (user == null) // caso user não exista, registrá-lo
                 {
-                   
+                    Guid imageId = Guid.Empty; // identificador da imagem no blob (ainda não identificada)
+
+                    if (model.ImageFile != null && model.ImageFile.Length > 0) //verificar se existe a imagem
+                    {
+                        imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "imagens"); //manda gravar o ficheiros na pasta imagens 
+                    }
+
                     user = new User
                     {
                         FirstName = model.FirstName,
@@ -106,10 +116,11 @@ namespace GestaoEscolarWeb.Controllers
                         Email = model.Username,
                         UserName = model.Username,
                         Address = model.Address,
-                        PhoneNumber = model.PhoneNumber
+                        PhoneNumber = model.PhoneNumber,
+                        ImageId = imageId,
                     };
 
-                    var result = await _userHelper.AddUserAsync(user, model.Password); //add user depois de criado
+                    var result = await _userHelper.AddUserAsync(user, "123456"); //add user depois de criado
 
                     if (result != IdentityResult.Success) // caso não consiga criar user
                     {
@@ -126,11 +137,31 @@ namespace GestaoEscolarWeb.Controllers
                         case "Employee":
                             await _userHelper.AddUserToRoleAsync(user, "Employee");
                             break;
+                        case "Admin":
+                            await _userHelper.AddUserToRoleAsync(user, "Admin");
+                            break;
                         default:
                             ModelState.AddModelError(string.Empty, "The user couldn't be created, you need to choose a role");
 
                             model.AvailableRoles = _userHelper.RolesToSelectList();
-                            return View(model); 
+                            return View(model);
+                    }
+
+                    var isStudent = await _userHelper.IsUserInRoleAsync(user, "Student");
+
+                    if (isStudent) // caso o user seja um estudante, criar estudante
+                    {
+                        Student student = new Student
+                        {
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Email = user.UserName,
+                            Address = user.Address,
+                            PhoneNumber = user.PhoneNumber,
+                            UserStudentId = user.Id,
+                        };
+
+                        await _studentRepository.CreateAsync(student);
                     }
 
                     string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
@@ -156,7 +187,7 @@ namespace GestaoEscolarWeb.Controllers
                     //se não conseguiu enviar email:
                     ModelState.AddModelError(string.Empty, "The user couldn't be logged");
 
-                    
+
                 }
                 else
                 {
@@ -177,29 +208,29 @@ namespace GestaoEscolarWeb.Controllers
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token)) //verificar parâmetros
             {
-                return NotFound();
+                return new NotFoundViewResult("UserNotFound");
             }
 
             var user = await _userHelper.GetUserByIdAsync(userId); //verificar user
 
             if (user == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("UserNotFound");
             }
 
             var result = await _userHelper.ConfirmEmailAsync(user, token); //resposta do email, ver se user e token dão match
 
             if (!result.Succeeded)
             {
-                return NotFound();
+                return new NotFoundViewResult("UserNotFound");
             }
 
             var passwordToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
 
             var model = new ResetPasswordViewModel
             {
-                Username = user.Email, 
-                Token = passwordToken         
+                Username = user.Email,
+                Token = passwordToken
             };
 
             ModelState.Remove("Token"); //limpa o ModelState para evitar o uso do token antigo de confirmação de email
@@ -249,8 +280,53 @@ namespace GestaoEscolarWeb.Controllers
                 model.Address = user.Address;
                 model.PhoneNumber = user.PhoneNumber;
             }
-               
+
             return View(model); //retornar model novo para view
+        }
+
+        public IActionResult RecoverPassword() //direciona para view de recover da password
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> RecoverPassword(RecoverPasswordViewModel model) //recebe modelo com dados recuperar password
+        {
+            if (this.ModelState.IsValid)//verificar se modelo é válido
+            {
+                var user = await _userHelper.GetUserByEmailAsync(model.Email); //buscar user
+                if (user == null)
+                {
+                    //mensagem de erro caso user não exista
+                    ModelState.AddModelError(string.Empty, "The email doesn't correspond to a registered user.");
+                    return View(model);
+                }
+
+                // caso exista user prosseguir e gerar o token
+                var myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //confirma email para depois gerar o token de reset password no GET de RestPassword
+
+                var link = this.Url.Action( //criar o link de reset da password
+                    "ResetPassword", "Account", new
+                    {
+                        userId = user.Id,
+                        token = myToken
+                    },
+                    protocol: HttpContext.Request.Scheme);
+
+                Response response = _mailHelper.SendEmail(model.Email, "Shop Password Reset", $"<h1>Shop Password Reset</h1>" + //mandar o email
+                    $"To reset the password click in this link </br><br/>" +
+                    $"<a href = \"{link}\">Reset Password</a>");
+
+                if (response.IsSuccess) //se correr tudo bem
+                {
+                    this.ViewBag.Message = "The instructions to recover your password has been sent to email.";
+                }
+
+                return this.View();
+            }
+
+            return this.View(model);
         }
 
 
@@ -263,12 +339,12 @@ namespace GestaoEscolarWeb.Controllers
 
                 if (user != null) //caso user exista, user com propridades registradas no modelo
                 {
-                    
+
                     user.FirstName = model.FirstName;
                     user.LastName = model.LastName;
                     user.Address = model.Address;
                     user.PhoneNumber = model.PhoneNumber;
-                    
+
                     var response = await _userHelper.UpdateUserAsync(user); //fazer update do user
 
                     if (response.Succeeded)
@@ -318,6 +394,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         public IActionResult NotAuthorized()
+        {
+            return View();
+        }
+
+        public IActionResult UserNotFound()
         {
             return View();
         }

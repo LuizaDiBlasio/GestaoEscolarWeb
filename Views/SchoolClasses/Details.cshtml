@@ -1,0 +1,97 @@
+﻿@model GestaoEscolarWeb.Data.Entities.SchoolClass
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Class details</h2>
+<br />
+<div class="row">
+    <div class="col-md-8">
+        <dl class="row">
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Course.Name)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Course.Name)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.SchoolYear)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.SchoolYear)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Shift)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Shift)
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<br />
+<h4>Students</h4>
+@if (Model.Students == null || Model.Students.Count == 0)
+{
+    <h5>No students in this class</h5>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Students.FirstOrDefault().FullName)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Students.OrderBy(c => c.FullName))
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FullName)
+                    </td>
+                </tr>
+            }
+    </tbody>
+</table>
+}
+<br />
+<h4>Subjects</h4>
+@if (Model.Course.CourseSubjects == null || Model.Course.CourseSubjects.Count == 0)
+{
+    <h5>No this class has no subjects</h5>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Course.CourseSubjects.FirstOrDefault().Name)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Course.CourseSubjects.OrderBy(s => s.Name))
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<br />
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+

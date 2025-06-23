@@ -26,9 +26,9 @@ namespace GestaoEscolarWeb.Data.Entities
 
 
         [Display(Name = "Student Status")]
-        public int StudentStatus { get; set; }  
+        public int StudentStatus { get; set; }
 
-
+        //TODO ver se isso vai ser necessário
         public User UserAudit { get; set; }
     }
 }

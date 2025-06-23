@@ -4,11 +4,11 @@
     ViewData["Title"] = "Students";
 }
 
-<h1>Index</h1>
+<h2>Students</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>  | 
-    <a asp-area="" asp-controller="Enrollments" asp-action="Index">Enrollments</a>
+    <a asp-action="Create">Register new student</a>  | 
+    <a asp-area="" asp-controller="Enroll student" asp-action="Index">Enrollments</a>
 </p>
 
 
@@ -61,12 +61,16 @@
                 @Html.DisplayFor(modelItem => item.Email)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ProfileImageId)
+                @if (!string.IsNullOrEmpty(item.ImageFullPath))
+                {
+                    <img src="@Url.Content(item.ImageFullPath)" alt="Image" style="width:100px;height:150px;max-width:100%;height:auto;" />
+                }
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |
+                    <a asp-action="Enrollments" asp-route-id="@item.Id">Enroll</a>
             </td>
         </tr>
 }

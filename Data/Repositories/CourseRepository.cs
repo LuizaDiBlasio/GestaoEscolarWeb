@@ -1,5 +1,7 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,11 +16,30 @@ namespace GestaoEscolarWeb.Data.Repositories
             _context = context;
         }
 
-        public async Task<Course> GetCourseWithSubjectsByIdAsync(int id) //o GetByIdAsync é lazyload, não carrega as listas
+        public IEnumerable<SelectListItem> GetComboCourses()
+        {
+            var list = _context.Courses.Select(c => new SelectListItem 
+            {
+                //preencher as propriedades da combobox
+                Text = c.Name,
+                Value = c.Id.ToString()
+            }).OrderBy(i => i.Text).ToList(); //ordenar por nome
+
+            //primeiro item fora do range para colocar um placeholder
+            list.Insert(0, new SelectListItem
+            {
+                Text = "Select a course...",
+                Value = "0"
+            });
+
+            return list; //vai direto pro html na combo
+        }
+
+        public async Task<Course> GetCourseSubjectsAndSchoolClassesByIdAsync(int id) //o GetByIdAsync é lazyload, não carrega as listas
         {
             return await _context.Set<Course>() //ir para a tabela course
            .Include(c => c.CourseSubjects) // Isso carregará os Subjects relacionados
-           //.ThenInclude(cs => cs.UserAudit) // quando precisar incluir UserAudit dos Subjects
+           .Include(sc => sc.SchoolClasses)
            .FirstOrDefaultAsync(e => e.Id == id);
         }
     }

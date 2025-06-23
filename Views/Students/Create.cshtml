@@ -1,16 +1,15 @@
-﻿@model GestaoEscolarWeb.Data.Entities.Student
+﻿@model CreateEditStudentViewModel
 
 @{
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<h2>Register Student</h2>
 
-<h4>Student</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="FirstName" class="control-label"></label>
@@ -24,7 +23,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="BirthDate" class="control-label"></label>
-                <input asp-for="BirthDate" class="form-control" />
+                <div class="input-group date" data-provide="datepicker">
+                    <input type="text" asp-for="BirthDate" class="form-control" placeholder="Select your birthdate..." />
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                    </div>
+                </div>
                 <span asp-validation-for="BirthDate" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -42,11 +46,19 @@
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="ProfileImageId" class="control-label"></label>
-                <input asp-for="ProfileImageId" class="form-control" />
-                <span asp-validation-for="ProfileImageId" class="text-danger"></span>
+                <label asp-for="SelectedSchoolClassId" class="control-label"></label>
+                <select asp-for="SelectedSchoolClassId" asp-items="Model.AvailableSchoolClasses" class="form-control"></select>
+                <span asp-validation-for="SelectedSchoolClassId" class="text-danger"></span>
             </div>
+
+            <div class="form-group">
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" class="form-control" type="file" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+           
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -54,10 +66,30 @@
     </div>
 </div>
 
+<div class="text-success">
+    <p>
+        @ViewBag.Message @*Menssagem de confirmação do envio de email*@
+    </p>
+</div>
+
+
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#BirthDate').datepicker({
+                orientation: "bottom",
+                autoclose: true,
+                format: "mm/dd/yyyy",
+                changeMonth: true,     // dropdown para selecionar o mês
+                changeYear: true,      // dropdown para selecionar o ano
+                yearRange: "-100:+0"   // intervalo de anos para o dropdown
+            });
+        });
+    </script>
 }

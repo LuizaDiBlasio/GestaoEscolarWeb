@@ -1,8 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using GestaoEscolarWeb.Data;
 using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
+using GestaoEscolarWeb.Helpers;
+using GestaoEscolarWeb.Migrations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,13 +33,13 @@ namespace GestaoEscolarWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound(); //TODO Mudar para view personalizada
+                return new NotFoundViewResult("SubjectNotFound");
             }
 
             var subject = await _subjectRepository.GetByIdAsync(id.Value);
             if (subject == null)
             {
-                return NotFound(); //TODO Mudar para view personalizada
+                return new NotFoundViewResult("SubjectNotFound");
             }
 
             return View(subject);
@@ -52,7 +55,6 @@ namespace GestaoEscolarWeb.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Subject subject)
         {
             if (ModelState.IsValid)
@@ -68,13 +70,13 @@ namespace GestaoEscolarWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();//TODO Mudar para view personalizada
+                return new NotFoundViewResult("SubjectNotFound");
             }
 
             var subject = await _subjectRepository.GetByIdAsync(id.Value);
             if (subject == null)
             {
-                return NotFound();//TODO Mudar para view personalizada
+                return new NotFoundViewResult("SubjectNotFound");
             }
             return View(subject);
         }
@@ -83,12 +85,11 @@ namespace GestaoEscolarWeb.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Subject subject)
         {
             if (id != subject.Id)
             {
-                return NotFound(); //TODO Mudar para view personalizada
+                return new NotFoundViewResult("SubjectNotFound");
             }
 
             if (ModelState.IsValid)
@@ -101,7 +102,7 @@ namespace GestaoEscolarWeb.Controllers
                 {
                     if (!await _subjectRepository.ExistAsync(id))
                     {
-                        return NotFound(); //TODO Mudar para view personalizada
+                        return new NotFoundViewResult("SubjectNotFound");
                     }
                     else
                     {
@@ -116,33 +117,68 @@ namespace GestaoEscolarWeb.Controllers
         // GET: Subjects/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            //TODO Resolver o delete em cascata
+            
             if (id == null)
             {
-                return NotFound(); //TODO Mudar para view personalizada
+                return new NotFoundViewResult("SubjectNotFound");
             }
 
             var subject = await _subjectRepository.GetByIdAsync(id.Value);
             if (subject == null)
             {
-                return NotFound(); //TODO Mudar para view personalizada
+                return new NotFoundViewResult("SubjectNotFound");
             }
 
-            return View(subject);
+            try
+            {
+                await _subjectRepository.DeleteAsync(subject);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch(Exception ex)
+            {
+                ViewBag.ErrorTitle = $"Failed to delete subject '{subject.Name}'.";
+
+                string errorMessage = "An unexpected database error occurred.";
+
+                if (ex.InnerException != null)
+                {
+                    errorMessage = ex.InnerException.Message;
+                }
+
+                ViewBag.ErrorMessage = errorMessage;
+
+                return View("Error");
+            }
+
+            
         }
 
         // POST: Subjects/Delete/5
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var subject = await _subjectRepository.GetByIdAsync(id);
+            //TODO Resolver o delete em cascata
+            var subject = await _subjectRepository.GetSubjectWithCoursesAsync(id);
+
+            if (subject == null)
+            {
+                return new NotFoundViewResult("SubjectNotFound");
+            }
+
+            if (subject.SubjectCourses != null)
+            {
+                subject.SubjectCourses.Clear(); // limpar tabela de join para relações desta subject
+            }
 
             await _subjectRepository.DeleteAsync(subject); 
             
             return RedirectToAction(nameof(Index));
         }
 
-        
+        public IActionResult SubjectNotFound()
+        {
+            return View();  
+        }
     }
 }

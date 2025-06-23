@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Vereyon.Web;
 
 
 namespace GestaoEscolarWeb.Controllers
@@ -23,7 +25,10 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IConverterHelper _converterHelper;
 
-        public CoursesController(DataContext context, ISubjectRepository subjectRepository, ICourseRepository courseRepository, IConverterHelper converterHelper)
+        private readonly IFlashMessage _flashMessage;
+
+        public CoursesController(DataContext context, ISubjectRepository subjectRepository, ICourseRepository courseRepository, 
+            IConverterHelper converterHelper, IFlashMessage flashMessage)
         {
             _context = context;
 
@@ -32,6 +37,8 @@ namespace GestaoEscolarWeb.Controllers
             _courseRepository = courseRepository;
 
             _converterHelper = converterHelper;
+
+            _flashMessage = flashMessage;
         }
 
         // GET: Courses
@@ -45,13 +52,13 @@ namespace GestaoEscolarWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound(); //TODO fazer notfound personalizado 
+                return new NotFoundViewResult("CourseNotFound");
             }
 
-            var course = await _courseRepository.GetByIdAsync(id.Value);
+            var course = await _courseRepository.GetCourseSubjectsAndSchoolClassesByIdAsync(id.Value);
             if (course == null)
             {
-                return NotFound(); //TODO fazer notfound personalizado
+                return new NotFoundViewResult("CourseNotFound");
             }
 
             return View(course);
@@ -82,7 +89,6 @@ namespace GestaoEscolarWeb.Controllers
                     Name = model.Name,
                     StartDate = model.StartDate,
                     EndDate = model.EndDate,
-                    //TODO UserAudit = ... (definir quando fizer os users)
                     CourseSubjects = new List<Subject>() // Inicializar a lista de Subjects
                 };
 
@@ -115,13 +121,13 @@ namespace GestaoEscolarWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound(); //TODO fazer notfound personalizado
+                return new NotFoundViewResult("CourseNotFound");
             }
 
-            var course = await _courseRepository.GetCourseWithSubjectsByIdAsync(id.Value);
+            var course = await _courseRepository.GetCourseSubjectsAndSchoolClassesByIdAsync(id.Value);
             if (course == null)
             {
-                return NotFound(); //TODO fazer notfound personalizado
+                return new NotFoundViewResult("CourseNotFound");
             }
 
             var model = _converterHelper.ToCourseViewModel(course); //converter para model
@@ -140,18 +146,17 @@ namespace GestaoEscolarWeb.Controllers
         {
             if (id != model.Id)
             {
-                return NotFound(); //TODO fazer notfound personalizado
+                return new NotFoundViewResult("CourseNotFound");
             }
 
             if (ModelState.IsValid)
             {
-                var course = await _courseRepository.GetCourseWithSubjectsByIdAsync(id); //buscar curso com subjects
+                var course = await _courseRepository.GetCourseSubjectsAndSchoolClassesByIdAsync(id); //buscar curso com subjects
 
                 //atualizar propriedades
                 course.Name = model.Name;
                 course.StartDate = model.StartDate;
                 course.EndDate = model.EndDate;
-                // course.UserAudit = model.UserAudit; // Atualizar se UserAudit quando fizer users
 
                 // atualizar listas de subjects
                 var selectedSubjectIdsSet = new List<int>(model.SelectedSubjectIds ?? new List<int>());
@@ -206,17 +211,16 @@ namespace GestaoEscolarWeb.Controllers
 
         // GET: Courses/Delete/5
         public async Task<IActionResult> Delete(int? id)
-        {
-            //TODO resolver o delete em cascata
+        { 
             if (id == null)
             {
-                return NotFound(); //TODO fazer notfound personalizado
+                return new NotFoundViewResult("CourseNotFound");
             }
 
             var course = await _courseRepository?.GetByIdAsync(id.Value);
             if (course == null)
             {
-                return NotFound(); //TODO fazer notfound personalizado
+                return new NotFoundViewResult("CourseNotFound");
             }
 
             return View(course);
@@ -224,14 +228,52 @@ namespace GestaoEscolarWeb.Controllers
 
         // POST: Courses/Delete/5
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var course = await _courseRepository.GetByIdAsync(id);
+            var course = await _courseRepository.GetCourseSubjectsAndSchoolClassesByIdAsync(id);
 
-            await _courseRepository.DeleteAsync(course);
+            if (course == null)
+            {
+                return new NotFoundViewResult("CourseNotFound");
+            }
+            if (course.SchoolClasses != null && course.SchoolClasses.Any())
+            {
+                _flashMessage.Danger($"{course.Name} can't be deleted, school classes belong to this course.");
+                return RedirectToAction(nameof(Delete), new { id = course.Id });
+            }
 
-            return RedirectToAction(nameof(Index));
+            if (course.CourseSubjects != null)
+            {
+                course.CourseSubjects.Clear(); // limpar tabela de join para relações deste course
+            }
+
+            try
+            {
+                await _courseRepository.DeleteAsync(course);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch(Microsoft.EntityFrameworkCore.DbUpdateException ex)
+            {
+                ViewBag.ErrorTitle = $"Failed to delete course '{course.Name}'.";
+
+                string errorMessage = "An unexpected database error occurred.";
+
+                if (ex.InnerException != null)
+                {
+                    errorMessage = ex.InnerException.Message;
+                }
+
+                ViewBag.ErrorMessage = errorMessage;
+
+                return View("Error");
+            }
+           
+        }
+
+        public IActionResult CourseNotFound()
+        {
+            return View();  
         }
 
     }

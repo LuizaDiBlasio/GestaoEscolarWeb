@@ -8,17 +8,31 @@ namespace GestaoEscolarWeb.Data.Entities
     {
         public int Id { get; set; }
 
+
         [Required]
         [Display(Name = "School Year")]
         public int SchoolYear { get; set; }
 
         [Required]
-        public string Course { get; set; }
+        public int CourseId { get; set; }
 
         [Required]
-        public string Shift { get; set; }   
+        public Course Course { get; set; }
 
+
+        [Required]
+        public string Shift { get; set; }
+
+
+        //TODO ver se isso vai ser necessário
         public User UserAudit { get; set; }
+
+        public string CourseYearShift => $"{Course.Name} - {SchoolYear} - {Shift}"; //propriedade ara a view Details
+
+        public override string ToString()
+        {
+            return $"{Course.Name} - {SchoolYear} - {Shift}";   //override para a lista AvailableSchooClasses (combobox)
+        }
 
         public ICollection<Student> Students { get; set; } 
     }

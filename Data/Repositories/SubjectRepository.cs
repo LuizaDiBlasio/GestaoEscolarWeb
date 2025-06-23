@@ -33,5 +33,13 @@ namespace GestaoEscolarWeb.Data.Repositories
             return subjectsToSelect;    
         }
 
+        public async Task<Subject> GetSubjectWithCoursesAsync(int id)
+        {
+            var subject = await _context.Subjects
+                               .Include(s => s.SubjectCourses)
+                               .FirstOrDefaultAsync(s => s.Id == id);    
+
+            return subject; 
+        }
     }
 }

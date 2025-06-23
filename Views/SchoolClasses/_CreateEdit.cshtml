@@ -1,0 +1,21 @@
+﻿@model GestaoEscolarWeb.Models.CreateEditSchoolClassViewModel
+
+@{
+    ViewData["Title"] = "_CreateEdit";
+}
+
+<div class="form-group">
+    <label asp-for="SelectedYear" class="control-label"></label>
+    <select asp-for="SelectedYear" asp-items="Model.SchoolYears" class="form-control"></select>
+    <span asp-validation-for="SelectedYear" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="SelectedShiftId" class="control-label"></label>
+    <select asp-for="SelectedShiftId" asp-items="Model.Shifts" class="form-control"></select>
+    <span asp-validation-for="SelectedShiftId" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="SelectedCourseId" class="control-label"></label>
+    <select asp-for="SelectedCourseId" asp-items="Model.AvailableCourses" class="form-control"></select>
+    <span asp-validation-for="SelectedCourseId" class="text-danger"></span>
+</div>

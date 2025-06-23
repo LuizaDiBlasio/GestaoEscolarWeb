@@ -4,10 +4,9 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h2>Course details</h2>
 
 <div>
-    <h4>Course</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
@@ -38,7 +37,58 @@
             @Html.DisplayFor(model => model.EndDate)
         </dd>
     </dl>
+    <br />
+    <h4>Subjects</h4>
+    @if (Model.CourseSubjects == null || Model.CourseSubjects.Count == 0)
+    {
+        <h5>No subjects for this course</h5>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var subject in Model.CourseSubjects.OrderBy(s => s.Name))
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => subject.Name)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 </div>
+<br />
+<h4>School classes that belong to this course:</h4>
+@if (Model.SchoolClasses == null || Model.SchoolClasses.Count == 0)
+{
+    <h5>No school classes belong to this course</h5>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Class Id</th>
+                <th>Year</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var schoolClass in Model.SchoolClasses.OrderBy(sc => sc.SchoolYear))
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => schoolClass.Id)</td>
+                    <td>@Html.DisplayFor(modelItem => schoolClass.SchoolYear)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>

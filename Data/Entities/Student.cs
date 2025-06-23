@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -22,9 +21,10 @@ namespace GestaoEscolarWeb.Data.Entities
         public string LastName { get; set; }
 
 
-        [Required]
         [Display(Name = "Date of Birth")]
-        public DateTime BirthDate { get; set; }
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime? BirthDate { get; set; }
 
 
         [Required]
@@ -40,21 +40,31 @@ namespace GestaoEscolarWeb.Data.Entities
         public string Email { get; set; }
 
 
+        public string UserStudentId { get; set; }
+
+
         [Display(Name = "User Id")]
         public User UserStudent { get; set; }
 
 
+        //TODO ver se isso vai ser necessário
         public User UserAudit { get; set; }
 
 
-        [Required]
         [Display(Name = "School Class")]
-        public SchoolClass SchoolClass { get; set; }
+        public SchoolClass? SchoolClass { get; set; }
 
 
-        [Required]
+        public int? SchoolClassId { get; set; }
+
+
         [Display(Name = "Profile Image")]
         public Guid ProfileImageId { get; set; }
+
+
+        public string ImageFullPath => ProfileImageId == Guid.Empty
+             ? $"/imagens/noImage.jpg" // caminho relativo à raiz da aplicação!
+   : $"https://gestaoescolar.blob.core.windows.net/imagens/{ProfileImageId}";
 
 
         public ICollection<Evaluation> Evaluations { get; set; }

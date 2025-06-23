@@ -24,9 +24,7 @@ namespace GestaoEscolarWeb.Data
 
         public DbSet<Student> Students { get; set; }
 
-        public DbSet<Alert> Alerts { get; set; }
-
-        public DbSet<User> Users { get; set; }  
+        public DbSet<Alert> Alerts { get; set; } 
 
         public DbSet<SystemData> SystemData { get; set; }
 

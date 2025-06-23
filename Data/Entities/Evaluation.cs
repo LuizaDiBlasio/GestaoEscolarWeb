@@ -19,9 +19,9 @@ namespace GestaoEscolarWeb.Data.Entities
 
 
         [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = false)]
-        public double Score { get ; set ; }    
+        public double Score { get ; set ; }
 
-
+        //TODO ver se isso vai ser necessário
         public User UserAudit {  get ; set ; } 
     }
 }

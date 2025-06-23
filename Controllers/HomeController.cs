@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using GestaoEscolarWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using GestaoEscolarWeb.Models;
+
 
 namespace GestaoEscolarWeb.Controllers
 {
@@ -32,6 +29,12 @@ namespace GestaoEscolarWeb.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [Route ("error/404")]
+        public IActionResult Error404()
+        {
+            return View();
         }
     }
 }

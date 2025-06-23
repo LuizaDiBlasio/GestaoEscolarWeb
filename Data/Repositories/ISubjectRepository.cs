@@ -9,5 +9,7 @@ namespace GestaoEscolarWeb.Data.Repositories
     public interface ISubjectRepository : IGenericRepository<Subject>
     {
         public Task<List<SelectListItem>> GetSubjectsToSelectAsync();
+
+        public Task<Subject> GetSubjectWithCoursesAsync(int id);
     }
 }

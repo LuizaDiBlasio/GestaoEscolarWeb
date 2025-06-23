@@ -4,57 +4,129 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h2>Student Details</h2>
 
 <div>
-    <h4>Student</h4>
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
+
+    <div class="row">
+        <div class="col-md-8">
+            <dl class="row"> 
+                <dt class = "col-sm-3"> 
             @Html.DisplayNameFor(model => model.FirstName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FirstName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BirthDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BirthDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PhoneNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PhoneNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Address)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProfileImageId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProfileImageId)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.FirstName)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.LastName)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.LastName)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.BirthDate)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.BirthDate)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.PhoneNumber)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Address)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Address)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Email)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Email)
+            </dd>
+            <dt class="col-sm-3">
+                School Class
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.SchoolClass == null)
+                {
+                    <span class="text-muted">Not assigned to any school class</span>
+                }
+                else
+                {
+                    @Html.DisplayFor(model => model.SchoolClass.CourseYearShift)
+                }
+            </dd>
+            </dl>
+        </div>
+
+        <div class="col-md-4 text-center">
+            <img src="@Url.Content(Model.ImageFullPath)" alt="Profile Image" class="img-thumbnail" style="max-width:200px; max-height:250px; object-fit: cover;" /> 
+        </div>
+    </div> 
+
+            <hr />
+
+            <h4 class="mt-4">Enrollments</h4>
+            @if (Model.Enrollments == null || !Model.Enrollments.Any())
+            {
+                <p class="text-muted">Student is not enrolled in any subjects</p>
+            }
+            else
+            {
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var enrollment in Model.Enrollments.OrderBy(e => e.Subject))
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => enrollment.Subject)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+
+            <h4 class="mt-4">Evaluations</h4>
+            @if (Model.Evaluations == null || !Model.Evaluations.Any())
+            {
+                <p class="text-muted">Student doesn't have any evaluations</p>
+            }
+            else
+            {
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Grade</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var evaluation in Model.Evaluations.OrderBy(e => e.Subject))
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => evaluation.Subject)</td>
+                                <td>@Html.DisplayFor(modelItem => evaluation.Score)</td>
+                                <td>@Html.DisplayFor(modelItem => evaluation.ExamDate)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+
+        </div>
+
+        <hr />
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a> |
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>

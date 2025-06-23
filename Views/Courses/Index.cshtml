@@ -1,15 +1,14 @@
 ﻿@model IEnumerable<GestaoEscolarWeb.Data.Entities.Course>
 
 @{
-    ViewData["Title"] = "Courses";
+    ViewData["Title"] = "Index";
 }
 
 <h1>Courses</h1>
-
 @if (this.User.IsInRole("Admin"))
 {
     <p>
-        <a asp-action="Create">Create New</a>
+        <a asp-action="Create">Add courses</a>
     </p>
 }
 
