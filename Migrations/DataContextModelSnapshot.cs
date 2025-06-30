@@ -77,12 +77,7 @@ namespace GestaoEscolarWeb.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserAuditId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserAuditId");
 
                     b.ToTable("Courses");
                 });
@@ -94,7 +89,7 @@ namespace GestaoEscolarWeb.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("AbscenceRecord")
+                    b.Property<int>("AbsenceRecord")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("EnrollmentDate")
@@ -106,19 +101,15 @@ namespace GestaoEscolarWeb.Migrations
                     b.Property<int>("StudentStatus")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SubjectId")
+                    b.Property<int>("SubjectId")
                         .HasColumnType("int");
-
-                    b.Property<string>("UserAuditId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
-
                     b.HasIndex("SubjectId");
 
-                    b.HasIndex("UserAuditId");
+                    b.HasIndex("StudentId", "SubjectId")
+                        .IsUnique();
 
                     b.ToTable("Enrollments");
                 });
@@ -133,17 +124,14 @@ namespace GestaoEscolarWeb.Migrations
                     b.Property<DateTime>("ExamDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("Score")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Score")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("StudentId")
+                    b.Property<int>("StudentId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SubjectId")
+                    b.Property<int>("SubjectId")
                         .HasColumnType("int");
-
-                    b.Property<string>("UserAuditId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -151,7 +139,8 @@ namespace GestaoEscolarWeb.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.HasIndex("UserAuditId");
+                    b.HasIndex("ExamDate", "SubjectId")
+                        .IsUnique();
 
                     b.ToTable("Evaluations");
                 });
@@ -173,14 +162,9 @@ namespace GestaoEscolarWeb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserAuditId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
-
-                    b.HasIndex("UserAuditId");
 
                     b.ToTable("SchoolClasses");
                 });
@@ -203,12 +187,7 @@ namespace GestaoEscolarWeb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("LastName")
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -223,17 +202,12 @@ namespace GestaoEscolarWeb.Migrations
                     b.Property<int?>("SchoolClassId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserAuditId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("UserStudentId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("SchoolClassId");
-
-                    b.HasIndex("UserAuditId");
 
                     b.HasIndex("UserStudentId");
 
@@ -255,12 +229,7 @@ namespace GestaoEscolarWeb.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("UserAuditId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserAuditId");
 
                     b.ToTable("Subjects");
                 });
@@ -303,16 +272,12 @@ namespace GestaoEscolarWeb.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("FullName")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("ImageId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -515,15 +480,6 @@ namespace GestaoEscolarWeb.Migrations
                     b.Navigation("UserAudit");
                 });
 
-            modelBuilder.Entity("GestaoEscolarWeb.Data.Entities.Course", b =>
-                {
-                    b.HasOne("GestaoEscolarWeb.Data.Entities.User", "UserAudit")
-                        .WithMany()
-                        .HasForeignKey("UserAuditId");
-
-                    b.Navigation("UserAudit");
-                });
-
             modelBuilder.Entity("GestaoEscolarWeb.Data.Entities.Enrollment", b =>
                 {
                     b.HasOne("GestaoEscolarWeb.Data.Entities.Student", "Student")
@@ -534,38 +490,32 @@ namespace GestaoEscolarWeb.Migrations
 
                     b.HasOne("GestaoEscolarWeb.Data.Entities.Subject", "Subject")
                         .WithMany()
-                        .HasForeignKey("SubjectId");
-
-                    b.HasOne("GestaoEscolarWeb.Data.Entities.User", "UserAudit")
-                        .WithMany()
-                        .HasForeignKey("UserAuditId");
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Student");
 
                     b.Navigation("Subject");
-
-                    b.Navigation("UserAudit");
                 });
 
             modelBuilder.Entity("GestaoEscolarWeb.Data.Entities.Evaluation", b =>
                 {
                     b.HasOne("GestaoEscolarWeb.Data.Entities.Student", "Student")
                         .WithMany("Evaluations")
-                        .HasForeignKey("StudentId");
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("GestaoEscolarWeb.Data.Entities.Subject", "Subject")
                         .WithMany()
-                        .HasForeignKey("SubjectId");
-
-                    b.HasOne("GestaoEscolarWeb.Data.Entities.User", "UserAudit")
-                        .WithMany()
-                        .HasForeignKey("UserAuditId");
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Student");
 
                     b.Navigation("Subject");
-
-                    b.Navigation("UserAudit");
                 });
 
             modelBuilder.Entity("GestaoEscolarWeb.Data.Entities.SchoolClass", b =>
@@ -576,13 +526,7 @@ namespace GestaoEscolarWeb.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("GestaoEscolarWeb.Data.Entities.User", "UserAudit")
-                        .WithMany()
-                        .HasForeignKey("UserAuditId");
-
                     b.Navigation("Course");
-
-                    b.Navigation("UserAudit");
                 });
 
             modelBuilder.Entity("GestaoEscolarWeb.Data.Entities.Student", b =>
@@ -591,28 +535,13 @@ namespace GestaoEscolarWeb.Migrations
                         .WithMany("Students")
                         .HasForeignKey("SchoolClassId");
 
-                    b.HasOne("GestaoEscolarWeb.Data.Entities.User", "UserAudit")
-                        .WithMany()
-                        .HasForeignKey("UserAuditId");
-
                     b.HasOne("GestaoEscolarWeb.Data.Entities.User", "UserStudent")
                         .WithMany()
                         .HasForeignKey("UserStudentId");
 
                     b.Navigation("SchoolClass");
 
-                    b.Navigation("UserAudit");
-
                     b.Navigation("UserStudent");
-                });
-
-            modelBuilder.Entity("GestaoEscolarWeb.Data.Entities.Subject", b =>
-                {
-                    b.HasOne("GestaoEscolarWeb.Data.Entities.User", "UserAudit")
-                        .WithMany()
-                        .HasForeignKey("UserAuditId");
-
-                    b.Navigation("UserAudit");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -13,16 +13,10 @@
         <div class="col-md-8">
             <dl class="row"> 
                 <dt class = "col-sm-3"> 
-            @Html.DisplayNameFor(model => model.FirstName)
+            @Html.DisplayNameFor(model => model.FullName)
             </dt>
             <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.FirstName)
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.LastName)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.LastName)
+                @Html.DisplayFor(model => model.FullName)
             </dd>
             <dt class="col-sm-3">
                 @Html.DisplayNameFor(model => model.BirthDate)
@@ -82,13 +76,15 @@
                     <thead>
                         <tr>
                             <th>Subject</th>
+                            <th>Student Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var enrollment in Model.Enrollments.OrderBy(e => e.Subject))
+                        @foreach (var enrollment in Model.Enrollments.OrderBy(e => e.Subject.Name))
                         {
                             <tr>
-                                <td>@Html.DisplayFor(modelItem => enrollment.Subject)</td>
+                                <td>@Html.DisplayFor(modelItem => enrollment.Subject.Name)</td>
+                                <td>@Html.DisplayFor(modelItem => enrollment.StudentStatus)</td>
                             </tr>
                         }
                     </tbody>
@@ -114,7 +110,7 @@
                         @foreach (var evaluation in Model.Evaluations.OrderBy(e => e.Subject))
                         {
                             <tr>
-                                <td>@Html.DisplayFor(modelItem => evaluation.Subject)</td>
+                                <td>@Html.DisplayFor(modelItem => evaluation.Subject.Name)</td>
                                 <td>@Html.DisplayFor(modelItem => evaluation.Score)</td>
                                 <td>@Html.DisplayFor(modelItem => evaluation.ExamDate)</td>
                             </tr>

@@ -18,10 +18,6 @@ namespace GestaoEscolarWeb.Data.Entities
         public int CreditHours { get; set; }
 
 
-        //TODO ver se isso vai ser necessário
-        public User UserAudit { get; set; }
-
-
         public ICollection<Course> SubjectCourses { get; set; }
 
     }

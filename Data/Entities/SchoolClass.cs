@@ -23,10 +23,6 @@ namespace GestaoEscolarWeb.Data.Entities
         [Required]
         public string Shift { get; set; }
 
-
-        //TODO ver se isso vai ser necessário
-        public User UserAudit { get; set; }
-
         public string CourseYearShift => $"{Course.Name} - {SchoolYear} - {Shift}"; //propriedade ara a view Details
 
         public override string ToString()

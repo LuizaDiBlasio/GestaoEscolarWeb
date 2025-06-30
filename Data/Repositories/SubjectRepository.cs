@@ -33,6 +33,30 @@ namespace GestaoEscolarWeb.Data.Repositories
             return subjectsToSelect;    
         }
 
+        public async Task<List<SelectListItem>> GetComboSubjectsToEnrollAsync(Student student)
+        {
+            //Popular a checklist com disciplinas que pertencem ao curso da turma do aluno
+            if(student.SchoolClass != null)
+            {
+                var subjects = await _context.Students.Where(s => s.Id == student.Id)
+                             .Include(s => s.SchoolClass)
+                             .ThenInclude(sc => sc.Course)
+                             .ThenInclude(c => c.CourseSubjects)
+                             .SelectMany(s => s.SchoolClass.Course.CourseSubjects)
+                             .Select(s => new SelectListItem //compor lista
+                             {
+                                 Value = s.Id.ToString(),
+                                 Text = s.Name
+                             })
+                             .OrderBy(s => s.Text) // Ordenar lista
+                             .ToListAsync();
+
+                return subjects;
+            }
+
+            return null; 
+        }
+
         public async Task<Subject> GetSubjectWithCoursesAsync(int id)
         {
             var subject = await _context.Subjects
@@ -40,6 +64,35 @@ namespace GestaoEscolarWeb.Data.Repositories
                                .FirstOrDefaultAsync(s => s.Id == id);    
 
             return subject; 
+        }
+
+        public async Task<List<SelectListItem>> GetComboSubjectsToEvaluateAsync(Student studentWithEnrollments)
+        {
+            var subjects = await _context.Enrollments
+                                .Where(e => e.Student.Id == studentWithEnrollments.Id)   
+                                .Select(e => e.Subject)
+                                .Select(s => new SelectListItem
+                                {
+                                    Value = s.Id.ToString(),
+                                    Text = s.Name
+                                })
+                                 .OrderBy(s => s.Text) // Ordenar lista
+                                 .ToListAsync();
+            return subjects;
+
+        }
+
+        public async Task<Subject> GetSubjectByNameAsync(string subjectName)
+        {
+            if (string.IsNullOrEmpty(subjectName))
+            {
+                return null;
+            }
+
+            string cleanedName = subjectName.Trim();
+            return await _context.Subjects
+                .Include(s => s.SubjectCourses)
+                .FirstOrDefaultAsync(s => s.Name == cleanedName);
         }
     }
 }

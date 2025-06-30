@@ -7,12 +7,8 @@ namespace GestaoEscolarWeb.Models
     public class ChangeUserViewModel
     {
         [Required]
-        [Display(Name = "First Name")]
-        public string FirstName { get; set; }
-
-        [Required]
-        [Display(Name = "Last Name")]
-        public string LastName { get; set; }
+        [Display(Name = "Full Name")]
+        public string FullName { get; set; }
 
 
         [MaxLength(100, ErrorMessage = "The field {0} only can cointain {1} characters.")]

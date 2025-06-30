@@ -7,8 +7,7 @@
 <h2>Students</h2>
 
 <p>
-    <a asp-action="Create">Register new student</a>  | 
-    <a asp-area="" asp-controller="Enroll student" asp-action="Index">Enrollments</a>
+    <a asp-action="Create">Register new student</a> 
 </p>
 
 
@@ -16,10 +15,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.FirstName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastName)
+                @Html.DisplayNameFor(model => model.FullName)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.BirthDate)
@@ -43,10 +39,7 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
+                @Html.DisplayFor(modelItem => item.FullName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.BirthDate)
@@ -70,7 +63,7 @@
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |
-                    <a asp-action="Enrollments" asp-route-id="@item.Id">Enroll</a>
+                    <a asp-area="" asp-controller="Enrollments" asp-action="Create" asp-route-studentId="@item.Id">Enroll</a>
             </td>
         </tr>
 }

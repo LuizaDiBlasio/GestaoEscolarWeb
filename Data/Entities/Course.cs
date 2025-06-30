@@ -22,17 +22,15 @@ namespace GestaoEscolarWeb.Data.Entities
         
         [Required]
         [Display(Name ="Start Date")]
-        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd}", ApplyFormatInEditMode = true)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime StartDate {  get; set; }
 
 
         [Required]
         [Display(Name ="End Date")]
-        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd}", ApplyFormatInEditMode = true)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime EndDate { get; set; }
 
-        //TODO ver se isso vai ser necessário
-        public User UserAudit { get; set; }
 
         public ICollection<Subject> CourseSubjects { get; set; }
 

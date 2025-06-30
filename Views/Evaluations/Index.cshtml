@@ -9,7 +9,7 @@
 @if (this.User.IsInRole("Employee"))
 {
     <p>
-        <a asp-action="Post evaluations">Create New</a>
+        <a asp-action="Create">Add evaluations</a>
     </p>
 }
 
@@ -35,10 +35,10 @@
         @foreach (var item in Model) {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Student)
+                    @Html.DisplayFor(modelItem => item.Student.FullName)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Subject)
+                    @Html.DisplayFor(modelItem => item.Subject.Name)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.ExamDate)

@@ -42,5 +42,13 @@ namespace GestaoEscolarWeb.Data.Repositories
            .Include(sc => sc.SchoolClasses)
            .FirstOrDefaultAsync(e => e.Id == id);
         }
+
+        public async Task<IEnumerable<Student>> GetStudentsFromCourseAsync(int courseId)
+        {
+           return await _context.Courses
+                    .Where(c => c.Id == courseId)
+                    .SelectMany(c => c.SchoolClasses.SelectMany(sc => sc.Students)) // Acha os alunos de todas as SchoolClasses do curso
+                    .ToListAsync();
+        }
     }
 }

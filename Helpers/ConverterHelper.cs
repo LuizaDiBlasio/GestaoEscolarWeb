@@ -1,10 +1,10 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Migrations;
 using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace GestaoEscolarWeb.Helpers
 {
@@ -17,8 +17,8 @@ namespace GestaoEscolarWeb.Helpers
             {
                 Id = isNew ? 0 : model.Id,
                 Name = model.Name,
-                StartDate = model.StartDate,
-                EndDate = model.EndDate
+                StartDate = model.StartDate.Value,
+                EndDate = model.EndDate.Value
             };
         }
 
@@ -44,15 +44,14 @@ namespace GestaoEscolarWeb.Helpers
             return new Data.Entities.Student
             {
                 Id = isNew ? 0 : model.Id,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
+                FullName = model.FullName,
                 Email = model.Email,
                 Address = model.Address,
                 PhoneNumber = model.PhoneNumber,
-                BirthDate = model.BirthDate,
-                ProfileImageId = imageId 
+                BirthDate = model.BirthDate.Value,
+                ProfileImageId = imageId
             };
-            
+
         }
 
         public MyProfileViewModel ToMyProfileViewModel(Data.Entities.Student student)
@@ -60,8 +59,7 @@ namespace GestaoEscolarWeb.Helpers
             return new MyProfileViewModel
             {
                 Id = student.Id,
-                FirstName = student.FirstName,
-                LastName = student.LastName,
+                FullName = student.FullName,
                 Email = student.Email,
                 Address = student.Address,
                 PhoneNumber = student.PhoneNumber,
@@ -70,17 +68,16 @@ namespace GestaoEscolarWeb.Helpers
             };
         }
 
-        public Data.Entities.Student FromCreateEditToStudent (CreateEditStudentViewModel model, bool isNew, Guid imageId)
+        public Data.Entities.Student FromCreateEditToStudent(CreateEditStudentViewModel model, bool isNew, Guid imageId)
         {
             return new Data.Entities.Student
             {
                 Id = isNew ? 0 : model.Id,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
+                FullName = model.FullName,
                 Email = model.Email,
                 Address = model.Address,
                 PhoneNumber = model.PhoneNumber,
-                BirthDate = model.BirthDate,
+                BirthDate = model.BirthDate.Value,
                 ProfileImageId = imageId,
                 SchoolClassId = model.SelectedSchoolClassId
             };
@@ -92,8 +89,7 @@ namespace GestaoEscolarWeb.Helpers
             return new CreateEditStudentViewModel
             {
                 Id = student.Id,
-                FirstName = student.FirstName,
-                LastName = student.LastName,
+                FullName = student.FullName,
                 Email = student.Email,
                 Address = student.Address,
                 PhoneNumber = student.PhoneNumber,
@@ -123,7 +119,7 @@ namespace GestaoEscolarWeb.Helpers
                     break;
             }
 
-            return shift;   
+            return shift;
         }
 
         public int ToSelectedId(SchoolClass schoolClass)
@@ -143,7 +139,65 @@ namespace GestaoEscolarWeb.Helpers
                     break;
             }
 
-            return selectedId;  
+            return selectedId;
         }
+
+        public EditEnrollmentViewModel ToEditEnrollmentViewModel(IEnumerable<SelectListItem> subjects, Enrollment enrollment, IEnumerable<SelectListItem> statusList)
+        {
+            return new EditEnrollmentViewModel()
+            {
+                Id = enrollment.Id,
+                StudentFullName = enrollment.Student.FullName,
+                SelectedSubjectId = enrollment.SubjectId,
+                StudentStatus = enrollment.StudentStatus,
+                EnrollmentDate = enrollment.EnrollmentDate,
+                AbscenceRecord = enrollment.AbscenceRecord,
+                Subjects = subjects,
+                StudentStatusList = statusList
+            };
+        }
+
+        public Enrollment ToEnrollment(EditEnrollmentViewModel model, Data.Entities.Student student, bool isNew)
+        {
+            return new Enrollment()
+            {
+                Id = isNew? 0 : model.Id,
+                StudentId = student.Id,
+                StudentStatus = model.StudentStatus,
+                SubjectId = model.SelectedSubjectId,
+                EnrollmentDate = model.EnrollmentDate,
+                AbscenceRecord = model.AbscenceRecord
+            };
+        }
+
+        public CreateEditEvaluationViewModel ToCreateEditEvaluationViewModel(Evaluation evaluation, IEnumerable<SelectListItem> subjects)
+        {
+            var model = new CreateEditEvaluationViewModel()
+            {
+                Id = evaluation.Id,
+                StudentFullName = evaluation.Student.FullName,
+                ExamDate = evaluation.ExamDate,
+                SelectedSubjectId = evaluation.SubjectId,
+                Score = evaluation.Score,
+                Subjects = subjects
+            };
+
+            return model;
+        }
+
+        public Evaluation ToEvaluation(CreateEditEvaluationViewModel model, Data.Entities.Student student,  bool IsNew)
+        {
+            var evaluation = new Evaluation()
+            {   
+                Id = IsNew ? 0 : model.Id,
+                StudentId = student.Id,
+                ExamDate = model.ExamDate.Value,
+                SubjectId = model.SelectedSubjectId,
+                Score = model.Score.Value,
+            };
+
+            return evaluation;  
+        }
+
     }
 }

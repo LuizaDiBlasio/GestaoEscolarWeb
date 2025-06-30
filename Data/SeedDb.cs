@@ -34,8 +34,7 @@ namespace GestaoEscolarWeb.Data
             {
                 user = new User // cria utilizador admin
                 {
-                    FirstName = "Luiza",
-                    LastName = "Bandeira",
+                    FullName = "Luiza Bandeira",
                     Email = "luizabandeira90@gmail.com",
                     UserName = "luizabandeira90@gmail.com",
                     PhoneNumber = "12345678",

@@ -7,27 +7,20 @@
 <h2>Register Student</h2>
 
 <hr />
+
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
+                <label asp-for="FullName" class="control-label"></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="BirthDate" class="control-label"></label>
-                <div class="input-group date" data-provide="datepicker">
-                    <input type="text" asp-for="BirthDate" class="form-control" placeholder="Select your birthdate..." />
-                    <div class="input-group-append">
-                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                    </div>
+                <div>
+                    <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" />
                 </div>
                 <span asp-validation-for="BirthDate" class="text-danger"></span>
             </div>
@@ -81,15 +74,13 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script type="text/javascript">
-        $(document).ready(function() {
-            $('#BirthDate').datepicker({
-                orientation: "bottom",
-                autoclose: true,
-                format: "mm/dd/yyyy",
-                changeMonth: true,     // dropdown para selecionar o mês
-                changeYear: true,      // dropdown para selecionar o ano
-                yearRange: "-100:+0"   // intervalo de anos para o dropdown
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa o DatePicker para BirthDate
+            var birthDatePicker = new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select a date'
             });
-        });
+            birthDatePicker.appendTo('#birthDateInput'); //ligação ao elemento de BirthDate
+           });
     </script>
 }

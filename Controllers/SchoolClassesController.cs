@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GestaoEscolarWeb.Data;
+using GestaoEscolarWeb.Data.Entities;
+using GestaoEscolarWeb.Data.Repositories;
+using GestaoEscolarWeb.Helpers;
+using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using GestaoEscolarWeb.Data;
-using GestaoEscolarWeb.Data.Entities;
-using GestaoEscolarWeb.Models;
-using GestaoEscolarWeb.Data.Repositories;
 using Vereyon.Web;
-using GestaoEscolarWeb.Helpers;
 
 namespace GestaoEscolarWeb.Controllers
 {
@@ -31,18 +29,18 @@ namespace GestaoEscolarWeb.Controllers
         {
             _context = context;
             _courseRepository = courseRepository;
-            _schoolClassRepository = schoolClassRepository; 
-            _flashMessage = flashMessage;   
+            _schoolClassRepository = schoolClassRepository;
+            _flashMessage = flashMessage;
             _converterHelper = converterHelper;
-            
+
         }
 
         // GET: SchoolClasses
         public async Task<IActionResult> Index()
         {
-            var schoolClasses = (await _schoolClassRepository.GetAllSchoolClassesWithCourseAsync()).OrderBy(sc=> sc.SchoolYear); //listar todas as turmas
+            var schoolClasses = (await _schoolClassRepository.GetAllSchoolClassesWithCourseAsync()).OrderBy(sc => sc.SchoolYear); //listar todas as turmas
 
-            return View(schoolClasses); 
+            return View(schoolClasses);
         }
 
         // GET: SchoolClasses/Details/5
@@ -87,7 +85,7 @@ namespace GestaoEscolarWeb.Controllers
                 if (courses == null)
                 {
                     return new NotFoundViewResult("SchoolClassNotFound");
-                } 
+                }
 
                 //ver se course selecionado existe
                 Course schoolClassCourse = courses.FirstOrDefault(c => c.Id == model.SelectedCourseId);
@@ -111,7 +109,7 @@ namespace GestaoEscolarWeb.Controllers
 
                     return View(model);
                 }
-               
+
                 // Criar um curso
                 var schoolClass = new SchoolClass
                 {
@@ -212,7 +210,7 @@ namespace GestaoEscolarWeb.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (! await _schoolClassRepository.ExistAsync(id))
+                    if (!await _schoolClassRepository.ExistAsync(id))
                     {
                         return new NotFoundViewResult("SchoolClassNotFound"); ;
                     }
@@ -293,12 +291,12 @@ namespace GestaoEscolarWeb.Controllers
                 return View("Error");
             }
 
-            
+
         }
 
         public IActionResult SchoolClassNotFound()
         {
-            return View();  
+            return View();
         }
 
 

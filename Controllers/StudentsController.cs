@@ -33,6 +33,8 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly ISchoolClassRepository _schoolClassRepository; 
 
+       
+
         public StudentsController(DataContext context, IUserHelper userHelper, IBlobHelper blobHelper,
             IStudentRepository studentRepository, IFlashMessage flashMessage, IConverterHelper converterHelper,
             IMailHelper mailHelper, ISchoolClassRepository schoolClassRepository)
@@ -45,12 +47,13 @@ namespace GestaoEscolarWeb.Controllers
             _schoolClassRepository = schoolClassRepository; 
             _converterHelper = converterHelper; 
             _mailHelper = mailHelper;   
+              
         }
 
         // GET: Students
         public async Task<IActionResult> Index()
         {
-            var students = await _studentRepository.GetAllStudentsWithSchoolClass();
+            var students = await _studentRepository.GetAllStudentsWithSchoolClassAsync();
             return View(students);
         }
 
@@ -63,12 +66,13 @@ namespace GestaoEscolarWeb.Controllers
 
             if (user == null)
             {
-                return new NotFoundViewResult("UserNotFound");
+                _flashMessage.Danger("User not found");
+                return RedirectToAction(nameof(MyProfile));
             }
 
             //encontrar estudante
 
-            var students = await _studentRepository.GetAllStudentsWithSchoolClass();
+            var students = await _studentRepository.GetAllStudentsWithSchoolClassAsync();
 
             Data.Entities.Student student = students.FirstOrDefault(s => s.Email == username);  //encontrar o student corrspondente ao username
 
@@ -92,7 +96,7 @@ namespace GestaoEscolarWeb.Controllers
                 return new NotFoundViewResult("StudentNotFound");
             }
 
-            var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluations(id.Value);
+            var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(id.Value);
             if (student == null)
             {
                 return new NotFoundViewResult("StudentNotFound");
@@ -124,8 +128,7 @@ namespace GestaoEscolarWeb.Controllers
             {
                 var user = new User //user vai ser sempre null antes de criar o student
                 {
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
+                    FullName = model.FullName,
                     Email = model.Email,
                     UserName = model.Email,
                     Address = model.Address,
@@ -162,9 +165,8 @@ namespace GestaoEscolarWeb.Controllers
                 }
                 var student = new Data.Entities.Student()
                 {
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    BirthDate = model.BirthDate,
+                    FullName = model.FullName,
+                    BirthDate = model.BirthDate.Value,
                     Email = model.Email,
                     UserStudentId = user.Id,
                     SchoolClassId = model.SelectedSchoolClassId,
@@ -343,7 +345,7 @@ namespace GestaoEscolarWeb.Controllers
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluations(id);
+            var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(id);
 
             if (student.Evaluations != null && student.Evaluations.Any())
             {

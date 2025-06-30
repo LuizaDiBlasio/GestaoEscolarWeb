@@ -8,18 +8,10 @@ namespace GestaoEscolarWeb.Models
     {
         public int Id { get; set; }
 
-
         [Required]
-        [Display(Name = "First Name")]
+        [Display(Name = "Full Name")]
         [MaxLength(50, ErrorMessage = "The field {0} allows only {1} characters")] //mensagem não chega a ser mostrada
-        public string FirstName { get; set; }
-
-
-        [Required]
-        [Display(Name = "Last Name")]
-        [MaxLength(50, ErrorMessage = "The field {0} allows only {1} characters")] //mensagem não chega a ser mostrada
-        public string LastName { get; set; }
-
+        public string FullName { get; set; }
 
         [Display(Name = "Date of Birth")]
         [DataType(DataType.Date)]

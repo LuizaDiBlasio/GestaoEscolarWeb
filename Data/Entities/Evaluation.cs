@@ -10,18 +10,22 @@ namespace GestaoEscolarWeb.Data.Entities
 
         public Subject Subject { get ; set ; }
 
+        public int SubjectId { get; set; }
+
 
         public Student Student { get ; set ; }
 
+        public int StudentId { get; set; }
+
 
         [Display(Name = "Exam Date")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime ExamDate { get ; set ; }
 
 
         [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = false)]
-        public double Score { get ; set ; }
+        public decimal Score { get ; set ; }
 
-        //TODO ver se isso vai ser necessário
-        public User UserAudit {  get ; set ; } 
     }
 }

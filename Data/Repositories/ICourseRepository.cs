@@ -10,5 +10,7 @@ namespace GestaoEscolarWeb.Data.Repositories
         Task<Course> GetCourseSubjectsAndSchoolClassesByIdAsync(int id);
 
         IEnumerable<SelectListItem> GetComboCourses(); //preenche combobos de cursos na seleção de cursos da turma
+
+        Task<IEnumerable<Student>> GetStudentsFromCourseAsync(int courseId);
     }
 }

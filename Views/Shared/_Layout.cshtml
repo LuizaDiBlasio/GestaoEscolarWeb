@@ -8,13 +8,14 @@
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/29.2.11/bootstrap5.css" />
 
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GestaoEscolarWeb</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Escola Cinel</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -25,42 +26,76 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
 
-                        @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Admin")) //se user está autenticado é é o admin
+                        @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Admin"))
                         {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Users and roles</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
+                            </li>
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin</a>
+
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Search</a>
+
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li> <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Register">Users and roles</a> </li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a></li>
+
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Courses">Courses</a></li>
+
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Subjects">Subjects</a></li>
+
                                 </ul>
+
                             </li>
                         }
 
-                        @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Employee")) //se user está autenticado é é o employee
+                        @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Employee"))
                         {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Students" asp-action="Index">Students</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Evaluations" asp-action="Index">Evaluations</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="SchoolClasses" asp-action="Index">School Classes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Enrollments" asp-action="Index">Enrollments</a>
+                            </li>
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Employee</a>
+
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Search</a>
+
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Students" asp-action="Index">Students</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Evaluations" asp-action="Index">Evaluations</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="SchoolClasses" asp-action="Index">School Classes</a></li>
+
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Student">Student profile</a></li>
+
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="SchoolClass">School Class</a></li>
+
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Grades">Grades</a></li>
+
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Enrollments">Enrollments</a></li>
+
                                 </ul>
+
                             </li>
                         }
 
-                        @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Student")) //se user está autenticado é é o student
+                        @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Student"))
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Student</a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Students" asp-action="MyProfile">My Profile</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Evaluations" asp-action="Index">Check grades</a></li>
-                                </ul>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Students" asp-action="MyProfile">My Profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Evaluations" asp-action="MyGrades">My grades</a>
                             </li>
                         }
 
-                        @if (!this.User.Identity.IsAuthenticated) //se user for anonimo
+                        @if (!this.User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
@@ -68,25 +103,24 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a>
                             </li>
-
                         }
 
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        @if (this.User.Identity.IsAuthenticated && (this.User.IsInRole("Employee") || this.User.IsInRole("Admin") || this.User.IsInRole("Student"))) @*se estiver autenticado, mostrar username (tem a possibilidade de mudar clicando em cima do username ou de fazer logout)*@
+                        @if (this.User.Identity.IsAuthenticated && (this.User.IsInRole("Employee") || this.User.IsInRole("Admin") || this.User.IsInRole("Student")))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ChangeUser">@this.User.Identity.Name</a> @*fazer action ChangeUser com o utilizador corrente*@
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ChangeUser">@this.User.Identity.Name</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a> @*Botão de logout*@
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                             </li>
                         }
-    
+
                         @if (!this.User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a> @*link de login*@
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                         }
                     </ul>
@@ -109,7 +143,9 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    
+    <script src="https://cdn.syncfusion.com/ej2/29.2.11/dist/ej2.min.js"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+    <ejs-scripts></ejs-scripts>
 </body>
 </html>

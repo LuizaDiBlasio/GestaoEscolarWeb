@@ -171,9 +171,27 @@ namespace GestaoEscolarWeb.Controllers
                 subject.SubjectCourses.Clear(); // limpar tabela de join para relações desta subject
             }
 
-            await _subjectRepository.DeleteAsync(subject); 
-            
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _subjectRepository.DeleteAsync(subject);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorTitle = $"Failed to delete subject {subject.Name}.";
+
+                string errorMessage = "An unexpected database error occurred.";
+
+                if (ex.InnerException != null)
+                {
+                    errorMessage = ex.InnerException.Message;
+                }
+
+                ViewBag.ErrorMessage = errorMessage;
+
+                return View("Error");
+            }
         }
 
         public IActionResult SubjectNotFound()

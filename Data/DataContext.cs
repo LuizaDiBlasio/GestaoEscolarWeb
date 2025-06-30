@@ -42,6 +42,16 @@ namespace GestaoEscolarWeb.Data
             {
                 fk.DeleteBehavior = DeleteBehavior.Restrict; // restringe comportamento ao deletar, se houver entidades filhas, não deleta. Deve ser deletado por código individualmente.
             }
+
+            //evitar inscrições duplicadas, criar uma chave composta na tabela Enrollments
+            modelBuilder.Entity<Enrollment>()
+               .HasIndex(e => new { e.StudentId, e.SubjectId })
+               .IsUnique();
+
+            //evitar avaliações duplicadas, criar uma chave composta na tabela Evaluations
+            modelBuilder.Entity<Evaluation>()
+               .HasIndex(e => new { e.ExamDate, e.SubjectId })
+               .IsUnique();
         }
     }
 

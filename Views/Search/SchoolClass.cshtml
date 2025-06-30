@@ -1,0 +1,120 @@
+﻿
+@model GestaoEscolarWeb.Models.SearchSchoolClassViewModel
+@{
+    ViewData["Title"] = "SchoolClass";
+}
+
+
+<h2>Search school class</h2>
+
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="SchoolClass" method="post">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="SearchId" class="control-label"></label>
+                <input asp-for="SearchId" class="form-control" />
+                <span asp-validation-for="SearchId" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <input type="submit" value="search" class="btn btn-primary" />
+            </div>
+            <flash dismissable="true" />
+        </form>
+    </div>
+</div>
+
+<hr />
+
+@if (Model.IsSearchSuccessful)
+{
+    <h4>School class @Model.SearchId details:</h4>
+    <div class="row">
+        <div class="col-md-8">
+            <dl class="row">
+                <dt class="col-sm-3">
+                    Course name
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.Course.Name)
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.SchoolYear)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.SchoolYear)
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.Shift)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.Shift)
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <br />
+    <h4>Students</h4>
+    @if (Model.Students.Count == 0)
+    {
+        <h5>No students in this class</h5>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Students.FirstOrDefault().FullName)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Students.OrderBy(c => c.FullName))
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FullName)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    <br />
+    <h4>Subjects</h4>
+    @if (Model.CourseSubjects.Count == 0)
+    {
+        <h5>No this class has no subjects</h5>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Course.CourseSubjects.FirstOrDefault().Name)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Course.CourseSubjects.OrderBy(s => s.Name))
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+
+

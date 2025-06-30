@@ -1,0 +1,64 @@
+﻿@model SearchViewModel<GestaoEscolarWeb.Data.Entities.Enrollment>
+@{
+    ViewData["Title"] = "Enrollments";
+}
+
+
+<h2>Search student's enrollments</h2>
+
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Enrollments" method="post">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="StudentFullName" class="control-label"></label>
+                <input asp-for="StudentFullName" class="form-control" />
+                <span asp-validation-for="StudentFullName" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <input type="submit" value="search" class="btn btn-primary" />
+            </div>
+            <flash dismissable="true" />
+        </form>
+    </div>
+</div>
+
+<hr />
+
+@if (Model.IsSearchSuccessful)
+{
+    <h4>@Model.StudentFullName exam results:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Enrollment date</th>
+                <th>Absense record</th>
+                <th>Student status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Results)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Subject.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.EnrollmentDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.AbscenceRecord)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StudentStatus)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+

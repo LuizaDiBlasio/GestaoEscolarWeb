@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Syncfusion.Licensing;
 using Vereyon.Web;
 
 
@@ -26,6 +27,7 @@ namespace GestaoEscolarWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2XFhhQlJHfVhdX2NWfFN0QHNRdV5wfldPcC0sT3RfQFhjT3xXd0ZmX3xdcnxdQmteWA ==");
 
             services.AddIdentity<User, IdentityRole>(cfg => //adicionar serviço de Identiy para ter o user e configurar o serviço
             {
@@ -79,6 +81,10 @@ namespace GestaoEscolarWeb
 
             services.AddScoped<IMailHelper, MailHelper>();
 
+            services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+
+            services.AddScoped<IEvaluationRepository, EvaluationRepository>();
+
             //TODO ver NotAuthorized isso vai servir
             //anula o ReturnUrl no Login (AccountController)
             services.ConfigureApplicationCookie(options =>
@@ -88,6 +94,8 @@ namespace GestaoEscolarWeb
             });
 
             services.AddControllersWithViews();
+
+
 
         }
 

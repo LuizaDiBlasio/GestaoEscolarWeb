@@ -10,21 +10,15 @@ namespace GestaoEscolarWeb.Data.Entities
 
 
         [Required]
-        [Display(Name = "First Name")]
+        [Display(Name = "Full Name")]
         [MaxLength(50, ErrorMessage = "The field {0} allows only {1} characters")] //mensagem não chega a ser mostrada
-        public string FirstName { get; set; }
-
+        public string FullName { get; set; }
 
         [Required]
-        [Display(Name = "Last Name")]
-        [MaxLength(50, ErrorMessage = "The field {0} allows only {1} characters")] //mensagem não chega a ser mostrada
-        public string LastName { get; set; }
-
-
         [Display(Name = "Date of Birth")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
-        public DateTime? BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
 
 
         [Required]
@@ -45,10 +39,6 @@ namespace GestaoEscolarWeb.Data.Entities
 
         [Display(Name = "User Id")]
         public User UserStudent { get; set; }
-
-
-        //TODO ver se isso vai ser necessário
-        public User UserAudit { get; set; }
 
 
         [Display(Name = "School Class")]
@@ -72,10 +62,6 @@ namespace GestaoEscolarWeb.Data.Entities
 
         public ICollection<Enrollment> Enrollments { get; set; }
 
-
-        //Propriedade de leitura 
-        [Display(Name = "Full Name")]
-        public string FullName => $"{FirstName} {LastName}";
 
     }
 }

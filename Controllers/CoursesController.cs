@@ -87,8 +87,8 @@ namespace GestaoEscolarWeb.Controllers
                 var course = new Course
                 {
                     Name = model.Name,
-                    StartDate = model.StartDate,
-                    EndDate = model.EndDate,
+                    StartDate = model.StartDate.Value,
+                    EndDate = model.EndDate.Value,
                     CourseSubjects = new List<Subject>() // Inicializar a lista de Subjects
                 };
 
@@ -155,8 +155,8 @@ namespace GestaoEscolarWeb.Controllers
 
                 //atualizar propriedades
                 course.Name = model.Name;
-                course.StartDate = model.StartDate;
-                course.EndDate = model.EndDate;
+                course.StartDate = model.StartDate.Value;
+                course.EndDate = model.EndDate.Value;
 
                 // atualizar listas de subjects
                 var selectedSubjectIdsSet = new List<int>(model.SelectedSubjectIds ?? new List<int>());

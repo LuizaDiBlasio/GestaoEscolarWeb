@@ -111,8 +111,7 @@ namespace GestaoEscolarWeb.Controllers
 
                     user = new User
                     {
-                        FirstName = model.FirstName,
-                        LastName = model.LastName,
+                        FullName = model.FullName,
                         Email = model.Username,
                         UserName = model.Username,
                         Address = model.Address,
@@ -153,8 +152,7 @@ namespace GestaoEscolarWeb.Controllers
                     {
                         Student student = new Student
                         {
-                            FirstName = user.FirstName,
-                            LastName = user.LastName,
+                            FullName = user.FullName,
                             Email = user.UserName,
                             Address = user.Address,
                             PhoneNumber = user.PhoneNumber,
@@ -275,8 +273,7 @@ namespace GestaoEscolarWeb.Controllers
 
             if (user != null) //caso user exista, preencher novo modelo com dados do user
             {
-                model.FirstName = user.FirstName;
-                model.LastName = user.LastName;
+                model.FullName = user.FullName;
                 model.Address = user.Address;
                 model.PhoneNumber = user.PhoneNumber;
             }
@@ -340,8 +337,7 @@ namespace GestaoEscolarWeb.Controllers
                 if (user != null) //caso user exista, user com propridades registradas no modelo
                 {
 
-                    user.FirstName = model.FirstName;
-                    user.LastName = model.LastName;
+                    user.FullName = model.FullName;
                     user.Address = model.Address;
                     user.PhoneNumber = model.PhoneNumber;
 

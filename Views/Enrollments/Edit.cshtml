@@ -1,33 +1,50 @@
-﻿@model GestaoEscolarWeb.Data.Entities.Enrollment
+﻿@model GestaoEscolarWeb.Models.EditEnrollmentViewModel
 
 @{
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit enrollment</h1>
+<h2>Edit enrollment</h2>
 
-<h4>Enrollment</h4>
 <hr />
+<flash dismissable="true" />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
+                <label asp-for="StudentFullName" class="control-label"></label>
+                <input asp-for="StudentFullName" class="form-control"
+                       placeholder="Insert name of the student..."
+                       readonly="@(true)" /> @*campo será readonly caso nome já venha pré preenchido*@
+                <span asp-validation-for="StudentFullName" class="text-danger"></span>
+            </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
                 <label asp-for="EnrollmentDate" class="control-label"></label>
-                <input asp-for="EnrollmentDate" class="form-control" />
+                <div>
+                    <input type="text" id="enrollmentDateInput" asp-for="EnrollmentDate" class="form-control" />
+                </div>
                 <span asp-validation-for="EnrollmentDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedSubjectId" class="control-label"></label>
+                <select asp-for="SelectedSubjectId" asp-items="Model.Subjects" class="form-control" id="subjectDropdown"></select>
+                <span asp-validation-for="SelectedSubjectId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="AbscenceRecord" class="control-label"></label>
                 <input asp-for="AbscenceRecord" class="form-control" />
                 <span asp-validation-for="AbscenceRecord" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="StudentStatus" class="control-label"></label>
-                <input asp-for="StudentStatus" class="form-control" />
+                <select asp-for="StudentStatus" asp-items="Model.StudentStatusList" class="form-control" id="subjectDropdown"></select>
                 <span asp-validation-for="StudentStatus" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -41,4 +58,16 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa o DatePicker para StartDate
+            var enrollmentDatePicker = new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select a date'
+            });
+            enrollmentDatePicker.appendTo('#enrollmentDateInput'); //ligação ao elemento de StartDate
+
+        });
+    </script>
 }

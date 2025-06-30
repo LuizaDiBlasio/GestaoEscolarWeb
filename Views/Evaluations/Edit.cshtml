@@ -1,28 +1,45 @@
-﻿@model GestaoEscolarWeb.Data.Entities.Evaluation
+﻿@model GestaoEscolarWeb.Models.CreateEditEvaluationViewModel
 
 @{
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<h2>Edit Evaluation</h2>
 
-<h4>Evaluation</h4>
+<flash dismissable="true" />
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="StudentFullName" class="control-label"></label>
+                <input asp-for="StudentFullName" class="form-control"
+                       id="studentFullNameInput"
+                       readonly="@(true)" />
+                <span id="studentErrorFeedback" class="text-danger"></span>
+                <span asp-validation-for="StudentFullName" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <label asp-for="ExamDate" class="control-label"></label>
-                <input asp-for="ExamDate" class="form-control" />
+                <div>
+                    <input type="text" id="examDateInput" asp-for="ExamDate" class="form-control" />
+                </div>
                 <span asp-validation-for="ExamDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedSubjectId" class="control-label"></label>
+                <select asp-for="SelectedSubjectId" asp-items="Model.Subjects" class="form-control" id="subjectDropdown"></select>
+                <span asp-validation-for="SelectedSubjectId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Score" class="control-label"></label>
                 <input asp-for="Score" class="form-control" />
                 <span asp-validation-for="Score" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -36,4 +53,16 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa o DatePicker para ExamDate
+            var examDatePicker = new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select a date'
+            });
+            examDatePicker.appendTo('#examDateInput'); //ligação ao elemento de ExamDate
+
+         });
+    </script>
 }
