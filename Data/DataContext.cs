@@ -52,6 +52,21 @@ namespace GestaoEscolarWeb.Data
             modelBuilder.Entity<Evaluation>()
                .HasIndex(e => new { e.ExamDate, e.SubjectId })
                .IsUnique();
+
+            //determinar casas decimais
+            modelBuilder.Entity<Evaluation>()
+           .Property(e => e.Score)
+           .HasColumnType("decimal(5, 2)");
+
+            
+            modelBuilder.Entity<SystemData>()
+                .Property(s => s.AbsenceLimit)
+                .HasColumnType("decimal(5, 2)");
+
+            modelBuilder.Entity<SystemData>()
+                .Property(sd => sd.Id)
+                .ValueGeneratedNever(); //desativar identity para esse id especifico
+
         }
     }
 

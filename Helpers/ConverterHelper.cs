@@ -45,7 +45,6 @@ namespace GestaoEscolarWeb.Helpers
             {
                 Id = isNew ? 0 : model.Id,
                 FullName = model.FullName,
-                Email = model.Email,
                 Address = model.Address,
                 PhoneNumber = model.PhoneNumber,
                 BirthDate = model.BirthDate.Value,
@@ -60,7 +59,6 @@ namespace GestaoEscolarWeb.Helpers
             {
                 Id = student.Id,
                 FullName = student.FullName,
-                Email = student.Email,
                 Address = student.Address,
                 PhoneNumber = student.PhoneNumber,
                 BirthDate = student.BirthDate,
@@ -147,6 +145,7 @@ namespace GestaoEscolarWeb.Helpers
             return new EditEnrollmentViewModel()
             {
                 Id = enrollment.Id,
+                StudentId = enrollment.StudentId,
                 StudentFullName = enrollment.Student.FullName,
                 SelectedSubjectId = enrollment.SubjectId,
                 StudentStatus = enrollment.StudentStatus,
@@ -175,6 +174,7 @@ namespace GestaoEscolarWeb.Helpers
             var model = new CreateEditEvaluationViewModel()
             {
                 Id = evaluation.Id,
+                StudentId = evaluation.StudentId,   
                 StudentFullName = evaluation.Student.FullName,
                 ExamDate = evaluation.ExamDate,
                 SelectedSubjectId = evaluation.SubjectId,
@@ -199,5 +199,38 @@ namespace GestaoEscolarWeb.Helpers
             return evaluation;  
         }
 
+        public MyUserProfileViewModel ToMyUserProfileViewModel(User user)
+        {
+            var model = new MyUserProfileViewModel()
+            {
+                
+                UserName = user.UserName,   
+                FullName = user.FullName,
+                BirthDate = user.BirthDate,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                ImageId = user.ImageId,
+            };
+
+            return model;   
+        }
+
+      
+
+        public User ToUser(MyUserProfileViewModel model, Guid ImageId)
+        {
+            var user = new User()
+            {
+                UserName = model.UserName,
+                FullName = model.FullName,
+                BirthDate = model.BirthDate,
+                PhoneNumber = model.PhoneNumber,
+                Address = model.Address,
+                ImageId = ImageId,
+
+            };
+
+            return user;    
+        }
     }
 }

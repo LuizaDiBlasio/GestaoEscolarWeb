@@ -32,5 +32,11 @@ namespace GestaoEscolarWeb.Helpers
 
 
         Evaluation ToEvaluation(CreateEditEvaluationViewModel model, Student student, bool IsNew);
+
+
+        MyUserProfileViewModel ToMyUserProfileViewModel(User user);
+
+
+        User ToUser(MyUserProfileViewModel model, Guid ImageId);
     }
 }

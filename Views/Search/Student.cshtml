@@ -80,5 +80,51 @@
 
 }
 
+<div id="homonymDialog" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Homonym Students Found</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Multiple students were found with the name <strong>@Model.SearchFullName</strong>. Please select the correct student:</p>
+                <ul class="list-group">
+                    @foreach (var student in Model.HomonymStudents) //atribuir link da action a todos os estudantes encontrados
+                    {
+                        <li class="list-group-item">
+                            <a href="@Url.Action("GetStudentById", "Search", new { studentId = student.Id })">
+                                @student.FullName (@student.Email) @*mostrar email para distinguir*@
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    @*Se o modelo indicar homônimos, exibir o modal*@ 
+    <script type="text/javascript">
+        $(document).ready(function () {
+            
+        @if (Model.HasHomonyms)
+        {
+            <text>
+                        $('#homonymDialog').modal('show');
+            </text>
+        }
+        });
+    </script>
+
+}
 

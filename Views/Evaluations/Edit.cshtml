@@ -15,10 +15,14 @@
             <input type="hidden" asp-for="Id" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
+                <label asp-for="StudentId" class="control-label"></label>
+                <input asp-for="StudentId" class="form-control" readonly />
+                <span asp-validation-for="StudentId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="StudentFullName" class="control-label"></label>
                 <input asp-for="StudentFullName" class="form-control"
-                       id="studentFullNameInput"
-                       readonly="@(true)" />
+                       readonly />
                 <span id="studentErrorFeedback" class="text-danger"></span>
                 <span asp-validation-for="StudentFullName" class="text-danger"></span>
             </div>

@@ -85,11 +85,13 @@ namespace GestaoEscolarWeb
 
             services.AddScoped<IEvaluationRepository, EvaluationRepository>();
 
+            services.AddScoped<ISystemDataService, SystemDataService>();
+
             //TODO ver NotAuthorized isso vai servir
             //anula o ReturnUrl no Login (AccountController)
             services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/Account/NotAuthorized"; 
+                options.LoginPath = "/Account/NotAuthorized";
                 options.AccessDeniedPath = "/Account/NotAuthorized";
             });
 

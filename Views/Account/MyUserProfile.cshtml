@@ -1,20 +1,18 @@
-﻿@model GestaoEscolarWeb.Models.MyProfileViewModel;
-
+﻿@model GestaoEscolarWeb.Models.MyUserProfileViewModel
 @{
-    ViewData["Title"] = "MyProfile";
+    ViewData["Title"] = "MyUserProfile";
 }
 
 <h2>My Profile</h2>
 
 <hr />
-
+<flash dismissable="true" />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="MyProfile" method="post" enctype="multipart/form-data">
+        <form asp-action="MyUserProfile" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="ProfileImageId" />
-           
+            <input type="hidden" asp-for="ImageId" />
+
             <div class="form-group">
                 <label asp-for="FullName" class="control-label"></label>
                 <input asp-for="FullName" class="form-control" />
@@ -37,7 +35,7 @@
                 <input asp-for="Address" class="form-control" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
-            
+           
             <div class="form-group">
                 <label asp-for="ImageFile" class="control-label"></label>
                 <input asp-for="ImageFile" class="form-control" type="file" />
@@ -46,6 +44,12 @@
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ViewBag.ErrorMessage
+                </div>
+            }
         </form>
     </div>
     <div class="col-md-4">
@@ -66,7 +70,7 @@
 
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
-            // Inicializa o DatePicker 
+            // Inicializa o DatePicker
             var birthDatePicker = new ej.calendars.DatePicker({
                 format: 'MM/dd/yyyy',
                 placeholder: 'Select a date'
@@ -76,3 +80,4 @@
         });
     </script>
 }
+

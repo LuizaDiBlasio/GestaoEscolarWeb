@@ -262,7 +262,7 @@ namespace GestaoEscolarWeb.Controllers
             if (schoolClass.Students != null && schoolClass.Students.Any()) //se a turma possuir alunos
             {
                 _flashMessage.Danger($"School class can't be deleted because it has students");
-                return RedirectToAction(nameof(Delete), new { id = schoolClass.Id });
+                return View("Delete", schoolClass);
             }
 
             //desfazer relação com course

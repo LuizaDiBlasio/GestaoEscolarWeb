@@ -49,25 +49,17 @@ namespace GestaoEscolarWeb.Controllers
         // GET: Enrollments
         public async Task<IActionResult> Index()
         {
-            return View(await _enrollmentRepository.GetEnrollmentsWithStudentAndSubjectAsync());
-        }
+            var enrollments = await _enrollmentRepository.GetEnrollmentsWithStudentAndSubjectAsync();
 
-        // GET: Enrollments/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
+            foreach (var enrollment in enrollments)
             {
-                return new NotFoundViewResult("EnrollmentNotFound");
+                enrollment.StudentStatus = await _enrollmentRepository.GetStudentStatusAsync(enrollment); 
             }
 
-            var enrollment = await _enrollmentRepository.GetEnrollmentWithStudentAndSubjectByIdAsync(id.Value);
-            if (enrollment == null)
-            {
-                return new NotFoundViewResult("EnrollmentNotFound");
-            }
-
-            return View(enrollment);
+            return View(enrollments);
         }
+
+       
 
         // GET: Enrollments/Create
         public async Task<IActionResult> Create(int? studentId)
@@ -81,29 +73,45 @@ namespace GestaoEscolarWeb.Controllers
                 if (student == null)
                 {
                     _flashMessage.Danger("Student not found.");
-                    return RedirectToAction(nameof(Create)); 
+
+                    model = new CreateEnrollmentViewModel()
+                    {
+                        StudentId = studentId.Value, 
+                        StudentFullName = string.Empty, 
+                        Subjects = new List<SelectListItem>() 
+                    };
+                    return View(model);
                 }
 
                 // verificar se aluno tem turma
                 if (student.SchoolClass == null)
                 {
                     _flashMessage.Warning("Enrollment failed, student needs to be enrolled in a school class first. Got to Edit Student section to enroll student in a school class");
-                    return RedirectToAction(nameof(Create));
+
+                    model = new CreateEnrollmentViewModel()
+                    {
+                        StudentId = studentId.Value,
+                        StudentFullName = student.FullName,
+                        Subjects = new List<SelectListItem>()
+                    };
+                    return View(model);
                 }
 
                 var subjects = await _subjectRepository.GetComboSubjectsToEnrollAsync(student);
 
                 // Verifica se a lista de subjects é null ou vazia
-                if (subjects == null || subjects.Count <= 1) // Count <= 1 por causa do "Select a subject..." 
+                if (subjects == null || subjects.Count == 0) 
                 {
                     _flashMessage.Warning("Student's school class course has no subjects defined. Please ensure subjects are associated with the course.");
 
                     model = new CreateEnrollmentViewModel()
                     {
-                        StudentFullName = student.FullName                    
+                        StudentId = studentId.Value, // Mantém o ID
+                        StudentFullName = student.FullName, // Mantém o nome
+                        Subjects = new List<SelectListItem>() // Lista vazia para o dropdown
                     };
 
-                    return RedirectToAction(nameof(Create), model);
+                    return View(model);
                 }
 
                 model = new CreateEnrollmentViewModel()
@@ -132,12 +140,12 @@ namespace GestaoEscolarWeb.Controllers
             if (ModelState.IsValid)
             {
                 // checar nome 
-                var student = await _studentRepository.GetStudentByFullNameAsync(model.StudentFullName);   //resolver esse metodo 
+                var student = await _studentRepository.GetStudentWithSchoolClassAsync(model.StudentId);   //resolver esse metodo 
 
                 if (student == null)
                 {
                     _flashMessage.Danger("Not possible the complete enrollment, you need to register student first");
-                    return RedirectToAction(nameof(Create), model);
+                    return View(model);
                 }
 
                 //verificar se enrollment já existe pela chave composta
@@ -184,15 +192,22 @@ namespace GestaoEscolarWeb.Controllers
             if (student == null)
             {
                 _flashMessage.Danger("Not possible to carry on with enrollment");
-                return RedirectToAction(nameof(Edit));
+
+                var errorModel = _converterHelper.ToEditEnrollmentViewModel(new List<SelectListItem>(), enrollment, _studentRepository.GetStudentStatusList() ?? new List<SelectListItem>());
+                
+                errorModel.StudentFullName = string.Empty; 
+                return View(errorModel);
             }
 
             var subjects = await _subjectRepository.GetComboSubjectsToEnrollAsync(student);
 
             if (subjects == null)
             {
-                _flashMessage.Danger("Not possible to carry on with enrollment");
-                return RedirectToAction(nameof(Edit));
+               
+                _flashMessage.Danger("Not possible to carry on with enrollment: No subjects available for this student.");
+              
+                var errorModel = _converterHelper.ToEditEnrollmentViewModel(new List<SelectListItem>(), enrollment, _studentRepository.GetStudentStatusList() ?? new List<SelectListItem>());
+                return View(errorModel);
             }
 
             var statusList = _studentRepository.GetStudentStatusList();
@@ -200,7 +215,9 @@ namespace GestaoEscolarWeb.Controllers
             if (statusList == null)
             {
                 _flashMessage.Warning("No student status loaded, enrollment chages will proceed with same status");
-                return RedirectToAction(nameof(Edit));
+
+                var errorModel = _converterHelper.ToEditEnrollmentViewModel(new List<SelectListItem>(), enrollment, _studentRepository.GetStudentStatusList() ?? new List<SelectListItem>());
+                return View(errorModel);
             }
 
             var model = _converterHelper.ToEditEnrollmentViewModel(subjects, enrollment, statusList);
@@ -219,12 +236,12 @@ namespace GestaoEscolarWeb.Controllers
 
             if (ModelState.IsValid)
             {
-                var student = await _studentRepository.GetStudentByFullNameAsync(model.StudentFullName);
+                var student = await _studentRepository.GetStudentWithSchoolClassAsync(model.StudentId);
 
                 if (student == null)
                 {
                     _flashMessage.Danger("Student not found.");
-                    return RedirectToAction(nameof(Edit));
+                    return View(model);
                 }
 
                 var enrollment = _converterHelper.ToEnrollment(model, student, false);
@@ -307,32 +324,25 @@ namespace GestaoEscolarWeb.Controllers
 
         // chamada AJAX
         [HttpGet]
-        public async Task<IActionResult> GetSubjectsForStudent(string studentFullName)
+        public async Task<IActionResult> GetSubjectsForStudent([FromQuery]int id)
         {
-            if (string.IsNullOrWhiteSpace(studentFullName))
-            {
-                return BadRequest("Full name cannot be empty.");
-            }
-
-            var student = await _studentRepository.GetStudentByFullNameAsync(studentFullName);
+            var student = await _studentRepository.GetStudentWithSchoolClassAsync(id);
 
             if (student == null)
             {
-                return NotFound("Student not found with the provided full name.");
-            }
+                return NotFound("Student not found with the provided id.");
+            }    
 
-            // verificar se aluno está numa turma
-            var studentWithSchoolClass = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(student.Id);
 
-            if (studentWithSchoolClass.SchoolClass == null)
+            if (student.SchoolClass == null)
             {
                 return BadRequest("Enrollment failed, student needs to be enrolled in a school class first.");
             }
 
-            var subjects = await _subjectRepository.GetComboSubjectsToEnrollAsync(studentWithSchoolClass); 
+            var subjects = await _subjectRepository.GetComboSubjectsToEnrollAsync(student); 
 
-            // Se subjects for null ou apenas tiver "Select a subject...", retornar uma lista vazia
-            if (subjects == null || subjects.Count < 1)
+            // Se subjects for null ou vazia
+            if (subjects == null || subjects.Count == 0)
             {
                 return this.Json(new List<SelectListItem>()); // Retorna uma lista vazia
             }

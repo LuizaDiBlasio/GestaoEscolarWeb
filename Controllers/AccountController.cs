@@ -7,6 +7,8 @@ using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Vereyon.Web;
 
 
 namespace GestaoEscolarWeb.Controllers
@@ -17,14 +19,18 @@ namespace GestaoEscolarWeb.Controllers
         private readonly IUserHelper _userHelper;
         private readonly IBlobHelper _blobHelper;
         private readonly IStudentRepository _studentRepository;
+        private readonly IConverterHelper _converterHelper;
+        private readonly IFlashMessage _flashMessage;
 
         public AccountController(IUserHelper userHelper, IMailHelper mailHelper, IBlobHelper blobHelper,
-            IStudentRepository studentRepository)
+            IStudentRepository studentRepository, IFlashMessage flashMessage, IConverterHelper converterHelper)
         {
             _userHelper = userHelper;
             _mailHelper = mailHelper;
             _blobHelper = blobHelper;
             _studentRepository = studentRepository;
+            _converterHelper = converterHelper;
+            _flashMessage = flashMessage;   
 
             //_countryRepository = countryRepository;
 
@@ -157,6 +163,7 @@ namespace GestaoEscolarWeb.Controllers
                             Address = user.Address,
                             PhoneNumber = user.PhoneNumber,
                             UserStudentId = user.Id,
+                            BirthDate = user.BirthDate.Value
                         };
 
                         await _studentRepository.CreateAsync(student);
@@ -388,6 +395,103 @@ namespace GestaoEscolarWeb.Controllers
 
             return this.View(model); //retornar model para view caso corra mal
         }
+
+        //GET
+        public async Task<IActionResult> MyUserProfile()
+        {
+            var username = this.User.Identity.Name; //pegar o username
+
+            var user = await _userHelper.GetUserByEmailAsync(username);
+
+            if (user == null)
+            {
+                _flashMessage.Danger("User not found");
+                return RedirectToAction(nameof(MyUserProfile));
+            }
+
+            //converter user para model
+            var model = _converterHelper.ToMyUserProfileViewModel(user);
+
+            //mandar model para a view
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> MyUserProfile(MyUserProfileViewModel model)
+        {
+           var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
+
+            if (user == null)
+            {
+                return new NotFoundViewResult("UserNotFound");
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // ver se já tem imagem
+                    Guid currentImageId = user.ImageId ?? Guid.Empty;
+
+                    // confirmar se carregou image file
+                    if (model.ImageFile != null && model.ImageFile.Length > 0)
+                    {
+                        currentImageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "imagens");
+                    }
+                    else
+                    {
+                        //se não houver imagem
+                        if (!model.ImageId.HasValue || model.ImageId.Value == Guid.Empty)
+                        {
+                            currentImageId = Guid.Empty; // zerar guid por garntia
+                        }
+                    }
+
+                    user.FullName = model.FullName;
+                    user.BirthDate = model.BirthDate;
+                    user.PhoneNumber = model.PhoneNumber;
+                    user.Address = model.Address;
+
+                    // Atribuir nova guid ou guid antiga
+                    user.ImageId = currentImageId != Guid.Empty ? currentImageId : (Guid?)null;
+
+
+                    var result = await _userHelper.UpdateUserAsync(user);
+
+                    if (!result.Succeeded)
+                    {
+                        _flashMessage.Danger("Error updating user profile.");
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                        return View(model); 
+                    }
+
+                    _flashMessage.Confirmation($"Your profile has been updated successfully.");
+
+                    
+                    return RedirectToAction(nameof(MyUserProfile));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    ViewBag.ErrorMessage = "Cannot save data. Unexpected Error";
+                    return View(model);
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.ErrorMessage = $"An unexpected error occurred: {ex.Message}";
+                   
+                    return View(model);
+                }
+            }
+            
+            return View(model);
+        
+        }
+
+
 
         public IActionResult NotAuthorized()
         {

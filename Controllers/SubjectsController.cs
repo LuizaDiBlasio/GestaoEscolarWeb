@@ -28,23 +28,7 @@ namespace GestaoEscolarWeb.Controllers
             return View(_subjectRepository.GetAll().OrderBy(s => s.Name));
         }
 
-        // GET: Subjects/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return new NotFoundViewResult("SubjectNotFound");
-            }
-
-            var subject = await _subjectRepository.GetByIdAsync(id.Value);
-            if (subject == null)
-            {
-                return new NotFoundViewResult("SubjectNotFound");
-            }
-
-            return View(subject);
-        }
-
+       
         // GET: Subjects/Create
         public IActionResult Create()
         {

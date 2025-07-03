@@ -10,6 +10,10 @@ namespace GestaoEscolarWeb.Models
 {
     public class CreateEnrollmentViewModel
     {
+        [Range(1, int.MaxValue, ErrorMessage = "The student Id cannot be 0")]
+        public int StudentId { get; set; } 
+
+
         [Required]
         [Display(Name = "Student")]
         public string StudentFullName { get; set; }

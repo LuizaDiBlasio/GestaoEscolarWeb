@@ -12,6 +12,9 @@ namespace GestaoEscolarWeb.Models
         public int Id { get; set; } 
 
 
+        public int StudentId { get; set; }  
+
+
         [Display(Name = "Student")]
         public string StudentFullName { get; set; }
 

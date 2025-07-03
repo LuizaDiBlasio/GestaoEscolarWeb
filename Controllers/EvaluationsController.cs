@@ -55,23 +55,7 @@ namespace GestaoEscolarWeb.Controllers
             return View(await _evaluationRepository.GetEvaluationsWithStudentsAndSubjectsAsync());
         }
 
-        // GET: Evaluations/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return new NotFoundViewResult("EvaluationNotFound");
-            }
-
-            var evaluation = await _evaluationRepository.GetEvaluationWithStudentAndSubjectByIdAsync(id.Value);
-
-            if (evaluation == null)
-            {
-                return new NotFoundViewResult("EvaluationNotFound");
-            }
-
-            return View(evaluation);
-        }
+       
 
         //GET do MyGrades (avaliações do estudante)
         public async Task<IActionResult> MyGrades()
@@ -114,10 +98,7 @@ namespace GestaoEscolarWeb.Controllers
         // GET: Evaluations/Create
         public IActionResult Create()
         {
-            var model = new CreateEditEvaluationViewModel()
-            {
-                Subjects = new List<SelectListItem>()
-            };
+            var model = new CreateEditEvaluationViewModel();
 
             return View(model);
         }
@@ -128,12 +109,12 @@ namespace GestaoEscolarWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var student = await _studentRepository.GetStudentByFullNameAsync(model.StudentFullName);   //resolver esse metodo 
+                var student = await _studentRepository.GetStudentWithEnrollmentsAsync(model.StudentId);   //resolver esse metodo 
 
                 if (student == null)
                 {
-                    _flashMessage.Danger("Not possible the complete enrollment, you need to register student first");
-                    return RedirectToAction(nameof(Create), model);
+                    _flashMessage.Danger("Not possible the complete evaluation, you need to enroll student first");
+                    return View(model);
                 }
 
                 //verificar se evaluation já existe pela chave composta
@@ -141,7 +122,7 @@ namespace GestaoEscolarWeb.Controllers
 
                 if (existingEvaluation)
                 {
-                    _flashMessage.Warning("This student is already enrolled in this subject.");
+                    _flashMessage.Warning("Evaluation is already registered.");
 
                     return View(model);
                 }
@@ -181,7 +162,9 @@ namespace GestaoEscolarWeb.Controllers
             if (student == null)
             {
                 _flashMessage.Danger("Not possible to carry on with enrollment");
-                return RedirectToAction(nameof(Edit));
+
+                var errorModel = _converterHelper.ToCreateEditEvaluationViewModel(evaluation, new List<SelectListItem>());
+                return View(errorModel);
             }
 
             var subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
@@ -189,7 +172,9 @@ namespace GestaoEscolarWeb.Controllers
             if (subjects == null)
             {
                 _flashMessage.Danger("Not possible to carry on with enrollment");
-                return RedirectToAction(nameof(Edit));
+
+                var errorModel = _converterHelper.ToCreateEditEvaluationViewModel(evaluation, new List<SelectListItem>());
+                return View(errorModel);
             }
 
             var model = _converterHelper.ToCreateEditEvaluationViewModel(evaluation, subjects);
@@ -207,7 +192,7 @@ namespace GestaoEscolarWeb.Controllers
                 return new NotFoundViewResult("EvaluationNotFound");
             }
 
-            var student = await _studentRepository.GetStudentByFullNameAsync(model.StudentFullName);
+            var student = await _studentRepository.GetStudentWithSchoolClassAsync(model.StudentId);
 
             var evaluation = _converterHelper.ToEvaluation(model, student, false);
 
@@ -241,8 +226,8 @@ namespace GestaoEscolarWeb.Controllers
                 return new NotFoundViewResult("EvaluationNotFound");
             }
 
-            var evaluation = await _context.Evaluations
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var evaluation = await _evaluationRepository.GetByIdAsync(id.Value); 
+            
             if (evaluation == null)
             {
                 return new NotFoundViewResult("EvaluationNotFound");
@@ -253,7 +238,6 @@ namespace GestaoEscolarWeb.Controllers
 
         // POST: Evaluations/Delete/5
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var evaluation = await _evaluationRepository.GetByIdAsync(id);
@@ -289,32 +273,26 @@ namespace GestaoEscolarWeb.Controllers
             
         }
 
-        public async Task<IActionResult> GetSubjectsForStudentEvaluation(string studentFullName)
+        [HttpGet]
+        public async Task<IActionResult> GetSubjectsForStudentEvaluation(int id)
         {
-            if (string.IsNullOrWhiteSpace(studentFullName))
-            {
-                return BadRequest("Full name cannot be empty.");
-            }
 
-            var student = await _studentRepository.GetStudentByFullNameAsync(studentFullName);
+            var student = await _studentRepository.GetStudentWithEnrollmentsAsync(id);
 
             if (student == null)
             {
-                return NotFound("Student not found with the provided full name.");
+                return NotFound("Student not found with the provided id.");
             }
 
-            // verificar se aluno está numa turma
-            var studentWithEnrollments = await _studentRepository.GetStudentWithEnrollmentsAsync(student.Id);
-
-            if (studentWithEnrollments == null)
+            if (student.Enrollments == null)
             {
                 return BadRequest("Not possible to register evaluation, student needs to be enrolled in a subject first.");
             }
 
-            var subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(studentWithEnrollments);
+            var subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
 
-            // Se subjects for null ou apenas tiver "Select a subject...", retornar uma lista vazia
-            if (subjects == null || subjects.Count < 1)
+            // Se subjects for null ou vazia
+            if (subjects == null || subjects.Count == 0)
             {
                 return this.Json(new List<SelectListItem>()); // Retorna uma lista vazia
             }

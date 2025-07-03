@@ -19,9 +19,17 @@ namespace GestaoEscolarWeb.Models
         public bool IsSearchSuccessful { get; set; } = false;
 
 
+        public bool HasHomonyms { get; set; } = false;
+
+
+        public List<Student> HomonymStudents { get; set; }
+
+
         public SearchViewModel() //para não ter que sempre instanciar a lista
         {
-            Results = new List<T>(); 
+            Results = new List<T>();
+
+            HomonymStudents = new List<Student>();
         }
     }
 }

@@ -9,11 +9,12 @@ namespace GestaoEscolarWeb.Data.Entities
 
 
         [Required]
-        [MaxLength(50, ErrorMessage = "The field {0} allows only {1} characters")] //mensagem não chega a ser mostrada
+        [MaxLength(50, ErrorMessage = "The field {0} allows only {1} characters")] 
         public string Name { get; set; }
 
 
         [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Credit Hours must be greater than zero.")]
         [Display(Name = "Credit Hours")]
         public int CreditHours { get; set; }
 

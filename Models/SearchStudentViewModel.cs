@@ -45,7 +45,19 @@ namespace GestaoEscolarWeb.Models
              ? $"/imagens/noImage.jpg" // caminho relativo à raiz da aplicação!
    : $"https://gestaoescolar.blob.core.windows.net/imagens/{ProfileImageId}";
 
+        public bool HasHomonyms { get; set; } = false;
+
+
+        public List<Student> HomonymStudents { get; set; }
+
 
         public bool IsSearchSuccessful { get; set; } = false;
+
+        public SearchStudentViewModel()
+        {
+            HomonymStudents = new List<Student>();  
+        }
+
+
     }
 }

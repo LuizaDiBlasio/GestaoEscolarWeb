@@ -1,9 +1,11 @@
 ﻿using GestaoEscolarWeb.Data;
 using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
+using GestaoEscolarWeb.Migrations;
 using GestaoEscolarWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Vereyon.Web;
 
@@ -56,22 +58,59 @@ namespace GestaoEscolarWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Enrollments(SearchViewModel<Enrollment> model)
         {
+            if (ModelState.IsValid)
+            {
+                var students = await _studentRepository.GetStudentsByFullNameAsync(model.StudentFullName);
 
-            var student = await _studentRepository.GetStudentByFullNameAsync(model.StudentFullName);
+                //se não houver estudantes
+                if (students == null || !students.Any())
+                {
+                    _flashMessage.Danger("Student not found");
+                    model.IsSearchSuccessful = false;
+                    return View(model);
+                }
+
+                if (students.Count() > 1)
+                {
+                    // Se houver homônimos
+                    model.HasHomonyms = true;
+                    model.HomonymStudents = students.ToList(); 
+                    return View(model); 
+                }
+                else
+                {
+                    // Apenas um estudante encontrado
+                    var student = students.First();
+                    var studentWithEnrollments = await _studentRepository.GetStudentWithEnrollmentsAsync(student.Id);
+
+                    model.Results = studentWithEnrollments.Enrollments;
+                    model.IsSearchSuccessful = true;
+                    model.StudentFullName = studentWithEnrollments.FullName; 
+                    return View(model);
+                }
+            }
+            return View(model);
+        }
+
+        [HttpGet] // GET para mostrar os enrollments
+        public async Task<IActionResult> GetEnrollmentsByStudentId(int studentId)
+        {
+            var student = await _studentRepository.GetStudentWithEnrollmentsAsync(studentId);
 
             if (student == null)
             {
-                _flashMessage.Danger("Student not found");
-                model.IsSearchSuccessful = false;
-                return View(model);
+                _flashMessage.Danger("Student not found.");
+                return View();
             }
 
-            var studentEvaluations = await _studentRepository.GetStudentWithEnrollmentsAsync(student.Id);
+            var model = new SearchViewModel<Enrollment>
+            {
+                StudentFullName = student.FullName,
+                Results = student.Enrollments,
+                IsSearchSuccessful = true
+            };
 
-            model.Results = student.Enrollments;
-            model.IsSearchSuccessful = true;
-
-            return View(model);
+            return View("Enrollments", model); // Retorna a mesma View de inscrições com os resultados
         }
 
         // GET: Search/SchoolClasses
@@ -79,7 +118,7 @@ namespace GestaoEscolarWeb.Controllers
         {
             var model = new SearchSchoolClassViewModel()
             {
-                Students = new List<Student>(),
+                Students = new List<Data.Entities.Student>(),
                 CourseSubjects = new List<Subject>()
             };
 
@@ -126,22 +165,60 @@ namespace GestaoEscolarWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Grades(SearchViewModel<Evaluation> model)
         {
-            var student = await _studentRepository.GetStudentByFullNameAsync(model.StudentFullName);
+            if (ModelState.IsValid)
+            {
+                var students = await _studentRepository.GetStudentsByFullNameAsync(model.StudentFullName);
+
+                //se não houver estudantes
+                if (students == null || !students.Any())
+                {
+                    _flashMessage.Danger("Student not found");
+                    model.IsSearchSuccessful = false;
+                    return View(model);
+                }
+
+                if (students.Count() > 1)
+                {
+                    // Se houver homônimos
+                    model.HasHomonyms = true;
+                    model.HomonymStudents = students.ToList();
+                    return View(model);
+                }
+                else
+                {
+                    // Apenas um estudante encontrado
+                    var student = students.First();
+                    var studentWithEvaluations = await _studentRepository.GetStudentWithEvaluationsAsync(student.Id);
+
+                    model.Results = studentWithEvaluations.Evaluations;
+                    model.IsSearchSuccessful = true;
+                    model.StudentFullName = studentWithEvaluations.FullName;
+                    return View(model);
+                }
+            }
+            return View(model);
+
+        }
+
+        [HttpGet] // GET para mostrar as evaluations
+        public async Task<IActionResult> GetEvaluationsByStudentId(int studentId)
+        {
+            var student = await _studentRepository.GetStudentWithEvaluationsAsync(studentId);
 
             if (student == null)
             {
-                _flashMessage.Danger("Student not found");
-                model.IsSearchSuccessful = false;
-                return View(model);
+                _flashMessage.Danger("Student not found.");
+                return View();
             }
 
-            var studentEvaluations = await _studentRepository.GetStudentWithEvaluationsAsync(student.Id);
+            var model = new SearchViewModel<Evaluation>
+            {
+                StudentFullName = student.FullName,
+                Results = student.Evaluations,
+                IsSearchSuccessful = true
+            };
 
-            model.Results = student.Evaluations;
-            model.IsSearchSuccessful = true;
-
-            return View(model);
-
+            return View("Grades", model); // Retorna a mesma View de inscrições com os resultados
         }
 
 
@@ -153,35 +230,46 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
-        // POST: Search/Courses
+        // POST: Search/Student
         [HttpPost]
         public async Task<IActionResult> Student(SearchStudentViewModel model)
         {
-            var student = await _studentRepository.GetStudentByFullNameAsync(model.SearchFullName);
+            var students = await _studentRepository.GetStudentsByFullNameAsync(model.SearchFullName);
 
-            if (student == null)
+            //se não houver estudantes
+            if (students == null || !students.Any())
             {
                 _flashMessage.Danger("Student not found");
                 model.IsSearchSuccessful = false;
                 return View(model);
             }
 
-            //Passar valores do student para o model
+            if (students.Count() > 1)
+            {
+                // Se houver homônimos
+                model.HasHomonyms = true;
+                model.HomonymStudents = students.ToList();
+                return View(model);
+            }
+            else
+            {
+                // Apenas um estudante encontrado
+                var student = students.First();
 
-            model.BirthDate = student.BirthDate;
-            model.PhoneNumber = student.PhoneNumber;
-            model.Email = student.Email;
-            model.Id = student.Id;
-            model.Address = student.Address;
-            model.ProfileImageId = student.ProfileImageId;
-            model.SchoolClass = student.SchoolClass == null
-                        ? "A student not enrolled in any school class"
-                        : student.SchoolClass.Id.ToString();
-            model.UserStudentId = student.UserStudentId;
-            model.IsSearchSuccessful = true;
+                model.BirthDate = student.BirthDate;
+                model.PhoneNumber = student.PhoneNumber;
+                model.Email = student.Email;
+                model.Id = student.Id;
+                model.Address = student.Address;
+                model.ProfileImageId = student.ProfileImageId;
+                model.SchoolClass = student.SchoolClass == null
+                            ? "A student not enrolled in any school class"
+                            : student.SchoolClass.Id.ToString();
+                model.UserStudentId = student.UserStudentId;
+                model.IsSearchSuccessful = true;
 
-
-            return View(model);
+                return View(model);
+            }
         }
 
 
@@ -211,7 +299,7 @@ namespace GestaoEscolarWeb.Controllers
 
             model.Id = course.Id;
             model.Name = course.Name;       
-            model.CourseStudents = (ICollection<Student>)courseStudents;
+            model.CourseStudents = (ICollection<Data.Entities.Student>)courseStudents;
             model.IsSearchSuccessful = true;
             model.StartDate = course.StartDate;
             model.EndDate = course.EndDate; 
@@ -220,6 +308,37 @@ namespace GestaoEscolarWeb.Controllers
 
 
             return View(model);
+        }
+
+
+
+        [HttpGet] // GET para mostrar o student
+        public async Task<IActionResult> GetStudentById(int studentId)
+        {
+            var student = await _studentRepository.GetStudentWithEvaluationsAsync(studentId);
+
+            if (student == null)
+            {
+                _flashMessage.Danger("Student not found.");
+                return View();
+            }
+
+            var model = new SearchStudentViewModel()
+            {
+                BirthDate = student.BirthDate,
+                PhoneNumber = student.PhoneNumber,
+                Email = student.Email,
+                Id = student.Id,
+                Address = student.Address,
+                ProfileImageId = student.ProfileImageId,
+                SchoolClass = student.SchoolClass == null
+                            ? "A student not enrolled in any school class"
+                            : student.SchoolClass.Id.ToString(),
+                UserStudentId = student.UserStudentId,
+                IsSearchSuccessful = true,
+            };
+
+            return View("Student", model); // Retorna a mesma View de inscrições com os resultados
         }
 
 

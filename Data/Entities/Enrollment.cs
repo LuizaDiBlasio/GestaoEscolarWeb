@@ -31,7 +31,8 @@ namespace GestaoEscolarWeb.Data.Entities
 
 
         [Display(Name = "Student Status")]
-        public StudentStatus StudentStatus { get; set; } 
+        public StudentStatus StudentStatus { get; set; }    
+
 
         public Enrollment() //atribuir status default como enrolled no ctor
         {

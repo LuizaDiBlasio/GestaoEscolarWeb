@@ -13,13 +13,16 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         public Task<Student> GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(int id);
 
-        public Task<Student> GetStudentByFullNameAsync(string studentFullName);
+        public Task<IEnumerable<Student>> GetStudentsByFullNameAsync(string studentFullName);
 
         public Task<Student> GetStudentWithEnrollmentsAsync(int id);
 
         public Task<Student> GetStudentWithEvaluationsAsync(int id);
 
         public List<SelectListItem> GetStudentStatusList();
+
+
+        public Task<Student> GetStudentWithSchoolClassAsync(int id);
     }
 
 }

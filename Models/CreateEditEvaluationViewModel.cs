@@ -7,7 +7,11 @@ namespace GestaoEscolarWeb.Models
 {
     public class CreateEditEvaluationViewModel
     {
-        public int Id { get; set; }
+        public int Id { get; set; } 
+
+
+        [Range(1, int.MaxValue, ErrorMessage = "The student Id cannot be 0")]
+        public int StudentId { get; set; }
 
         [Required]
         [Display(Name = "Student")]
@@ -32,6 +36,11 @@ namespace GestaoEscolarWeb.Models
 
 
         public IEnumerable<SelectListItem> Subjects { get; set; }
+
+        public CreateEditEvaluationViewModel()
+        {
+            Subjects = new List<SelectListItem>();
+        }
 
     }
 }

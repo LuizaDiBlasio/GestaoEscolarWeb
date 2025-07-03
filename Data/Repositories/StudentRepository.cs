@@ -27,17 +27,19 @@ namespace GestaoEscolarWeb.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Student> GetStudentByFullNameAsync(string studentFullName)
+        public async Task<IEnumerable<Student>> GetStudentsByFullNameAsync(string studentFullName)
         {
             if (string.IsNullOrEmpty(studentFullName))
             {
-                return null;
+                return new List<Student>(); // retorna
             }
 
             string cleanedFullName = studentFullName.Trim();
+
             return await _context.Students
+                .Where(s => s.FullName == cleanedFullName)
                 .Include(s => s.SchoolClass)
-                .FirstOrDefaultAsync(s => s.FullName == studentFullName);   
+                .ToListAsync(); 
         }
 
         public List<SelectListItem> GetStudentStatusList()
@@ -66,6 +68,14 @@ namespace GestaoEscolarWeb.Data.Repositories
                 .Include(s => s.Evaluations)
                     .ThenInclude(e => e.Subject)
                 .FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        public async Task<Student> GetStudentWithSchoolClassAsync(int id)
+        {
+            return await _context.Students
+                    .Include (s => s.SchoolClass)
+                    .FirstOrDefaultAsync(s => s.Id == id);
+
         }
 
         public async Task<Student> GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(int id)

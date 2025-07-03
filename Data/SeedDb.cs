@@ -1,4 +1,5 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
+using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +15,11 @@ namespace GestaoEscolarWeb.Data
         private readonly IUserHelper _userHelper;
 
 
+
         public SeedDb(DataContext context, IUserHelper userHelper)
         {
             _context = context;
-            _userHelper = userHelper;
+            _userHelper = userHelper; 
         }
 
         public async Task SeedAdminAsync() //método para inicializar com admin
@@ -38,7 +40,9 @@ namespace GestaoEscolarWeb.Data
                     Email = "luizabandeira90@gmail.com",
                     UserName = "luizabandeira90@gmail.com",
                     PhoneNumber = "12345678",
-                    Address = "Fonte da Saudade"
+                    Address = "Fonte da Saudade",
+                    BirthDate = new DateTime(1990, 04, 06),
+                    IsActive = true
                 };
 
                 var result = await _userHelper.AddUserAsync(user, "123456"); //criar utilizador, mandar utilizador e password
@@ -57,6 +61,19 @@ namespace GestaoEscolarWeb.Data
             {
                 await _userHelper.AddUserToRoleAsync(user, "Admin"); //adiciona role ao user
             }
+
+            //inicializar SystemData
+
+            var systemData = await _context.SystemData.FirstOrDefaultAsync(sd => sd.Id == 1); //verificar se já existe
+
+            if (systemData == null)
+            {
+                var newSystemData = new SystemData();
+
+                await _context.SystemData.AddAsync(newSystemData);
+                await _context.SaveChangesAsync();
+            }
+
         }
     }
 }

@@ -202,13 +202,13 @@ namespace GestaoEscolarWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("StudentNotFound");
             }
 
             var student = await _studentRepository.GetByIdAsync(id.Value);
             if (student == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("StudentNotFound");
             }
 
             //converter para model
@@ -232,7 +232,6 @@ namespace GestaoEscolarWeb.Controllers
 
         // POST: Students/Edit/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, CreateEditStudentViewModel model)
         {
             if (id != model.Id)
@@ -281,7 +280,6 @@ namespace GestaoEscolarWeb.Controllers
 
         // POST: Students/MyProfile/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> MyProfile(int id, MyProfileViewModel model)
         {
             if (id != model.Id)
@@ -350,7 +348,7 @@ namespace GestaoEscolarWeb.Controllers
             if (student.Evaluations != null && student.Evaluations.Any())
             {
                 _flashMessage.Danger("Student cannot be deleted. There are grades associated with this student.");
-                return RedirectToAction(nameof(Delete), new { id = student.Id });
+                return View("Delete", student);
             }
 
             //se não houver notas, desfazer relações e deletar
@@ -366,6 +364,15 @@ namespace GestaoEscolarWeb.Controllers
             try
             {
                 await _studentRepository.DeleteAsync(student);
+
+                //tornar o user do estudante inativo 
+
+                var userStudent = await _userHelper.GetUserByEmailAsync(student.Email);
+
+                if (userStudent != null)
+                {
+                    userStudent.IsActive = false; 
+                }
 
                 return RedirectToAction(nameof(Index));
             }
@@ -386,6 +393,21 @@ namespace GestaoEscolarWeb.Controllers
             }
             
         }
+
+        [HttpGet("Students/GetStudentFullNameByIdAsync/{id?}")]
+        public async Task<IActionResult> GetStudentFullNameByIdAsync(int id)
+        {
+            var student = await _studentRepository.GetByIdAsync(id); 
+
+            if (student == null)
+            {
+                return new NotFoundViewResult("StudentNotFound");
+            }
+   
+            return Json(new { fullName = $"{student.FullName}" });
+        }
+
+
 
         private bool StudentExists(int id)
         {

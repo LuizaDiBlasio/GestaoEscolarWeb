@@ -14,12 +14,19 @@
     <div class="col-md-4">
         <form asp-action="Create" method="post">
             <div class="form-group">
+                <label asp-for="StudentId" class="control-label"></label>
+                <input asp-for="StudentId" class="form-control"
+                       id="studentIdInput"
+                       placeholder="Insert student's Id number..."
+                       readonly="@(Model.StudentId != 0)" /> @*campo será readonly caso nome já venha pré preenchido *@
+                <span id="studentErrorFeedback" class="text-danger"></span>
+                <span asp-validation-for="StudentId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="StudentFullName" class="control-label"></label>
                 <input asp-for="StudentFullName" class="form-control"
                        id="studentFullNameInput" 
-                placeholder="Insert name of the student..."
-                       readonly="@(Model.StudentFullName != null && !string.IsNullOrWhiteSpace(Model.StudentFullName))" /> @*campo será readonly caso nome já venha pré preenchido*@
-                <span id="studentErrorFeedback" class="text-danger"></span>
+                       readonly/> 
                 <span asp-validation-for="StudentFullName" class="text-danger"></span>
             </div>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -58,84 +65,117 @@
              });
              enrollmentDatePicker.appendTo('#enrollmentDateInput');
 
-             const studentFullNameInput = $("#studentFullNameInput");
+            const studentIdInput = $("#studentIdInput");
             const subjectDropdown = $("#subjectDropdown");
-            const studentErrorFeedback = $("#studentErrorFeedback"); // Selecionar o novo span
+            const studentFullNameInput = $("#studentFullNameInput"); // para preencher o nome automatico
+            const idValidationSpan = $('span[data-valmsg-for="StudentId"]'); // Span do asp-validation-for="Id"
+            const studentErrorFeedback = $("#studentErrorFeedback");
 
-            // Função para limpar a mensagem de erro específica do aluno
-            function clearStudentError() {
-                studentErrorFeedback.text(''); // Limpa o texto do span
+            // limpar mensagens de erro
+            function clearValidationMessages() {
+                idValidationSpan.text('');
+                studentErrorFeedback.text('');
+                studentIdInput.removeClass("input-validation-error");
+                var validator = $("form").validate();
+                validator.element(studentIdInput);
             }
 
-            // buscar e popular as disciplinas
+            //buscar e popular as disciplinas
             function fetchAndPopulateSubjects() {
-                const studentFullName = studentFullNameInput.val().trim();
+                const studentIdString = studentIdInput.val().trim();
+                let studentId = parseInt(studentIdString, 10); // Converte para número
 
-                // Limpa qualquer mensagem de erro anterior ao iniciar uma nova busca
-                clearStudentError();
+                // Limpar mensagens de erro antes de qualquer ação
+                clearValidationMessages();
 
-                // limpa e adiciona placeholder se o nome estiver vazio
-                if (studentFullName.length === 0) {
-                    subjectDropdown.empty();
-                    return; // Sai da função
+                // Limpar e adicionar placeholder caso id inválido
+                if (studentIdString.length === 0 || isNaN(studentId) || studentId <= 0) {
+                    studentFullNameInput.val('');
+
+                    return;
                 }
 
+
+                //aplicar ajax
                 $.ajax({
                     url: '@Url.Action("GetSubjectsForStudent", "Enrollments")',
                     type: 'GET',
                     dataType: 'json',
-                    data: { studentFullName: studentFullName },
+                    data: { id: studentId },
                     success: function (subjects) {
                         subjectDropdown.empty(); // Limpa o dropdown
 
-                        // placeholder
-                        subjectDropdown.append('<option value="0">Select a subject...</option>');
+                        // Adicionar um placeholder
+                        subjectDropdown.append('<option value="">--- Select a Subject ---</option>');
 
                         if (subjects && subjects.length > 0) {
                             $.each(subjects, function (i, subject) {
                                 subjectDropdown.append('<option value="' + subject.value + '">' + subject.text + '</option>');
                             });
-                        }
-                        else   // Se nenhuma disciplina for encontrada
-                        {
-                            subjectDropdown.append('<option value="0">No subjects found.</option>');
+                        } else {
+                            subjectDropdown.append('<option value="">No subjects available for this student.</option>');
                         }
                     },
-                    error: function (xhr, status, error) {  //XMLHttpRequest - xhr objeto que vai trazer a resposta HTTP, nesse caso contém um texto
+                    error: function (xhr, status, error) {
                         console.error('Failed to retrieve subjects', error);
                         console.error('Status:', status);
                         console.error('Response Text:', xhr.responseText);
 
-                        subjectDropdown.empty(); // Limpa o dropdown
-                        subjectDropdown.append('<option value="0">Failed to retrieve subjects</option>'); // Mensagem no dropdown
+                        subjectDropdown.empty().append('<option value="">Failed to retrieve subjects</option>'); // Mensagem no dropdown
 
                         // Exibir a mensagem de erro
-                        if (xhr.responseText) 
-                        { 
-                            studentErrorFeedback.text(xhr.responseText);
-                        } 
-                        else 
-                        {
-                            studentErrorFeedback.text('An unknown error occurred while retrieving subjects.');
+                        if (xhr.responseText) {
+                            studentErrorFeedback.text(xhr.responseText).addClass('text-danger');
+                        } else {
+                            studentErrorFeedback.text('An unknown error occurred while retrieving subjects.').addClass('text-danger');
                         }
+                        studentFullNameInput.val('Error fetching student');
                     }
                 });
+
+                // carregar o nome do aluno
+                getAndPopulateStudentName(studentId);
             }
 
-            // Ativar a busca quando perde o foco (blur)
-            studentFullNameInput.on('blur', fetchAndPopulateSubjects);
+            // buscar e popular o nome do aluno
+            function getAndPopulateStudentName(studentId) {
 
-            // Limpa a mensagem de erro do aluno
-            studentFullNameInput.on('focus', clearStudentError);
-
-            // inicialização da view
-            if (studentFullNameInput.val().trim().length > 0) {
-                fetchAndPopulateSubjects();
-            } 
-            else
-            {
-                subjectDropdown.empty();
+                if (studentId > 0) {
+                    $.ajax({
+                        url: '@Url.Action("GetStudentFullNameByIdAsync", "Students")',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: { id: studentId },
+                        success: function (data) {
+                            if (data && data.fullName) {
+                                studentFullNameInput.val(data.fullName);
+                                clearValidationMessages(); // Limpa validações se o aluno for encontrado
+                            } else {
+                                studentFullNameInput.val('Student not found');
+                                studentErrorFeedback.text('Student not found with the provided id.').addClass('text-danger');
+                            }
+                        },
+                        error: function (xhr, status, error) { //XMLHttpRequest - xhr objeto que vai trazer a resposta HTTP, nesse caso contém um texto
+                            console.error('Failed to retrieve student name', error);
+                            studentFullNameInput.val('Error loading student name');
+                        }
+                    });
+                } else {
+                    studentFullNameInput.val('');
+                }
             }
+
+
+            // Ativar a busca quando perde o foco
+            studentIdInput.on('blur', fetchAndPopulateSubjects);
+
+            // Limpar mensagens de erro
+            studentIdInput.on('focus', clearValidationMessages);
+
+            //inicializar a view
+            studentFullNameInput.val('');
+            idValidationSpan.text('');
+            
         });
     </script>
 }

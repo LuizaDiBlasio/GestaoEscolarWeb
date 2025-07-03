@@ -4,14 +4,16 @@ using GestaoEscolarWeb.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GestaoEscolarWeb.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250701173651_UserIsActiveChange")]
+    partial class UserIsActiveChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -243,9 +245,6 @@ namespace GestaoEscolarWeb.Migrations
 
                     b.Property<decimal>("AbsenceLimit")
                         .HasColumnType("decimal(5,2)");
-
-                    b.Property<decimal>("PassingGrade")
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
