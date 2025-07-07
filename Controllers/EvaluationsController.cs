@@ -2,8 +2,8 @@
 using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
-using GestaoEscolarWeb.Migrations;
 using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -29,10 +29,13 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IConverterHelper _converterHelper;
 
-        private readonly IUserHelper _userHelper;   
+        private readonly IUserHelper _userHelper;
+
+        private readonly IEnrollmentRepository _enrollmentRepository;
 
         public EvaluationsController(DataContext context, IEvaluationRepository evaluationRepository, IStudentRepository studentRepository, 
-            IFlashMessage flashMessage, ISubjectRepository subjectRepository, IConverterHelper converterHelper, IUserHelper userHelper )
+            IFlashMessage flashMessage, ISubjectRepository subjectRepository, IConverterHelper converterHelper, IUserHelper userHelper,
+            IEnrollmentRepository enrollmentRepository)
         {
             _context = context;
 
@@ -47,55 +50,20 @@ namespace GestaoEscolarWeb.Controllers
             _converterHelper = converterHelper;
 
             _userHelper = userHelper;
+
+            _enrollmentRepository = enrollmentRepository;
         }
 
         // GET: Evaluations
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Index()
         {
             return View(await _evaluationRepository.GetEvaluationsWithStudentsAndSubjectsAsync());
         }
 
-       
-
-        //GET do MyGrades (avaliações do estudante)
-        public async Task<IActionResult> MyGrades()
-        {
-            var username = this.User.Identity.Name; //pegar o username
-
-            var user = await _userHelper.GetUserByEmailAsync(username);
-
-            if (user == null)
-            {
-                _flashMessage.Danger("Not possible to display grades, user not found");
-                return View(Enumerable.Empty<Evaluation>());
-            }
-
-            //encontrar estudante
-
-            var students = await _studentRepository.GetAllStudentsWithSchoolClassAsync();
-
-            Data.Entities.Student student = students.FirstOrDefault(s => s.Email == username);  //encontrar o student corrspondente ao username
-
-            if (student == null)
-            {
-                _flashMessage.Danger("Not possible to display grades, student not found");
-                return View(Enumerable.Empty<Evaluation>());
-            }
-
-            //buscar notas do aluno
-
-            var grades = await _evaluationRepository.GetStudentEvaluationsAsync(student);
-
-            if(!grades.Any())
-            {
-                _flashMessage.Info("Student doesn't have any grades yet");
-                return View(Enumerable.Empty<Evaluation>());
-            }
-
-            return View(grades);
-        }
 
         // GET: Evaluations/Create
+        [Authorize(Roles = "Employee")]
         public IActionResult Create()
         {
             var model = new CreateEditEvaluationViewModel();
@@ -104,12 +72,13 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // POST: Evaluations/Create
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> Create(CreateEditEvaluationViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var student = await _studentRepository.GetStudentWithEnrollmentsAsync(model.StudentId);   //resolver esse metodo 
+                var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(model.StudentId);   //resolver esse metodo 
 
                 if (student == null)
                 {
@@ -124,6 +93,12 @@ namespace GestaoEscolarWeb.Controllers
                 {
                     _flashMessage.Warning("Evaluation is already registered.");
 
+                    return View(model);
+                }
+
+                if (student.SchoolClass.SchoolYear < DateTime.Now.Year)
+                {
+                    _flashMessage.Danger("Cannot create evaluation after schoolyear end");
                     return View(model);
                 }
 
@@ -143,6 +118,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // GET: Evaluations/Edit/5
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -183,6 +159,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         //POST: Evaluations/Edit/5
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> Edit(int id, CreateEditEvaluationViewModel model)
         {
@@ -195,6 +172,19 @@ namespace GestaoEscolarWeb.Controllers
             var student = await _studentRepository.GetStudentWithSchoolClassAsync(model.StudentId);
 
             var evaluation = _converterHelper.ToEvaluation(model, student, false);
+
+            if (evaluation == null)
+            {
+                return new NotFoundViewResult("EvaluationNotFound");
+            }
+
+            if (student.SchoolClass.SchoolYear < DateTime.Now.Year)
+            {
+                _flashMessage.Danger("Cannot edit evaluation after schoolyear end");
+                return View(model);
+            }
+
+            
 
             if (ModelState.IsValid)
             {
@@ -218,7 +208,60 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
-        // GET: Evaluations/Delete/5
+
+        //GET 
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> StudentEvaluationsStatus()
+        {
+            var username = this.User.Identity.Name; //pegar o username
+
+            var user = await _userHelper.GetUserByEmailAsync(username);
+
+            if (user == null)
+            {
+                _flashMessage.Danger("User not found");
+                return View();
+            }
+
+            var student = await _studentRepository.GetStudentByEmailAsync(username);    
+
+            if (student == null)
+            {
+                _flashMessage.Danger("Student not found");
+                return View();
+            }
+
+            var studentEvaluationsAndEnrollments = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(student.Id);
+
+            if (studentEvaluationsAndEnrollments == null)
+            {
+                _flashMessage.Danger("Student not found");
+                return View();
+            }
+
+            //atribuir student status e average score
+            foreach (Enrollment enrollment in studentEvaluationsAndEnrollments.Enrollments)
+            {
+                var studentStatus = await _enrollmentRepository.GetStudentStatusAsync(enrollment);
+                enrollment.StudentStatus = studentStatus;
+
+                var averageScore = await _enrollmentRepository.GetAverageScoreAsync(enrollment.Id);
+                enrollment.AvarageScore = averageScore; 
+            }
+            
+            var model = new StudentEvaluationsStatusViewModel()
+            {
+                Enrollments = student.Enrollments,
+                Evaluations = student.Evaluations,
+                StudentId = student.Id
+            };
+
+            return View(model);
+
+        }
+
+
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -237,6 +280,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // POST: Evaluations/Delete/5
+        [Authorize(Roles = "Employee")]
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -245,6 +289,14 @@ namespace GestaoEscolarWeb.Controllers
             if (evaluation == null)
             {
                 return new NotFoundViewResult("EvaluationNotFound");
+            }
+
+            var student = await _studentRepository.GetStudentWithSchoolClassAsync(evaluation.StudentId);
+
+            if (student.SchoolClass.SchoolYear < DateTime.Now.Year)
+            {
+                _flashMessage.Danger("Cannot delete evaluation after schoolyear end");
+                return View();
             }
 
             try
@@ -273,6 +325,8 @@ namespace GestaoEscolarWeb.Controllers
             
         }
 
+        //Chamada Ajax
+        [Authorize(Roles = "Employee")]
         [HttpGet]
         public async Task<IActionResult> GetSubjectsForStudentEvaluation(int id)
         {

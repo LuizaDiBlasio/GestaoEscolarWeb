@@ -6,8 +6,8 @@ using GestaoEscolarWeb.Data;
 using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
-using GestaoEscolarWeb.Migrations;
 using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +16,7 @@ using Vereyon.Web;
 
 namespace GestaoEscolarWeb.Controllers
 {
+    [Authorize(Roles = "Employee")]
     public class EnrollmentsController : Controller
     {
         private readonly DataContext _context;
@@ -46,6 +47,7 @@ namespace GestaoEscolarWeb.Controllers
             _converterHelper = converterHelper;
         }
 
+        
         // GET: Enrollments
         public async Task<IActionResult> Index()
         {
@@ -53,13 +55,14 @@ namespace GestaoEscolarWeb.Controllers
 
             foreach (var enrollment in enrollments)
             {
-                enrollment.StudentStatus = await _enrollmentRepository.GetStudentStatusAsync(enrollment); 
+                enrollment.StudentStatus = await _enrollmentRepository.GetStudentStatusAsync(enrollment);
+                enrollment.AvarageScore = await _enrollmentRepository.GetAverageScoreAsync(enrollment.Id);
             }
 
             return View(enrollments);
         }
 
-       
+
 
         // GET: Enrollments/Create
         public async Task<IActionResult> Create(int? studentId)
@@ -142,6 +145,12 @@ namespace GestaoEscolarWeb.Controllers
                 // checar nome 
                 var student = await _studentRepository.GetStudentWithSchoolClassAsync(model.StudentId);   //resolver esse metodo 
 
+                if (student.SchoolClass.SchoolYear < DateTime.Now.Year)
+                {
+                    _flashMessage.Danger("Cannot enroll student after schoolyear end");
+                    return View(model);
+                }
+
                 if (student == null)
                 {
                     _flashMessage.Danger("Not possible the complete enrollment, you need to register student first");
@@ -189,6 +198,7 @@ namespace GestaoEscolarWeb.Controllers
 
             var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(enrollment.StudentId);
 
+           
             if (student == null)
             {
                 _flashMessage.Danger("Not possible to carry on with enrollment");
@@ -237,6 +247,13 @@ namespace GestaoEscolarWeb.Controllers
             if (ModelState.IsValid)
             {
                 var student = await _studentRepository.GetStudentWithSchoolClassAsync(model.StudentId);
+
+                if (student.SchoolClass.SchoolYear < DateTime.Now.Year)
+                {
+                    _flashMessage.Danger("Cannot edit enrollment after schoolyear end");
+                    return View(model);
+                }
+
 
                 if (student == null)
                 {
@@ -317,9 +334,7 @@ namespace GestaoEscolarWeb.Controllers
                 ViewBag.ErrorMessage = errorMessage;
 
                 return View("Error");
-            }
-
-            
+            }      
         }
 
         // chamada AJAX

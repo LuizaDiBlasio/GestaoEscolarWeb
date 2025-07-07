@@ -8,12 +8,37 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GestaoEscolarWeb.Models
 {
-    public class RegisterNewUserViewModel : User
+    public class RegisterNewUserViewModel 
     {
+        [Required(ErrorMessage = "You need to register a full name")]
+        [MaxLength(50, ErrorMessage = "The field {0} can only contain {1} characters length")]
+        [Display(Name = "Full Name")]
+        public string FullName { get; set; }
 
-        [Required]
-        [DataType(DataType.EmailAddress)] // Obriga a colocar email
-        public string Username { get; set; }
+
+
+        [Required(ErrorMessage = "You need to register an email")]
+        [DataType(DataType.EmailAddress)] // Obriga a colocar formato email
+        public string Email { get; set; }
+
+
+        [Required(ErrorMessage = "You need to register an address")]
+        [MaxLength(100, ErrorMessage = "The field {0} can only contain {1} characters length")]
+        public string Address { get; set; }
+
+
+        [Required(ErrorMessage = "The Date of Birth is required.")]
+        [Display(Name = "Date of Birth")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime? BirthDate { get; set; }
+
+
+        [Display(Name = "Phone number")]
+        [Required(ErrorMessage = "You need to register a phone number")]
+        [MaxLength(30, ErrorMessage = "The field {0} can only contain {1} characters length")]
+        public string PhoneNumber { get; set; }
+
 
 
         [Required(ErrorMessage = "You need to select a role for your user")]
@@ -21,11 +46,12 @@ namespace GestaoEscolarWeb.Models
         public string SelectedRole { get; set; }
 
 
+        public IEnumerable<SelectListItem> AvailableRoles { get; set; }
+
+
         [RequiredIfRoleIsStudent]
         [Display(Name = "Profile picture")]
         public IFormFile ImageFile { get; set; }
 
-
-        public IEnumerable<SelectListItem> AvailableRoles { get; set; }
     }
 }

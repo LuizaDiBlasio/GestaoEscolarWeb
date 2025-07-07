@@ -1,4 +1,5 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
+using GestaoEscolarWeb.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
@@ -94,5 +95,11 @@ namespace GestaoEscolarWeb.Data.Repositories
                 .Include(s => s.SubjectCourses)
                 .FirstOrDefaultAsync(s => s.Name == cleanedName);
         }
+
+        public async Task<bool> ExistingSubject(Subject subject)
+        {
+            return await _context.Subjects.AnyAsync(s => s.CreditHours == subject.CreditHours && s.Name == subject.Name);
+        }
+
     }
 }

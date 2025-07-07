@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
+using System.Security.Principal;
 
 namespace GestaoEscolarWeb.Data
 {
@@ -53,19 +55,39 @@ namespace GestaoEscolarWeb.Data
                .HasIndex(e => new { e.ExamDate, e.SubjectId })
                .IsUnique();
 
+            //evitar disciplinas duplicadas, criar uma chave composta na tabela Subjects
+            modelBuilder.Entity<Subject>()
+               .HasIndex(s => new { s.CreditHours, s.Name })
+               .IsUnique();
+
             //determinar casas decimais
             modelBuilder.Entity<Evaluation>()
            .Property(e => e.Score)
            .HasColumnType("decimal(5, 2)");
 
-            
+            //determinar casas decimais
+            modelBuilder.Entity<SystemData>()
+           .Property(s => s.AbsenceLimit)
+           .HasColumnType("decimal(5, 2)");
+
+            //determinar casas decimais
+            modelBuilder.Entity<SystemData>()
+           .Property(s => s.PassingGrade)
+           .HasColumnType("decimal(4, 2)");
+
+
             modelBuilder.Entity<SystemData>()
                 .Property(s => s.AbsenceLimit)
                 .HasColumnType("decimal(5, 2)");
 
             modelBuilder.Entity<SystemData>()
+               .Property(s => s.PassingGrade)
+               .HasColumnType("decimal(5, 2)");
+
+            // desativar identity para esse id especifico
+            modelBuilder.Entity<SystemData>()
                 .Property(sd => sd.Id)
-                .ValueGeneratedNever(); //desativar identity para esse id especifico
+                .ValueGeneratedNever(); 
 
         }
     }

@@ -1,5 +1,4 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
-using GestaoEscolarWeb.Migrations;
 using GestaoEscolarWeb.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
@@ -16,9 +15,7 @@ namespace GestaoEscolarWeb.Helpers
             return new Course
             {
                 Id = isNew ? 0 : model.Id,
-                Name = model.Name,
-                StartDate = model.StartDate.Value,
-                EndDate = model.EndDate.Value
+                Name = model.Name
             };
         }
 
@@ -28,8 +25,6 @@ namespace GestaoEscolarWeb.Helpers
             {
                 Id = course.Id,
                 Name = course.Name,
-                StartDate = course.StartDate,
-                EndDate = course.EndDate,
                 CourseSubjects = course.CourseSubjects,
                 SelectedSubjectIds = course.CourseSubjects? //evitar erro caso CourseSubjects seja null
                                    .Select(s => s.Id) //selecionar por id

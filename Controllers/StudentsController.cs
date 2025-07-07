@@ -5,8 +5,8 @@ using GestaoEscolarWeb.Data;
 using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
-using GestaoEscolarWeb.Migrations;
 using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -50,6 +50,7 @@ namespace GestaoEscolarWeb.Controllers
               
         }
 
+        [Authorize(Roles = "Employee")]
         // GET: Students
         public async Task<IActionResult> Index()
         {
@@ -57,6 +58,8 @@ namespace GestaoEscolarWeb.Controllers
             return View(students);
         }
 
+
+        [Authorize(Roles = "Student")]
         //Get do MyProfile
         public async Task<IActionResult> MyProfile()
         {
@@ -88,7 +91,54 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        // POST: Students/MyProfile/5
+        [Authorize(Roles = "Student")]
+        [HttpPost]
+        public async Task<IActionResult> MyProfile(int id, MyProfileViewModel model)
+        {
+            if (id != model.Id)
+            {
+                return new NotFoundViewResult("StudentNotFound");
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    Guid profileImageId = Guid.Empty; // identificador da imagem no blob (ainda não identificada)
+
+                    if (model.ImageFile != null && model.ImageFile.Length > 0) //verificar se existe a imagem
+                    {
+                        profileImageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "imagens"); //manda gravar o ficheiros na pasta imagens 
+                    }
+
+                    var student = _converterHelper.FromMyProfileToStudent(model, false, profileImageId);
+
+                    await _studentRepository.UpdateAsync(student);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!StudentExists(model.Id))
+                    {
+                        return new NotFoundViewResult("StudentNotFound");
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                _flashMessage.Confirmation($"Your profile has been updated successfully.");
+
+                return RedirectToAction(nameof(MyProfile), model);
+            }
+            return View(model);
+        }
+
+
         // GET: Students/Details/5
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -105,7 +155,9 @@ namespace GestaoEscolarWeb.Controllers
             return View(student);
         }
 
+
         // GET: Students/Create
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Create()
         {
             //buscar a lista para a comboBox
@@ -121,7 +173,8 @@ namespace GestaoEscolarWeb.Controllers
 
 
         //POST: Students/Create
-       [HttpPost]
+        [Authorize(Roles = "Employee")]
+        [HttpPost]
         public async Task<IActionResult> Create(CreateEditStudentViewModel model)
         {
             if (ModelState.IsValid)
@@ -195,9 +248,10 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
 
         }
-            
+
 
         // GET: Students/Edit/5
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -231,6 +285,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // POST: Students/Edit/5
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> Edit(int id, CreateEditStudentViewModel model)
         {
@@ -278,51 +333,9 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
-        // POST: Students/MyProfile/5
-        [HttpPost]
-        public async Task<IActionResult> MyProfile(int id, MyProfileViewModel model)
-        {
-            if (id != model.Id)
-            {
-                return new NotFoundViewResult("StudentNotFound");
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    Guid profileImageId = Guid.Empty; // identificador da imagem no blob (ainda não identificada)
-
-                    if (model.ImageFile != null && model.ImageFile.Length > 0) //verificar se existe a imagem
-                    {
-                        profileImageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "imagens"); //manda gravar o ficheiros na pasta imagens 
-                    }
-
-                    var student = _converterHelper.FromMyProfileToStudent(model, false, profileImageId);
-
-                    await _studentRepository.UpdateAsync(student);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!StudentExists(model.Id))
-                    {
-                        return new NotFoundViewResult("StudentNotFound");
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                _flashMessage.Confirmation($"Your profile has been updated successfully.");
-
-                return RedirectToAction(nameof(MyProfile), model);
-            }
-            return View(model);
-        }
-
 
         // GET: Students/Delete/5
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -339,7 +352,9 @@ namespace GestaoEscolarWeb.Controllers
             return View(student);
         }
 
+
         // POST: Students/Delete/5
+        [Authorize(Roles = "Employee")]
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -394,6 +409,9 @@ namespace GestaoEscolarWeb.Controllers
             
         }
 
+
+        //Metodo chamado no ajax
+        [Authorize(Roles = "Employee")]
         [HttpGet("Students/GetStudentFullNameByIdAsync/{id?}")]
         public async Task<IActionResult> GetStudentFullNameByIdAsync(int id)
         {
@@ -409,6 +427,7 @@ namespace GestaoEscolarWeb.Controllers
 
 
 
+        [Authorize(Roles = "Employee")]
         private bool StudentExists(int id)
         {
             return _context.Students.Any(e => e.Id == id);

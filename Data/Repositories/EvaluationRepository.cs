@@ -1,11 +1,9 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
-using Microsoft.EntityFrameworkCore;
 using GestaoEscolarWeb.Models;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GestaoEscolarWeb.Data.Repositories
 {
@@ -23,7 +21,7 @@ namespace GestaoEscolarWeb.Data.Repositories
                                 .Include(e => e.Student)
                                 .Include(e => e.Subject)
                                 .ToListAsync();
-            return evaluations; 
+            return evaluations;
         }
 
         public async Task<bool> ExistingEvaluationAsync(CreateEditEvaluationViewModel model)
@@ -42,9 +40,9 @@ namespace GestaoEscolarWeb.Data.Repositories
         public async Task<IEnumerable<Evaluation>> GetStudentEvaluationsAsync(Student student)
         {
             return await _context.Evaluations
-         .Include(e => e.Student) // Já estava lá, mas não estritamente necessário se você já tem o student.Id
-         .Include(e => e.Subject) // <-- Adicione isso para carregar o Subject
-         .Where(e => e.StudentId == student.Id) // Filtra pelo Id do estudante na avaliação
+         .Include(e => e.Student)
+         .Include(e => e.Subject)
+         .Where(e => e.StudentId == student.Id)
          .ToListAsync();
         }
     }

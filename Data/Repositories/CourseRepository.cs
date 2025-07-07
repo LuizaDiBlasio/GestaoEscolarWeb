@@ -18,7 +18,8 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         public IEnumerable<SelectListItem> GetComboCourses()
         {
-            var list = _context.Courses.Select(c => new SelectListItem 
+            var list = _context.Courses
+                .Select(c => new SelectListItem 
             {
                 //preencher as propriedades da combobox
                 Text = c.Name,

@@ -8,6 +8,7 @@ using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vereyon.Web;
@@ -64,6 +65,8 @@ namespace GestaoEscolarWeb.Controllers
             return View(course);
         }
 
+
+        [Authorize(Roles = "Admin")]
         // GET: Courses/Create
         public async Task<IActionResult> Create()
         {
@@ -75,20 +78,16 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // POST: Courses/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CourseViewModel model)
         {
-            if (ModelState.IsValid) //TODO está dando CourseSubjects Invalid
+            if (ModelState.IsValid) 
             {
                 // Criar um curso
                 var course = new Course
                 {
                     Name = model.Name,
-                    StartDate = model.StartDate.Value,
-                    EndDate = model.EndDate.Value,
                     CourseSubjects = new List<Subject>() // Inicializar a lista de Subjects
                 };
 
@@ -116,7 +115,9 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
         // GET: Courses/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -138,10 +139,8 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // POST: Courses/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, CourseViewModel model)
         {
             if (id != model.Id)
@@ -155,8 +154,6 @@ namespace GestaoEscolarWeb.Controllers
 
                 //atualizar propriedades
                 course.Name = model.Name;
-                course.StartDate = model.StartDate.Value;
-                course.EndDate = model.EndDate.Value;
 
                 // atualizar listas de subjects
                 var selectedSubjectIdsSet = new List<int>(model.SelectedSubjectIds ?? new List<int>());
@@ -210,6 +207,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // GET: Courses/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         { 
             if (id == null)
@@ -227,6 +225,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // POST: Courses/Delete/5
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

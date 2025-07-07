@@ -1,0 +1,48 @@
+﻿@model GestaoEscolarWeb.Models.UserMessagesViewModel
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Messages history</h1>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.UserMessages == null || Model.UserMessages.Count() == 0)
+        {
+            <td>No messages </td>
+        }
+        else
+        {
+            @foreach (var item in Model.UserMessages)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MessageTitle)
+                    </td>
+                    <td>
+                        @item.AlertTime.ToString("dd/MM/yyyy HH:mm:ss")
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    </td>
+                </tr>
+            }
+        }
+        
+    </tbody>
+</table>
+<div>
+    <a asp-action="Index" asp-controller="Home">Back to Home</a>
+</div>

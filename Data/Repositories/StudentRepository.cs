@@ -27,6 +27,11 @@ namespace GestaoEscolarWeb.Data.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Student> GetStudentByEmailAsync(string email)
+        {
+            return await _context.Students.FirstOrDefaultAsync(s => s.Email == email);  
+        }
+
         public async Task<IEnumerable<Student>> GetStudentsByFullNameAsync(string studentFullName)
         {
             if (string.IsNullOrEmpty(studentFullName))

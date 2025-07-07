@@ -14,7 +14,7 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
+            <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Escola Cinel</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
                         @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Users and roles</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register User</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a>
@@ -54,6 +54,7 @@
                                 </ul>
 
                             </li>
+                           
                         }
 
                         @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Employee"))
@@ -70,6 +71,7 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Enrollments" asp-action="Index">Enrollments</a>
                             </li>
+                            
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="MyUserProFile">My Profile</a>
                             </li>
@@ -91,6 +93,18 @@
                                 </ul>
 
                             </li>
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Messages</a>
+
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Alerts" asp-action="Index">My messages</a></li>
+
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Alerts" asp-action="Create">Contact Admin</a></li>
+                                </ul>
+
+                            </li>
                         }
 
                         @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Student"))
@@ -99,7 +113,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Students" asp-action="MyProfile">My Profile</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Evaluations" asp-action="Grades & Status">My grades</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Evaluations" asp-action="StudentEvaluationsStatus">Grades & Status</a>
                             </li>
                         }
 

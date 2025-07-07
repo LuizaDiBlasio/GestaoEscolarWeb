@@ -1,7 +1,6 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Entities.Enums;
 using GestaoEscolarWeb.Models;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,6 +14,8 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         Task<bool> ExistingEnrollmentAsync(Student student, CreateEnrollmentViewModel model);
 
-        Task<StudentStatus> GetStudentStatusAsync(Enrollment enrollmentSearch);
+        Task<StudentStatus> GetStudentStatusAsync(Enrollment enrollment);
+
+        Task<decimal> GetAverageScoreAsync(int enrollmentId);  
     }
 }

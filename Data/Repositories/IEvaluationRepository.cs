@@ -1,5 +1,4 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
-using GestaoEscolarWeb.Migrations;
 using GestaoEscolarWeb.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,5 +14,7 @@ namespace GestaoEscolarWeb.Data.Repositories
         Task<Evaluation> GetEvaluationWithStudentAndSubjectByIdAsync(int id);
 
         Task<IEnumerable<Evaluation>> GetStudentEvaluationsAsync(Entities.Student student);
+
+        
     }
 }

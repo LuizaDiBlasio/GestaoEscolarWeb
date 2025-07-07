@@ -1,0 +1,76 @@
+﻿@model GestaoEscolarWeb.Models.StudentEvaluationsStatusViewModel
+@{
+    ViewData["Title"] = "StudentEvaluationsStatus";
+}
+
+<flash dismissable="true" />
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>My grades and status</h2>
+
+<div>
+    <hr /> 
+    <h4>Evaluations' details</h4>
+    <br />
+    @if (Model.Evaluations == null || Model.Evaluations.Count() == 0)
+    {
+        <h5>Student has no evaluations </h5>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Grade</th>
+                    <th>Exam date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var evaluation in Model.Evaluations.OrderBy(e => e.Subject.Name))
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => evaluation.Subject.Name)</td>
+                        <td>@Html.DisplayFor(modelItem => evaluation.Score)</td>
+                        <td>@Html.DisplayFor(modelItem => evaluation.ExamDate)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+<br />
+<h4>Enrollments' details</h4>
+@if (Model.Enrollments == null || Model.Enrollments.Count() == 0)
+{
+    <h5>Student not enrolled in any subject</h5>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Average</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var enrollment in Model.Enrollments.OrderBy(e => e.Subject.Name))
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => enrollment.Subject.Name)</td>
+                    <td>@Html.DisplayFor(modelItem => enrollment.AvarageScore)</td>
+                    <td>@Html.DisplayFor(modelItem => enrollment.StudentStatus)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div>
+    <a asp-action="Index" asp-controller="Home">Back to Home</a>
+</div>

@@ -4,9 +4,7 @@
     ViewData["Title"] = "Create";
 }
 
-
 <h2>Enroll in subject</h2>
-
 
 <flash dismissable="true" />
 <hr />
@@ -18,15 +16,15 @@
                 <input asp-for="StudentId" class="form-control"
                        id="studentIdInput"
                        placeholder="Insert student's Id number..."
-                       readonly="@(Model.StudentId != 0)" /> @*campo será readonly caso nome já venha pré preenchido *@
+                       readonly="@(Model.StudentId != 0)" /> @* campo será readonly caso ID já venha pré-preenchido *@
                 <span id="studentErrorFeedback" class="text-danger"></span>
                 <span asp-validation-for="StudentId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="StudentFullName" class="control-label"></label>
                 <input asp-for="StudentFullName" class="form-control"
-                       id="studentFullNameInput" 
-                       readonly/> 
+                       id="studentFullNameInput"
+                       readonly="@(Model.StudentId != 0)" /> @* campo será readonly caso nome já venha pré-preenchido *@
                 <span asp-validation-for="StudentFullName" class="text-danger"></span>
             </div>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -49,63 +47,54 @@
     </div>
 </div>
 
-
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
     <script type="text/javascript">
         $(document).ready(function () {
-             var enrollmentDatePicker = new ej.calendars.DatePicker({
-                 format: 'MM/dd/yyyy',
-                 placeholder: 'Select a date'
-             });
-             enrollmentDatePicker.appendTo('#enrollmentDateInput');
+            var enrollmentDatePicker = new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy', 
+                placeholder: 'Select a date'
+            });
+            enrollmentDatePicker.appendTo('#enrollmentDateInput');
 
             const studentIdInput = $("#studentIdInput");
             const subjectDropdown = $("#subjectDropdown");
-            const studentFullNameInput = $("#studentFullNameInput"); // para preencher o nome automatico
-            const idValidationSpan = $('span[data-valmsg-for="StudentId"]'); // Span do asp-validation-for="Id"
+            const studentFullNameInput = $("#studentFullNameInput");
             const studentErrorFeedback = $("#studentErrorFeedback");
 
-            // limpar mensagens de erro
             function clearValidationMessages() {
-                idValidationSpan.text('');
                 studentErrorFeedback.text('');
                 studentIdInput.removeClass("input-validation-error");
                 var validator = $("form").validate();
-                validator.element(studentIdInput);
+                validator.element(studentIdInput); // validação
             }
 
-            //buscar e popular as disciplinas
-            function fetchAndPopulateSubjects() {
+            function fetchAndPopulateSubjectsAndStudentName() {
                 const studentIdString = studentIdInput.val().trim();
-                let studentId = parseInt(studentIdString, 10); // Converte para número
+                let studentId = parseInt(studentIdString, 10);
 
-                // Limpar mensagens de erro antes de qualquer ação
-                clearValidationMessages();
+                clearValidationMessages(); // limpa buscas
 
-                // Limpar e adicionar placeholder caso id inválido
                 if (studentIdString.length === 0 || isNaN(studentId) || studentId <= 0) {
                     studentFullNameInput.val('');
-
-                    return;
+                    return; // Sai da função se o ID for inválido/vazio
                 }
 
-
-                //aplicar ajax
+                // AJAX para buscar Subjects
                 $.ajax({
                     url: '@Url.Action("GetSubjectsForStudent", "Enrollments")',
                     type: 'GET',
                     dataType: 'json',
                     data: { id: studentId },
                     success: function (subjects) {
-                        subjectDropdown.empty(); // Limpa o dropdown
-
-                        // Adicionar um placeholder
+                        subjectDropdown.empty();
                         subjectDropdown.append('<option value="">--- Select a Subject ---</option>');
 
                         if (subjects && subjects.length > 0) {
@@ -121,61 +110,65 @@
                         console.error('Status:', status);
                         console.error('Response Text:', xhr.responseText);
 
-                        subjectDropdown.empty().append('<option value="">Failed to retrieve subjects</option>'); // Mensagem no dropdown
+                        subjectDropdown.empty().append('<option value="">Failed to retrieve subjects</option>');
 
-                        // Exibir a mensagem de erro
                         if (xhr.responseText) {
                             studentErrorFeedback.text(xhr.responseText).addClass('text-danger');
                         } else {
                             studentErrorFeedback.text('An unknown error occurred while retrieving subjects.').addClass('text-danger');
                         }
-                        studentFullNameInput.val('Error fetching student');
                     }
                 });
 
-                // carregar o nome do aluno
-                getAndPopulateStudentName(studentId);
-            }
-
-            // buscar e popular o nome do aluno
-            function getAndPopulateStudentName(studentId) {
-
-                if (studentId > 0) {
-                    $.ajax({
-                        url: '@Url.Action("GetStudentFullNameByIdAsync", "Students")',
-                        type: 'GET',
-                        dataType: 'json',
-                        data: { id: studentId },
-                        success: function (data) {
-                            if (data && data.fullName) {
-                                studentFullNameInput.val(data.fullName);
-                                clearValidationMessages(); // Limpa validações se o aluno for encontrado
-                            } else {
-                                studentFullNameInput.val('Student not found');
-                                studentErrorFeedback.text('Student not found with the provided id.').addClass('text-danger');
-                            }
-                        },
-                        error: function (xhr, status, error) { //XMLHttpRequest - xhr objeto que vai trazer a resposta HTTP, nesse caso contém um texto
-                            console.error('Failed to retrieve student name', error);
-                            studentFullNameInput.val('Error loading student name');
+                // AJAX para carregar o nome do aluno
+                $.ajax({
+                    url: '@Url.Action("GetStudentFullNameByIdAsync", "Students")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { id: studentId },
+                    success: function (data) {
+                        if (data && data.fullName) {
+                            studentFullNameInput.val(data.fullName);
+                            studentIdInput.prop('readonly', true); //mudar campos para ReadOnly empty caso de sucesso
+                            studentFullNameInput.prop('readonly', true);
+                            clearValidationMessages(); // Limpa validações se obter sucesso
+                        } else {
+                            studentFullNameInput.val('Student not found');
+                            studentErrorFeedback.text('Student not found with the provided id.').addClass('text-danger');
+                            studentIdInput.prop('readonly', false);
+                            studentFullNameInput.prop('readonly', false);
                         }
-                    });
-                } else {
-                    studentFullNameInput.val('');
-                }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Failed to retrieve student name', error);
+                        studentFullNameInput.val('Error loading student name');
+                        studentErrorFeedback.text('An error occurred while fetching student name.').addClass('text-danger');
+                        studentIdInput.prop('readonly', false);
+                        studentFullNameInput.prop('readonly', false);
+                    }
+                });
             }
 
+            // Se StudentId não vem pré-preenchido
+            studentIdInput.on('blur', function() {
+                if (!$(this).prop('readonly')) {
+                    fetchAndPopulateSubjectsAndStudentName();
+                }
+            });
 
-            // Ativar a busca quando perde o foco
-            studentIdInput.on('blur', fetchAndPopulateSubjects);
+            // Limpar mensagens de erro após foco
+            studentIdInput.on('focus', function() {
+                if (!$(this).prop('readonly')) {
+                    clearValidationMessages();
+                    studentFullNameInput.val(''); // Limpar o nome ao começar a editar o ID
+                    subjectDropdown.empty().append('<option value="">--- Select a Subject ---</option>'); // Limpa subjects
+                }
+            });
 
-            // Limpar mensagens de erro
-            studentIdInput.on('focus', clearValidationMessages);
-
-            //inicializar a view
-            studentFullNameInput.val('');
-            idValidationSpan.text('');
-            
+            // Se StudentId for pré-preenchido (Model.StudentId != 0)
+            if (studentIdInput.val() != '0' && studentIdInput.val() != '') {
+                fetchAndPopulateSubjectsAndStudentName();
+            }
         });
     </script>
 }

@@ -12,7 +12,7 @@
         {
             Id = 1; 
             AbsenceLimit = 0.25m; 
-            PassingGrade = 70.0m; 
+            PassingGrade = 10.0m; 
         }
     }
 }

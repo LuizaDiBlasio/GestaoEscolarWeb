@@ -1,0 +1,73 @@
+﻿@model GestaoEscolarWeb.Models.DashBoardViewModel
+@{
+    ViewData["Title"] = "DashBoard";
+}
+
+<h1>Admin's DashBoard</h1>
+<br />
+<h2>Messages history</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.UserMessages == null || Model.UserMessages.Count() == 0)
+        {
+            <tr>
+                <td>No messages </td>
+            </tr>
+           
+        }
+        else
+        {
+            @foreach (var item in Model.UserMessages)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MessageTitle)
+                    </td>
+                    <td>
+                        @item.AlertTime.ToString("dd/MM/yyyy HH:mm:ss")
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    </td>
+                </tr>
+            }
+        }
+       
+    </tbody>
+</table>
+<br />
+<h2>Change Academic Policies </h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" asp-controller="SystemData">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="PassingGrade" class="control-label"></label>
+                <input asp-for="PassingGrade" class="form-control" />
+                <span asp-validation-for="PassingGrade" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AbsenceLimitPercentage" class="control-label"></label>
+                <input asp-for="AbsenceLimitPercentage" class="form-control" />
+                <span asp-validation-for="AbsenceLimitPercentage" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+<flash dismissable="true" />

@@ -23,9 +23,11 @@
                 @Html.DisplayNameFor(model => model.AbscenceRecord)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.AvarageScore)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.StudentStatus)
             </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -44,8 +46,11 @@
                 @Html.DisplayFor(modelItem => item.AbscenceRecord)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.StudentStatus)
+                @Html.DisplayFor(modelItem => item.AvarageScore)
             </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StudentStatus)
+                </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>

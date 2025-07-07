@@ -26,10 +26,11 @@ namespace GestaoEscolarWeb.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -51,12 +52,39 @@ namespace GestaoEscolarWeb.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SystemData",
+                name: "Courses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AbsenceLimit = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Courses", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Subjects",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CreditHours = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subjects", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SystemData",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    AbsenceLimit = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    PassingGrade = table.Column<decimal>(type: "decimal(5,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,9 +119,10 @@ namespace GestaoEscolarWeb.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     AlertTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MessageTitle = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: false),
                     UserAuditId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -192,69 +221,18 @@ namespace GestaoEscolarWeb.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Courses",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserAuditId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Courses", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Courses_AspNetUsers_UserAuditId",
-                        column: x => x.UserAuditId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Subjects",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    CreditHours = table.Column<int>(type: "int", nullable: false),
-                    UserAuditId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Subjects", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Subjects_AspNetUsers_UserAuditId",
-                        column: x => x.UserAuditId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "SchoolClasses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SchoolYear = table.Column<int>(type: "int", nullable: false),
-                    Course = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Shift = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserAuditId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CourseId = table.Column<int>(type: "int", nullable: true)
+                    CourseId = table.Column<int>(type: "int", nullable: false),
+                    Shift = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SchoolClasses", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SchoolClasses_AspNetUsers_UserAuditId",
-                        column: x => x.UserAuditId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_SchoolClasses_Courses_CourseId",
                         column: x => x.CourseId,
@@ -293,26 +271,18 @@ namespace GestaoEscolarWeb.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserStudentId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    UserAuditId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    SchoolClassId = table.Column<int>(type: "int", nullable: false),
+                    SchoolClassId = table.Column<int>(type: "int", nullable: true),
                     ProfileImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Students", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Students_AspNetUsers_UserAuditId",
-                        column: x => x.UserAuditId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Students_AspNetUsers_UserStudentId",
                         column: x => x.UserStudentId,
@@ -334,21 +304,15 @@ namespace GestaoEscolarWeb.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     StudentId = table.Column<int>(type: "int", nullable: false),
-                    SubjectId = table.Column<int>(type: "int", nullable: true),
+                    SubjectId = table.Column<int>(type: "int", nullable: false),
                     EnrollmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AbscenceRecord = table.Column<int>(type: "int", nullable: false),
-                    StudentStatus = table.Column<int>(type: "int", nullable: false),
-                    UserAuditId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    AvarageScore = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    StudentStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Enrollments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Enrollments_AspNetUsers_UserAuditId",
-                        column: x => x.UserAuditId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Enrollments_Students_StudentId",
                         column: x => x.StudentId,
@@ -369,21 +333,14 @@ namespace GestaoEscolarWeb.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SubjectId = table.Column<int>(type: "int", nullable: true),
-                    StudentId = table.Column<int>(type: "int", nullable: true),
+                    SubjectId = table.Column<int>(type: "int", nullable: false),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
                     ExamDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Score = table.Column<double>(type: "float", nullable: false),
-                    UserAuditId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Score = table.Column<decimal>(type: "decimal(5,2)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Evaluations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Evaluations_AspNetUsers_UserAuditId",
-                        column: x => x.UserAuditId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Evaluations_Students_StudentId",
                         column: x => x.StudentId,
@@ -443,19 +400,15 @@ namespace GestaoEscolarWeb.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Courses_UserAuditId",
-                table: "Courses",
-                column: "UserAuditId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CourseSubject_SubjectCoursesId",
                 table: "CourseSubject",
                 column: "SubjectCoursesId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Enrollments_StudentId",
+                name: "IX_Enrollments_StudentId_SubjectId",
                 table: "Enrollments",
-                column: "StudentId");
+                columns: new[] { "StudentId", "SubjectId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Enrollments_SubjectId",
@@ -463,9 +416,10 @@ namespace GestaoEscolarWeb.Migrations
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Enrollments_UserAuditId",
-                table: "Enrollments",
-                column: "UserAuditId");
+                name: "IX_Evaluations_ExamDate_SubjectId",
+                table: "Evaluations",
+                columns: new[] { "ExamDate", "SubjectId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Evaluations_StudentId",
@@ -478,19 +432,9 @@ namespace GestaoEscolarWeb.Migrations
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Evaluations_UserAuditId",
-                table: "Evaluations",
-                column: "UserAuditId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_SchoolClasses_CourseId",
                 table: "SchoolClasses",
                 column: "CourseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SchoolClasses_UserAuditId",
-                table: "SchoolClasses",
-                column: "UserAuditId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Students_SchoolClassId",
@@ -498,19 +442,9 @@ namespace GestaoEscolarWeb.Migrations
                 column: "SchoolClassId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Students_UserAuditId",
-                table: "Students",
-                column: "UserAuditId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Students_UserStudentId",
                 table: "Students",
                 column: "UserStudentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Subjects_UserAuditId",
-                table: "Subjects",
-                column: "UserAuditId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -555,13 +489,13 @@ namespace GestaoEscolarWeb.Migrations
                 name: "Subjects");
 
             migrationBuilder.DropTable(
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
                 name: "SchoolClasses");
 
             migrationBuilder.DropTable(
                 name: "Courses");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
         }
     }
 }

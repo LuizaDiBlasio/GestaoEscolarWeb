@@ -30,6 +30,10 @@ namespace GestaoEscolarWeb.Data.Entities
         public int AbscenceRecord { get; set; }
 
 
+        [Display(Name = "Average Score")]
+        public decimal? AvarageScore { get; set; }   
+
+
         [Display(Name = "Student Status")]
         public StudentStatus StudentStatus { get; set; }    
 

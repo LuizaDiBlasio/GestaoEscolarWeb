@@ -48,21 +48,6 @@
                 </div>
                 <span asp-validation-for="SelectedSubjectIds" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="StartDate" class="control-label"></label>
-                <div>
-                    <input type="text" id="startDateInput" asp-for="StartDate" class="form-control" />
-                </div>
-                <span asp-validation-for="StartDate" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="EndDate" class="control-label"></label>
-                <div>
-                    <input type="text" id="endDateInput" asp-for="EndDate" class="form-control" />
-                </div>
-                <span asp-validation-for="EndDate" class="text-danger"></span>
-            </div>
 
 
             <div class="form-group">
@@ -79,22 +64,4 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
-
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            // Inicializa o DatePicker para StartDate
-            var startDatePicker = new ej.calendars.DatePicker({
-                format: 'MM/dd/yyyy',
-                placeholder: 'Select a date'
-            });
-            startDatePicker.appendTo('#startDateInput'); //ligação ao elemento de StartDate
-
-            // Inicializa o DatePicker para EndDate
-            var endDatePicker = new ej.calendars.DatePicker({
-                format: 'MM/dd/yyyy',
-                placeholder: 'Select a date'
-            });
-            endDatePicker.appendTo('#endDateInput'); //ligação ao elemento de EndDate
-        });
-    </script>
 }

@@ -5,6 +5,7 @@ using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -63,6 +64,19 @@ namespace GestaoEscolarWeb.Controllers
                         return Redirect(this.Request.Query["ReturnUrl"].First()); //retorna a primeira Url contendo ReturnUrl e quando faz login entra na View onde tentou entrar e não na Home)
                     }
 
+                    var user = await _userHelper.GetUserByEmailAsync(model.Username);
+
+                    if (user == null)
+                    {
+                        _flashMessage.Danger("User not found");
+                        return View(model);
+                    }
+
+                    if(await _userHelper.IsUserInRoleAsync(user, "Admin"))
+                    {
+                        return this.RedirectToAction("DashBoard", "Home");
+                    }
+
                     return this.RedirectToAction("Index", "Home");
                 }
             }
@@ -78,6 +92,8 @@ namespace GestaoEscolarWeb.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+
+        [Authorize(Roles ="Admin")]
         public IActionResult Register() //só mostra a view do Register
         {
             //criar modelo com as opções da combobox 
@@ -90,6 +106,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Register(RegisterNewUserViewModel model) // registra o user
         {
@@ -104,7 +121,7 @@ namespace GestaoEscolarWeb.Controllers
                     return View(model); // Retorna a View com o erro
                 }
 
-                var user = await _userHelper.GetUserByEmailAsync(model.Username); //buscar user  
+                var user = await _userHelper.GetUserByEmailAsync(model.Email); //buscar user  
 
                 if (user == null) // caso user não exista, registrá-lo
                 {
@@ -118,11 +135,12 @@ namespace GestaoEscolarWeb.Controllers
                     user = new User
                     {
                         FullName = model.FullName,
-                        Email = model.Username,
-                        UserName = model.Username,
+                        Email = model.Email,
+                        UserName = model.Email,
                         Address = model.Address,
                         PhoneNumber = model.PhoneNumber,
                         ImageId = imageId,
+                        BirthDate = model.BirthDate.Value
                     };
 
                     var result = await _userHelper.AddUserAsync(user, "123456"); //add user depois de criado
@@ -178,7 +196,7 @@ namespace GestaoEscolarWeb.Controllers
                         token = myToken
                     }, protocol: HttpContext.Request.Scheme); //utiliza o protocolo Http para passar dados de uma action para a outra
 
-                    Response response = _mailHelper.SendEmail(model.Username, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+                    Response response = _mailHelper.SendEmail(model.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
                    $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link 
 
                     if (response.IsSuccess) //se conseguiu enviar o email
@@ -396,6 +414,8 @@ namespace GestaoEscolarWeb.Controllers
             return this.View(model); //retornar model para view caso corra mal
         }
 
+
+        [Authorize(Roles = "Admin, Employee")]
         //GET
         public async Task<IActionResult> MyUserProfile()
         {
@@ -406,7 +426,7 @@ namespace GestaoEscolarWeb.Controllers
             if (user == null)
             {
                 _flashMessage.Danger("User not found");
-                return RedirectToAction(nameof(MyUserProfile));
+                return View();
             }
 
             //converter user para model
@@ -417,6 +437,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        [Authorize(Roles = "Admin, Employee")]
         [HttpPost]
         public async Task<IActionResult> MyUserProfile(MyUserProfileViewModel model)
         {

@@ -16,9 +16,9 @@ namespace GestaoEscolarWeb.Data.Repositories
         }
         public async Task CreateAsync(T entity)
         {
-            await _context.Set<T>().AddAsync(entity); //adicionar à tabela 
+            await _context.Set<T>().AddAsync(entity); 
 
-            await SaveAllAsync(); //salvar
+            await SaveAllAsync();
         }
 
         public async Task DeleteAsync(T entity)
@@ -46,7 +46,7 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         public async Task UpdateAsync(T entity)
         {
-            _context.Set<T>().Update(entity); //não é async, por que ?
+            _context.Set<T>().Update(entity); 
 
             await SaveAllAsync();
         }

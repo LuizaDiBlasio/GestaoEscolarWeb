@@ -21,8 +21,9 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         public List<SelectListItem> GetStudentStatusList();
 
-
         public Task<Student> GetStudentWithSchoolClassAsync(int id);
+
+        public Task<Student> GetStudentByEmailAsync(string email);
     }
 
 }

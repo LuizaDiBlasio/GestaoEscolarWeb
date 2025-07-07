@@ -3,6 +3,7 @@ using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -62,6 +63,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // GET: SchoolClasses/Create
+        [Authorize(Roles = "Employee")]
         public IActionResult Create()
         {
             var model = new CreateEditSchoolClassViewModel
@@ -74,6 +76,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         //POST: SchoolClasses/Create
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> Create(CreateEditSchoolClassViewModel model)
         {
@@ -131,6 +134,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // GET: SchoolClasses/Edit/5
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -165,8 +169,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         //POST: SchoolClasses/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> Edit(int id, CreateEditSchoolClassViewModel model)
         {
@@ -231,6 +234,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // GET: SchoolClasses/Delete/5
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -249,6 +253,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // POST: SchoolClasses/Delete/5
+        [Authorize(Roles = "Employee")]
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

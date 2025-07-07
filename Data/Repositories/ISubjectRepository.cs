@@ -1,5 +1,4 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
-using GestaoEscolarWeb.Migrations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +17,7 @@ namespace GestaoEscolarWeb.Data.Repositories
         public Task<List<SelectListItem>> GetComboSubjectsToEvaluateAsync(Entities.Student studentWithEnrollments);
 
         public Task<Subject> GetSubjectByNameAsync(string subjectName);
+
+        public Task<bool> ExistingSubject(Subject subject);
     }
 }

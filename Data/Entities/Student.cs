@@ -11,7 +11,7 @@ namespace GestaoEscolarWeb.Data.Entities
 
         [Required]
         [Display(Name = "Full Name")]
-        [MaxLength(50, ErrorMessage = "The field {0} allows only {1} characters")] //mensagem não chega a ser mostrada
+        [MaxLength(50, ErrorMessage = "The field {0} allows only {1} characters")] 
         public string FullName { get; set; }
 
         [Required]

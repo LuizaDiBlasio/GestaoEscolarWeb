@@ -6,20 +6,17 @@ namespace GestaoEscolarWeb.Data.Entities
 {
     public class User : IdentityUser
     {
-
-        [MaxLength(50, ErrorMessage = "The field {0} can only contain {1} characters length")]
         [Display(Name = "Full Name")]
         public string FullName { get; set; }
 
 
-        [MaxLength(100, ErrorMessage = "The field {0} can only contain {1} characters length")]
         public string Address { get; set; }
 
 
         [Display(Name = "Date of Birth")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
-        public DateTime? BirthDate { get; set; }   
+        public DateTime? BirthDate { get; set; }
 
 
         [Display(Name = "User Image")]

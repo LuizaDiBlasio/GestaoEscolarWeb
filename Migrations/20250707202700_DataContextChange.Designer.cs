@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GestaoEscolarWeb.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250629134710_EnrollmentChange")]
-    partial class EnrollmentChange
+    [Migration("20250707202700_DataContextChange")]
+    partial class DataContextChange
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -47,10 +47,17 @@ namespace GestaoEscolarWeb.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("MessageTitle")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserAuditId")
                         .HasColumnType("nvarchar(450)");
@@ -69,15 +76,9 @@ namespace GestaoEscolarWeb.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -91,8 +92,11 @@ namespace GestaoEscolarWeb.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("AbsenceRecord")
+                    b.Property<int>("AbscenceRecord")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("AvarageScore")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("EnrollmentDate")
                         .HasColumnType("datetime2");
@@ -127,7 +131,7 @@ namespace GestaoEscolarWeb.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Score")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
@@ -182,7 +186,7 @@ namespace GestaoEscolarWeb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("BirthDate")
+                    b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
@@ -233,18 +237,22 @@ namespace GestaoEscolarWeb.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreditHours", "Name")
+                        .IsUnique();
+
                     b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("GestaoEscolarWeb.Data.Entities.SystemData", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<decimal>("AbsenceLimit")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("PassingGrade")
+                        .HasColumnType("decimal(5,2)");
 
                     b.HasKey("Id");
 
@@ -260,8 +268,10 @@ namespace GestaoEscolarWeb.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Address")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -275,11 +285,13 @@ namespace GestaoEscolarWeb.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FullName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ImageId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");

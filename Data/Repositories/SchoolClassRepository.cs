@@ -28,7 +28,7 @@ namespace GestaoEscolarWeb.Data.Repositories
         {
             var schoolClasses = await _context.SchoolClasses
                                          .Include(sc => sc.Course)
-                                         .Where(sc => sc.SchoolYear == DateTime.Now.Year || sc.SchoolYear == DateTime.Now.Year +1) //somente ano atual ou próximo
+                                         .Where(sc => sc.SchoolYear == DateTime.Now.Year || sc.SchoolYear == DateTime.Now.Year + 1) //somente ano atual ou próximo
                                          .OrderBy(sc => sc.Course.Name) // ordenar por nome do curso
                                          .ThenBy(sc => sc.SchoolYear) // depois por ano
                                          .ToListAsync();

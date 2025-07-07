@@ -4,6 +4,7 @@ using GestaoEscolarWeb.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GestaoEscolarWeb.Data.Repositories
@@ -16,16 +17,60 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         private readonly ISystemDataService _systemDataService;
 
-        public EnrollmentRepository(DataContext context, IStudentRepository studentRepository, ISystemDataService systemDataService) : base(context)
+        private readonly IEvaluationRepository _evaluationRepository;
+
+        public EnrollmentRepository(DataContext context, IStudentRepository studentRepository, ISystemDataService systemDataService, IEvaluationRepository evaluationRepository) : base(context)
         {
             _context = context;
             _studentRepository = studentRepository;
             _systemDataService = systemDataService;
+            _evaluationRepository = evaluationRepository;   
         }
 
         public async Task<bool> ExistingEnrollmentAsync(Entities.Student student, CreateEnrollmentViewModel model)
         {
             return await _context.Enrollments.AnyAsync(e => e.StudentId == student.Id && e.SubjectId == model.SelectedSubjectId);
+        }
+
+        public async Task<decimal> GetAverageScoreAsync(int enrollmentId)
+        {
+            var enrollment = await GetEnrollmentWithStudentAndSubjectByIdAsync(enrollmentId);
+
+            if (enrollment == null)
+            {
+                return 0;    
+            }
+
+            var evaluations = await _evaluationRepository.GetStudentEvaluationsAsync(enrollment.Student);
+
+            if (evaluations == null)
+            {
+                return 0;    
+            }
+
+            decimal totalScore = 0;
+            int count = 0;
+
+            var evaluationsFromSubject = evaluations.Where(e => e.SubjectId == enrollment.SubjectId).ToList(); 
+
+            if (evaluationsFromSubject.Any())
+            {
+                foreach (Evaluation evaluation in evaluationsFromSubject)
+                {
+                    totalScore += evaluation.Score;
+
+                    count++;
+                }
+            }
+
+            if(count > 0)
+            {
+                decimal average = totalScore / count;
+
+                return average;
+            }
+
+            return 0;     
         }
 
         public async Task<IEnumerable<Enrollment>> GetEnrollmentsWithStudentAndSubjectAsync()
@@ -56,14 +101,14 @@ namespace GestaoEscolarWeb.Data.Repositories
 
             if (enrollment == null || enrollment.Subject == null || enrollment.Student == null )
             {
-                return StudentStatus.NotFound;
+                return StudentStatus.Unknown;
             }
 
             if(enrollment.Subject.CreditHours > 0)
             {
                 if (enrollment.AbscenceRecord / (decimal)enrollment.Subject.CreditHours > systemData.AbsenceLimit)
                 {
-                    return StudentStatus.FailedByAbsence;
+                    return StudentStatus.Absent | StudentStatus.Failed;
                 }
             }            
 
@@ -71,11 +116,11 @@ namespace GestaoEscolarWeb.Data.Repositories
 
             if (student == null)
             {
-                return StudentStatus.NotFound;
+                return StudentStatus.Unknown;
             }
 
             decimal totalScore = 0;
-            decimal count = 0;
+            int count = 0;
 
             if (student.Evaluations.Count > 0)
             {
@@ -105,5 +150,6 @@ namespace GestaoEscolarWeb.Data.Repositories
 
             return StudentStatus.Enrolled;
         }
+
     }
 }

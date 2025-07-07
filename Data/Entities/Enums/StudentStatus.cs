@@ -1,20 +1,17 @@
-﻿using System.ComponentModel;
+﻿using System;
 
 namespace GestaoEscolarWeb.Data.Entities.Enums
 {
+    [Flags]
     public enum StudentStatus
     {
+        //mapeameto com potencias de 2 para poder combinar bits distintos em status compostos
         Enrolled = 0,
         Approved = 1,
         Failed = 2,
-
-        [Description("Failed (Excessive Absences)")]
-        FailedByAbsence = 3,
-
-        [Description("Status Not Found")]
-        NotFound = 4,
-
-        [Description("Not Enrolled")]
-        NotEnrolled = 5
+        Absent = 4,
+        Unknown = 16,
+        Unassigned = 32
+        
     }
 }

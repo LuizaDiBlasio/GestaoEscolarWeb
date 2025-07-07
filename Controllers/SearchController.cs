@@ -1,8 +1,8 @@
 ﻿using GestaoEscolarWeb.Data;
 using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
-using GestaoEscolarWeb.Migrations;
 using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,8 +27,11 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly ISubjectRepository _subjectRepository;
 
+        private readonly IEnrollmentRepository _enrollmentRepository;
+
         public SearchController(DataContext context, ICourseRepository courseRepository, ISchoolClassRepository schoolClassRepository,
-           IFlashMessage flashMessage, IEvaluationRepository evaluationRepository, IStudentRepository studentRepository, ISubjectRepository subjectRepository)
+           IFlashMessage flashMessage, IEvaluationRepository evaluationRepository, IStudentRepository studentRepository, 
+           ISubjectRepository subjectRepository, IEnrollmentRepository enrollmentRepository)
         {
             _context = context;
 
@@ -42,11 +45,14 @@ namespace GestaoEscolarWeb.Controllers
 
             _studentRepository = studentRepository;
 
-            _subjectRepository = subjectRepository; 
+            _subjectRepository = subjectRepository;
+            
+            _enrollmentRepository = enrollmentRepository;
 
         }
 
         // GET: Search/Enrollments
+        [Authorize(Roles = "Employee")]
         public IActionResult Enrollments()
         {
             var model = new SearchViewModel<Enrollment>();
@@ -55,6 +61,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // POST: Search/Enrollments
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> Enrollments(SearchViewModel<Enrollment> model)
         {
@@ -83,6 +90,12 @@ namespace GestaoEscolarWeb.Controllers
                     var student = students.First();
                     var studentWithEnrollments = await _studentRepository.GetStudentWithEnrollmentsAsync(student.Id);
 
+                    //atribuir status para cada enrollment
+                    foreach (var enrollment in studentWithEnrollments.Enrollments)
+                    {
+                        enrollment.StudentStatus = await _enrollmentRepository.GetStudentStatusAsync(enrollment);
+                    }
+
                     model.Results = studentWithEnrollments.Enrollments;
                     model.IsSearchSuccessful = true;
                     model.StudentFullName = studentWithEnrollments.FullName; 
@@ -92,10 +105,17 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        [Authorize(Roles = "Employee")]
         [HttpGet] // GET para mostrar os enrollments
         public async Task<IActionResult> GetEnrollmentsByStudentId(int studentId)
         {
             var student = await _studentRepository.GetStudentWithEnrollmentsAsync(studentId);
+
+            foreach (var enrollment in student.Enrollments)
+            {
+                enrollment.StudentStatus = await _enrollmentRepository.GetStudentStatusAsync(enrollment);
+            }
 
             if (student == null)
             {
@@ -113,7 +133,9 @@ namespace GestaoEscolarWeb.Controllers
             return View("Enrollments", model); // Retorna a mesma View de inscrições com os resultados
         }
 
+
         // GET: Search/SchoolClasses
+        [Authorize(Roles = "Employee")]
         public IActionResult SchoolClass()
         {
             var model = new SearchSchoolClassViewModel()
@@ -125,8 +147,9 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
-        // POST: Search/SchoolClasses
 
+        // POST: Search/SchoolClasses
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> SchoolClass(SearchSchoolClassViewModel model)
         {
@@ -151,7 +174,9 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
         // GET: Search/Grades
+        [Authorize(Roles = "Employee")]
         public IActionResult Grades()
         {
             var model = new SearchViewModel<Evaluation>();
@@ -162,6 +187,7 @@ namespace GestaoEscolarWeb.Controllers
 
 
         //POST
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> Grades(SearchViewModel<Evaluation> model)
         {
@@ -200,6 +226,7 @@ namespace GestaoEscolarWeb.Controllers
 
         }
 
+        [Authorize(Roles = "Employee")]
         [HttpGet] // GET para mostrar as evaluations
         public async Task<IActionResult> GetEvaluationsByStudentId(int studentId)
         {
@@ -223,6 +250,7 @@ namespace GestaoEscolarWeb.Controllers
 
 
         // GET: Search/Students
+        [Authorize(Roles = "Employee")]
         public IActionResult Student()
         {
             var model = new SearchStudentViewModel();
@@ -231,6 +259,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
         // POST: Search/Student
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> Student(SearchStudentViewModel model)
         {
@@ -274,6 +303,7 @@ namespace GestaoEscolarWeb.Controllers
 
 
         // GET: Search/Courses
+        [Authorize(Roles = "Admin")]
         public IActionResult Courses()
         {
             var model = new SearchCourseViewModel();
@@ -283,6 +313,7 @@ namespace GestaoEscolarWeb.Controllers
 
 
         // POST: Search/Courses
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async  Task<IActionResult> Courses(SearchCourseViewModel model)
         {
@@ -301,8 +332,6 @@ namespace GestaoEscolarWeb.Controllers
             model.Name = course.Name;       
             model.CourseStudents = (ICollection<Data.Entities.Student>)courseStudents;
             model.IsSearchSuccessful = true;
-            model.StartDate = course.StartDate;
-            model.EndDate = course.EndDate; 
             model.SchoolClasses = course.SchoolClasses;
             model.CourseSubjects = course.CourseSubjects;   
 
@@ -311,8 +340,9 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-
-        [HttpGet] // GET para mostrar o student
+        //Chamada Ajax
+        [Authorize(Roles = "Employee")]
+        [HttpGet] // GET para mostrar o profile do student
         public async Task<IActionResult> GetStudentById(int studentId)
         {
             var student = await _studentRepository.GetStudentWithEvaluationsAsync(studentId);
@@ -343,6 +373,7 @@ namespace GestaoEscolarWeb.Controllers
 
 
         //GET
+        [Authorize(Roles = "Admin")]
         public IActionResult Subjects()
         {
             var model = new SearchSubjectViewModel();
@@ -352,6 +383,7 @@ namespace GestaoEscolarWeb.Controllers
 
 
         //POST
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Subjects(SearchSubjectViewModel model)
         {
