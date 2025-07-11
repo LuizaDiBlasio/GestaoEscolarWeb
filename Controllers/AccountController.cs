@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using GestaoEscolarWeb.Data.Entities;
+﻿using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
@@ -9,7 +6,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text;
+using System.Threading.Tasks;
 using Vereyon.Web;
+using Microsoft.AspNetCore.Http;
 
 
 namespace GestaoEscolarWeb.Controllers
@@ -22,16 +27,21 @@ namespace GestaoEscolarWeb.Controllers
         private readonly IStudentRepository _studentRepository;
         private readonly IConverterHelper _converterHelper;
         private readonly IFlashMessage _flashMessage;
+        private readonly IConfiguration _configuration;
+        private readonly HttpClient _httpClient;
 
         public AccountController(IUserHelper userHelper, IMailHelper mailHelper, IBlobHelper blobHelper,
-            IStudentRepository studentRepository, IFlashMessage flashMessage, IConverterHelper converterHelper)
+            IStudentRepository studentRepository, IFlashMessage flashMessage, IConverterHelper converterHelper, 
+            IConfiguration configuration, HttpClient httpClient)
         {
             _userHelper = userHelper;
             _mailHelper = mailHelper;
             _blobHelper = blobHelper;
             _studentRepository = studentRepository;
             _converterHelper = converterHelper;
-            _flashMessage = flashMessage;   
+            _flashMessage = flashMessage;
+            _configuration = configuration;
+            _httpClient = httpClient;   
 
             //_countryRepository = countryRepository;
 
@@ -52,38 +62,111 @@ namespace GestaoEscolarWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
+
             if (ModelState.IsValid) // se modelo enviado passar na validação
             {
-                var result = await _userHelper.LoginAsync(model); //fazer login
+                var result = await _userHelper.LoginAsync(model); //fazer login (Este é o seu método que usa PasswordSignInAsync internamente)
 
                 if (result.Succeeded) //se login for bem sucedido
                 {
-                    //fez login e entrou através de uma Url de retorno (quando não tem permissão para entrar numa View qualquer sem login)
-                    if (this.Request.Query.Keys.Contains("ReturnUrl")) // Verifica se o URL atual (o URL da página de login) inclui um parâmetro de query chamado ReturnUrl.                                                                       
-                    {
-                        return Redirect(this.Request.Query["ReturnUrl"].First()); //retorna a primeira Url contendo ReturnUrl e quando faz login entra na View onde tentou entrar e não na Home)
-                    }
-
                     var user = await _userHelper.GetUserByEmailAsync(model.Username);
 
+                    // Verificação de usuário e roles para a API e redirecionamento (existente) 
                     if (user == null)
                     {
                         _flashMessage.Danger("User not found");
                         return View(model);
                     }
 
-                    if(await _userHelper.IsUserInRoleAsync(user, "Admin"))
+                    var isEmployee = await _userHelper.IsUserInRoleAsync(user, "Employee");
+                    var isAdmin= await _userHelper.IsUserInRoleAsync(user, "Admin");
+
+                    if (isAdmin) // Verifica novamente se é Admin para redirecionar para o Dashboard
                     {
                         return this.RedirectToAction("DashBoard", "Home");
                     }
 
-                    return this.RedirectToAction("Index", "Home");
+                    if (isEmployee) // Só tenta obter o token se for Employee
+                    {
+                        var token = await GetJwtTokenFromServerSide(model); 
+
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            // Armazenar o token para uso posterior 
+                            HttpContext.Session.SetString("JwtToken", token);
+
+                            // Redirecionamento 
+                            if (this.Request.Query.Keys.Contains("ReturnUrl"))
+                            {
+                                return Redirect(this.Request.Query["ReturnUrl"].First());
+                            }
+
+                            
+
+                            return this.RedirectToAction("Index", "Home");
+                        }
+                        else
+                        {
+                            await _userHelper.LogoutAsync(); // Desloga 
+                            _flashMessage.Danger("Login failed, token generation error");
+                            return View(model);
+                        }
+                    }
+                    else // Se não for Admin nem Employee, mas o login  foi bem-sucedido
+                    {
+
+                        if (this.Request.Query.Keys.Contains("ReturnUrl"))
+                        {
+                            return Redirect(this.Request.Query["ReturnUrl"].First());
+                        }
+
+                        return this.RedirectToAction("Index", "Home");
+                    }
                 }
             }
-
+            // Se o result.Succeeded for false (login falhou )
             this.ModelState.AddModelError(string.Empty, "Failed to login");
+            _flashMessage.Danger("Login failed. Invalid credentials.");
 
-            return View(model); //model retorna pra mesma View
+            return View(model); 
+        }
+
+
+        private async Task<string> GetJwtTokenFromServerSide(LoginViewModel model)
+        {
+            try
+            { 
+                string apiUrl = "https://localhost:44385/api/AccessApi/Login"; //Url de login na api
+
+                // Serializa o model do login para JSON
+                var jsonContent = JsonSerializer.Serialize(model);
+
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json"); //empacota a string JSON e informa ao servidor que o corpo da requisição é JSON
+
+                var response = await _httpClient.PostAsync(apiUrl, content); //envia o 'content' (que contém o JSON do model) para o 'apiUrl'.
+                                                                             //método 'Login' na API espera receber 'content' como '[FromBody] LoginViewModel model'
+
+                if (response.IsSuccessStatusCode) //se o envio correu bem
+                {
+                    //ler e Desserializar a resposta
+                    var responseContent = await response.Content.ReadAsStringAsync(); 
+                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    return tokenResponse?.Token; // Retorna o valor da propriedade 'Token' do objeto 'tokenResponse', e se a resposta for null, retornar null
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync(); //mostrar erro na resposta do json
+                    Console.WriteLine($"Error occured while trying to get API token: {response.StatusCode} - {errorContent}");
+                    return null;
+                }
+            }
+            
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occured : {ex.Message}");
+                return null;
+            }
         }
 
         public async Task<IActionResult> Logout()
@@ -93,7 +176,7 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Register() //só mostra a view do Register
         {
             //criar modelo com as opções da combobox 
@@ -441,7 +524,7 @@ namespace GestaoEscolarWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> MyUserProfile(MyUserProfileViewModel model)
         {
-           var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
+            var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
 
             if (user == null)
             {
@@ -487,12 +570,12 @@ namespace GestaoEscolarWeb.Controllers
                         {
                             ModelState.AddModelError(string.Empty, error.Description);
                         }
-                        return View(model); 
+                        return View(model);
                     }
 
                     _flashMessage.Confirmation($"Your profile has been updated successfully.");
 
-                    
+
                     return RedirectToAction(nameof(MyUserProfile));
                 }
                 catch (DbUpdateConcurrencyException)
@@ -503,16 +586,14 @@ namespace GestaoEscolarWeb.Controllers
                 catch (Exception ex)
                 {
                     ViewBag.ErrorMessage = $"An unexpected error occurred: {ex.Message}";
-                   
+
                     return View(model);
                 }
             }
-            
+
             return View(model);
-        
+
         }
-
-
 
         public IActionResult NotAuthorized()
         {

@@ -256,6 +256,8 @@ namespace GestaoEscolarWeb.Controllers
                 StudentId = student.Id
             };
 
+            model.EnrollmentStatusChartData = await _enrollmentRepository.GetStudentEnrollmentStatusPercentagesAsync(student.Id);
+
             return View(model);
 
         }

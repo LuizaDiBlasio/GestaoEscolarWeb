@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace GestaoEscolarWeb.Data.Entities
 {
@@ -20,8 +21,11 @@ namespace GestaoEscolarWeb.Data.Entities
         public int CourseHours => CourseSubjects == null? 0 : CourseSubjects.Sum(subject => subject.CreditHours);
 
 
+        [JsonIgnore]
         public ICollection<Subject> CourseSubjects { get; set; }
 
+
+        [JsonIgnore]
         public ICollection<SchoolClass> SchoolClasses { get; set; }
     }
 }

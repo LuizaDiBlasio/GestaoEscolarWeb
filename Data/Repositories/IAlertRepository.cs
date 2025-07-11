@@ -1,4 +1,5 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,18 +7,14 @@ using System.Threading.Tasks;
 
 namespace GestaoEscolarWeb.Data.Repositories
 {
-    public interface IAlertRepository
+    public interface IAlertRepository : IGenericRepository<Alert>
     {
         Task<IEnumerable<Alert>> GetAlertsByUserIdAsync(string userAuditId);
 
+        Task<IEnumerable<Alert>> GetAllAlertsWithEmployee();
 
-        Task<Alert> GetAlertByIdAsync(int id);
+        List<SelectListItem> GetStatusList();
 
-
-        Task CreateAlertAsync(Alert alert);
-
-
-        Task UpdateAlertAsync(Alert alert);
 
     }
 }

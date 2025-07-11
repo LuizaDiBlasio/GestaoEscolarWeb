@@ -122,5 +122,10 @@ namespace GestaoEscolarWeb.Helpers
         {
             return await _userManager.ResetPasswordAsync(user, token, password);
         }
+
+        public async Task<SignInResult> ValidatePasswordAsync(User user, string password)
+        {
+            return await _signInManager.CheckPasswordSignInAsync(user, password, false); //o false é para não bloquear após muitas tentativas, em ambiente de produção, tem que ser true
+        }
     }
 }

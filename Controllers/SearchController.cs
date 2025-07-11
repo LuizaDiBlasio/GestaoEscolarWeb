@@ -3,9 +3,14 @@ using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Vereyon.Web;
 
@@ -21,7 +26,6 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IFlashMessage _flashMessage;
 
-        private readonly IEvaluationRepository _evaluationRepository;
 
         private readonly IStudentRepository _studentRepository;
 
@@ -29,9 +33,11 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IEnrollmentRepository _enrollmentRepository;
 
+        private readonly HttpClient _httpClient;
+
         public SearchController(DataContext context, ICourseRepository courseRepository, ISchoolClassRepository schoolClassRepository,
-           IFlashMessage flashMessage, IEvaluationRepository evaluationRepository, IStudentRepository studentRepository, 
-           ISubjectRepository subjectRepository, IEnrollmentRepository enrollmentRepository)
+           IFlashMessage flashMessage, IStudentRepository studentRepository, 
+           ISubjectRepository subjectRepository, IEnrollmentRepository enrollmentRepository, HttpClient httpClient)
         {
             _context = context;
 
@@ -41,13 +47,13 @@ namespace GestaoEscolarWeb.Controllers
 
             _flashMessage = flashMessage;
 
-            _evaluationRepository = evaluationRepository;
-
             _studentRepository = studentRepository;
 
             _subjectRepository = subjectRepository;
             
             _enrollmentRepository = enrollmentRepository;
+
+            _httpClient = httpClient;   
 
         }
 
@@ -140,8 +146,7 @@ namespace GestaoEscolarWeb.Controllers
         {
             var model = new SearchSchoolClassViewModel()
             {
-                Students = new List<Data.Entities.Student>(),
-                CourseSubjects = new List<Subject>()
+                Students = new List<Data.Entities.Student>()
             };
 
             return View(model);
@@ -166,10 +171,66 @@ namespace GestaoEscolarWeb.Controllers
 
             model.Shift = schoolClass.Shift;
             model.Course = schoolClass.Course;
-            model.Students = schoolClass.Students;
-            model.CourseSubjects = schoolClass.Course.CourseSubjects;
             model.SchoolYear = schoolClass.SchoolYear;
-            model.IsSearchSuccessful = true;
+
+            if (!ModelState.IsValid)
+            {
+                model.IsSearchSuccessful = false;
+                _flashMessage.Danger("Invalid school class Id"); // Mensagem para validação
+                return View(model);
+            }
+
+            var jwtToken = HttpContext.Session.GetString("JwtToken"); //Pegar o token armazenado em cookies na Session
+
+            if (string.IsNullOrEmpty(jwtToken)) //se não houve token, o login não foi feito por um user no role autorizado
+            {
+                _flashMessage.Danger("Anauthorized access, only employees have access to this information ");
+            }
+
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken); //criar cabeçalho de autorização com o token para as requisições http
+
+                string apiUrl = $"https://localhost:44385/api/SchoolClassStudents/{model.SearchId}"; //definir o url da api com o id de busca
+
+                var response = await _httpClient.GetAsync(apiUrl); //busca conteudo na api
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync(); //leitura do conteudo em string
+
+                    // Desserializa  para uma lista de estudantes
+                    var studentsFromApi = JsonSerializer.Deserialize<ICollection<Student>>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    // Atribui a lista de estudantes ao ViewModel
+                    model.Students = studentsFromApi;
+
+                    model.IsSearchSuccessful = true; // Indica que a busca por alunos foi bem-sucedida
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)// Caso a requisição não tenha sido autorizada
+                {
+                    HttpContext.Session.Remove("JwtToken"); //limpar token invalido/expirado da sessão
+                    _flashMessage.Danger("Session expired, please login again");
+                    return RedirectToAction("Login", "Account", new { ReturnUrl = Url.Action("SchoolClass", "Search", new { id = model.SearchId }) });
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound) // se o retorno da api for not found
+                {
+                    _flashMessage.Warning($"School class Id {model.SearchId} was not found or has no students.");
+                    model.IsSearchSuccessful = false;
+                }
+                else
+                {
+                    //em caso de erro pegar a resposta da api e mostrar
+                    var errorContent = await response.Content.ReadAsStringAsync(); 
+                    _flashMessage.Danger($"Error loading: {response.StatusCode} - {errorContent}");
+                    model.IsSearchSuccessful = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _flashMessage.Danger($"An unexpected error occurred: {ex.Message}");
+                model.IsSearchSuccessful = false;
+            }
 
             return View(model);
         }

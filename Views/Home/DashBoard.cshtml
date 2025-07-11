@@ -13,6 +13,8 @@
             <th>Id</th>
             <th>Title</th>
             <th>Date</th>
+            <th>Employee</th>
+            <th>Status</th>
         </tr>
     </thead>
     <tbody>
@@ -38,8 +40,13 @@
                         @item.AlertTime.ToString("dd/MM/yyyy HH:mm:ss")
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        @Html.DisplayFor(modelItem => item.UserAudit.FullName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </td>
+                    <td>
+                        <a asp-action="ManageTicket" asp-controller="Alerts" asp-route-id="@item.Id">Manage ticket</a>
                     </td>
                 </tr>
             }
@@ -71,3 +78,6 @@
     </div>
 </div>
 <flash dismissable="true" />
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}}

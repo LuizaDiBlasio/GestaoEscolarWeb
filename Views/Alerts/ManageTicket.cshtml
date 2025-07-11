@@ -1,0 +1,109 @@
+﻿@model GestaoEscolarWeb.Models.ManageTicketViewModel
+@{
+    ViewData["Title"] = "ManageTicket";
+}
+
+<h2>Manage Ticket</h2>
+
+<br />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="ManageTicket">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="MessageTitle" class="control-label"></label>
+                <input asp-for="MessageTitle" class="form-control" readonly />
+                <span asp-validation-for="MessageTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Message" class="control-label"></label>
+                <textarea asp-for="Message" class="form-control" rows="5" readonly></textarea>
+                <span asp-validation-for="Message" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AlertTime" class="control-label"></label>
+                <input asp-for="AlertTime" class="form-control" readonly />
+                <span asp-validation-for="AlertTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UserFullName" class="control-label"></label>
+                <input asp-for="UserFullName" class="form-control" readonly />
+                <span asp-validation-for="UserFullName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedStatus" class="control-label"></label>
+                <select asp-for="SelectedStatus" asp-items="Model.StatusList" class="form-control" id="subjectDropdown"></select>
+                <span asp-validation-for="SelectedStatus" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+
+                <button type="button" class="btn btn-danger" id="btnDeleteAlert" data-id="@Model.Id">Delete</button>
+            </div>
+            <div>
+                <a asp-action="Index" asp-controller="Home">Back to List</a>
+            </div>
+            
+
+        </form>
+    </div>
+</div>
+<flash dismissable="true" />
+
+<div id="deleteDialog" class="modal fade">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete Ticket</h4> 
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-window-close"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this ticket?</p> 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="btnYesDelete">Delete</button>
+                <button type="button" class="btn btn-success" id="btnNoDelete" data-dismiss="modal">No</button> 
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+            var currentAlertIdToDelete = 0; 
+
+            $("#btnDeleteAlert").click(function(){
+                currentAlertIdToDelete = $(this).data("id"); 
+                console.log("1. Botão 'Delete' clicado. ID capturado do botão (data-id):", currentAlertIdToDelete);
+                $("#deleteDialog").modal("show");
+                return false;
+            });
+
+
+            $("#btnNoDelete").click(function(){
+                console.log("2a. Botão 'No' clicado. ID antes de fechar o modal:", currentAlertIdToDelete);
+                $("#deleteDialog").modal("hide");
+                return false;
+            });
+
+
+            $("#btnYesDelete").click(function(){
+                console.log("2b. Botão 'Yes Delete' clicado. ID a ser usado para exclusão:", currentAlertIdToDelete);
+                $("#deleteDialog").modal("hide"); 
+
+                var deleteUrl = '@Url.Action("DeleteAlert", "Alerts")/' + currentAlertIdToDelete;
+                console.log("2c. URL de exclusão gerada:", deleteUrl);
+
+                window.location.href = deleteUrl;
+            });
+        });
+    </script>
+}
+

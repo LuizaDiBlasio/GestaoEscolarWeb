@@ -282,7 +282,7 @@ namespace GestaoEscolarWeb.Controllers
             catch (Exception ex)
             {
 
-                ViewBag.ErrorTitle = $"Failed to delete school class '{schoolClass.CourseYearShift}'.";
+                ViewBag.ErrorTitle = $"Failed to delete school class.";
 
                 string errorMessage = "An unexpected database error occurred.";
 
@@ -298,6 +298,8 @@ namespace GestaoEscolarWeb.Controllers
 
 
         }
+
+
 
         public IActionResult SchoolClassNotFound()
         {

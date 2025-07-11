@@ -90,6 +90,85 @@ namespace GestaoEscolarWeb.Data.Repositories
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
+        public async Task<List<ChartDataPoint>> GetStudentEnrollmentStatusPercentagesAsync(int studentId)
+        {
+            var DataPointFailed = new ChartDataPoint();
+            var DataPointApproved = new ChartDataPoint();
+            var DataPointNotAssessed = new ChartDataPoint();
+            var ChartDataPoints = new List<ChartDataPoint>(); 
+
+            int totalCreditHours = 0;  
+            int failedOrAbsentHours = 0;
+            int approvedHours = 0;
+            int notAssessedHours = 0;
+
+            //buscar enrollments
+            var enrollments = await _context.Enrollments
+                .Include(e => e.Subject)
+                .Where(e => e.StudentId == studentId)   
+                .ToListAsync();
+
+            if (!enrollments.Any())
+            {
+                return new List<ChartDataPoint>(); // caso não haja enrollemnts retornar lista vazia
+            }
+
+            foreach (Enrollment enrollment in enrollments)
+            {
+                totalCreditHours += enrollment.Subject.CreditHours;
+
+                if(enrollment.StudentStatus == StudentStatus.Absent || enrollment.StudentStatus == StudentStatus.Failed)
+                {
+                    failedOrAbsentHours += enrollment.Subject.CreditHours;
+                }
+
+                if(enrollment.StudentStatus == StudentStatus.Approved)
+                {
+                    approvedHours += enrollment.Subject.CreditHours;
+                }
+
+                if(enrollment.StudentStatus == StudentStatus.Enrolled)
+                {
+                    notAssessedHours += enrollment.Subject.CreditHours;
+                }
+
+            }
+
+            if (totalCreditHours == 0)
+            {
+                return new List<ChartDataPoint>(); // evitar divisão por 0
+            }
+
+            if(failedOrAbsentHours > 0) //se repetiu ou abandonou alguma materia
+            {
+                DataPointFailed.Percentage = ((decimal)failedOrAbsentHours / totalCreditHours) * 100M;
+                DataPointFailed.Category = "Failed";
+                DataPointFailed.Color = "#F44336"; //vermelho
+
+                ChartDataPoints.Add(DataPointFailed);
+            }
+            
+            if(approvedHours > 0)
+            {
+                DataPointApproved.Percentage = ((decimal)approvedHours / totalCreditHours) * 100M;
+                DataPointApproved.Category = "Approved";
+                DataPointNotAssessed.Color = "#4CAF50"; //verde 
+
+                ChartDataPoints.Add(DataPointApproved);
+            }
+            
+            if(notAssessedHours > 0)
+            {
+                DataPointNotAssessed.Percentage = ((decimal)notAssessedHours / totalCreditHours) * 100M;
+                DataPointNotAssessed.Category = "Not Assessed";
+                DataPointNotAssessed.Color = "#9E9E9E"; //cinza
+
+                ChartDataPoints.Add(DataPointNotAssessed);
+            }
+     
+            return ChartDataPoints; 
+        }
+
         public async Task<StudentStatus> GetStudentStatusAsync(Enrollment enrollmentSearch)
         {
             var enrollment = await _context.Enrollments
@@ -150,6 +229,8 @@ namespace GestaoEscolarWeb.Data.Repositories
 
             return StudentStatus.Enrolled;
         }
+
+        
 
     }
 }

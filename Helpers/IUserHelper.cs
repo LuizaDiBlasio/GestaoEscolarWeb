@@ -31,8 +31,7 @@ namespace GestaoEscolarWeb.Helpers
 
         List<SelectListItem> RolesToSelectList(); //coloca roles em uma lista
 
-        //TODO fazer quando for fazer API
-        /*Task<SignInResult> ValidatePasswordAsync(User user, string password);*/ //não faz login, só valida a password para acesso à API
+        Task<SignInResult> ValidatePasswordAsync(User user, string password); //não faz login, só valida a password para acesso à API
 
         Task<string> GenerateEmailConfirmationTokenAsync(User user); //Gera o email de confirmação e insere o Token 
 

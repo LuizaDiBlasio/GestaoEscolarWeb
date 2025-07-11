@@ -138,7 +138,7 @@ namespace GestaoEscolarWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            //TODO Resolver o delete em cascata
+          
             var subject = await _subjectRepository.GetSubjectWithCoursesAsync(id);
 
             if (subject == null)

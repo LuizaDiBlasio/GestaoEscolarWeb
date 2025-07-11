@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace GestaoEscolarWeb.Data.Entities
 {
@@ -30,6 +31,7 @@ namespace GestaoEscolarWeb.Data.Entities
             return $"{Course.Name} - {SchoolYear} - {Shift}";   //override para a lista AvailableSchooClasses (combobox)
         }
 
+        [JsonIgnore]
         public ICollection<Student> Students { get; set; } 
     }
 }

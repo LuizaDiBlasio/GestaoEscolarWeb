@@ -9,7 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Syncfusion.Licensing;
+using System;
+using System.Text;
+using System.Text.Json.Serialization;
 using Vereyon.Web;
 
 
@@ -31,6 +35,8 @@ namespace GestaoEscolarWeb
 
             services.AddIdentity<User, IdentityRole>(cfg => //adicionar serviço de Identiy para ter o user e configurar o serviço
             {
+                cfg.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider; //buscar token com provider default
+                cfg.SignIn.RequireConfirmedEmail = true; //só permitir sign in se confirmar email
                 cfg.User.RequireUniqueEmail = true;
                 cfg.Password.RequireDigit = false;
                 cfg.Password.RequiredUniqueChars = 0;
@@ -42,19 +48,18 @@ namespace GestaoEscolarWeb
             }).AddEntityFrameworkStores<DataContext>() //Depois do serviço implementado continua a usar o DataContext, aplicar o serviço criado à BD
               .AddDefaultTokenProviders();
 
-            //TODO quando criar a API
             //adicionar servico de autentificação do Token e configurar os parâmetros
-            //vai ser utilizado na autenticação do user quando for usar a API dos produtos
-            //services.AddAuthentication().AddCookie().AddJwtBearer(cfg =>
-            //{
-            //    //mandar configurações do token
-            //    cfg.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidIssuer = this.Configuration["Tokens:Issuer"],
-            //        ValidAudience = this.Configuration["Tokens:Audience"],
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Configuration["Tokens:Key"]))
-            //    };
-            //});
+            //vai ser utilizado na autenticação do user quando for usar a API dos alunos da turma
+            services.AddAuthentication().AddCookie().AddJwtBearer(cfg =>
+            {
+                //mandar configurações do token
+                cfg.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = this.Configuration["Tokens:Issuer"],
+                    ValidAudience = this.Configuration["Tokens:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Configuration["Tokens:Key"]))
+                };
+            });
 
             services.AddDbContext<DataContext>(cfg =>
             {
@@ -67,7 +72,7 @@ namespace GestaoEscolarWeb
 
             services.AddScoped<IUserHelper, UserHelper>();
 
-            services.AddScoped<IStudentRepository, StudentRepository>();    
+            services.AddScoped<IStudentRepository, StudentRepository>();
 
             services.AddScoped<ISubjectRepository, SubjectRepository>();
 
@@ -89,6 +94,18 @@ namespace GestaoEscolarWeb
 
             services.AddScoped<IAlertRepository, AlertRepository>();
 
+            services.AddHttpClient(); // para injetar HttpClient direto
+
+            services.AddDistributedMemoryCache(); // para IMemoryCache, uso no login da API
+
+            //configurar sessions
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Define o tempo limite da sessão
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
 
             //anula o ReturnUrl no Login (AccountController) e nega acesso não autorizado
             services.ConfigureApplicationCookie(options =>
@@ -98,10 +115,7 @@ namespace GestaoEscolarWeb
             });
 
             services.AddControllersWithViews();
-
-
-
-        }
+            }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -129,11 +143,15 @@ namespace GestaoEscolarWeb
 
             app.UseAuthorization();
 
+            app.UseSession();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+                endpoints.MapControllers(); // importante para os [ApiController]
             });
         }
     }

@@ -24,6 +24,7 @@ namespace GestaoEscolarWeb.Data.Repositories
         {
             return await _context.Set<Student>()
                 .Include(s => s.SchoolClass)
+                    .ThenInclude(sc => sc.Course)
                 .ToListAsync();
         }
 
@@ -49,9 +50,9 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         public List<SelectListItem> GetStudentStatusList()
         {
-            return  Enum.GetValues(typeof(StudentStatus))
-                      .Cast<StudentStatus>()
-                      .Select(status => new SelectListItem
+            return  Enum.GetValues(typeof(StudentStatus)) // indica o tipo do enum a buscar
+                      .Cast<StudentStatus>() // converte a lista de ints do enum para uma IEnumerable<StudentStatus>
+                      .Select(status => new SelectListItem // converte a lista anterior para uma SelectListItem
                       {
                           Value = status.ToString(), // "Enrolled", "Approved", "Failed"
                           Text = status.ToString()    // "Enrolled", "Approved", "Failed"

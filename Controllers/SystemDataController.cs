@@ -1,19 +1,14 @@
-﻿using GestaoEscolarWeb.Data.Entities;
-using GestaoEscolarWeb.Data.Repositories;
+﻿using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Vereyon.Web;
 
 namespace GestaoEscolarWeb.Controllers
 {
     public class SystemDataController : Controller
-    {    
+    {
         private readonly ISystemDataService _systemDataService;
 
         private readonly IFlashMessage _flashMessage;
@@ -22,7 +17,7 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IAlertRepository _alertRepository;
 
-        public SystemDataController(ISystemDataService systemData, IFlashMessage flashMessage, 
+        public SystemDataController(ISystemDataService systemData, IFlashMessage flashMessage,
             IUserHelper userHelper, IAlertRepository alertRepository)
         {
             _systemDataService = systemData;
@@ -31,14 +26,14 @@ namespace GestaoEscolarWeb.Controllers
 
             _alertRepository = alertRepository;
 
-            _userHelper = userHelper;   
+            _userHelper = userHelper;
         }
 
         // POST: SystemDataController/Edit/5
         [HttpPost]
         public async Task<IActionResult> Edit(DashBoardViewModel model)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 _flashMessage.Danger("Please insert a valid number");
 
@@ -52,13 +47,13 @@ namespace GestaoEscolarWeb.Controllers
                 var alerts = await _alertRepository.GetAlertsByUserIdAsync(user.Id);
 
                 model.UserMessages = alerts;
-               
+
                 return View("~/Views/Home/Dashboard.cshtml", model);
             }
 
-            
+
             var data = await _systemDataService.GetSystemDataAsync();
-           
+
 
             data.AbsenceLimit = model.AbsenceLimitPercentage / 100; // Tirar a percentagem
             data.PassingGrade = model.PassingGrade;
@@ -72,12 +67,12 @@ namespace GestaoEscolarWeb.Controllers
             catch (System.Exception ex)
             {
                 _flashMessage.Danger($"An unexpected error occurred while submitting data: {ex.Message}");
-                
+
                 return View("~/Views/Home/Dashboard.cshtml", model);
             }
 
         }
 
-       
+
     }
 }

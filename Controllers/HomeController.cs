@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -54,23 +55,19 @@ namespace GestaoEscolarWeb.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+
         [Route ("error/404")]
         public IActionResult Error404()
         {
             return View();
         }
 
+
+        [Authorize(Roles = "Admin")]
         //GET da view DashBoard
         public async Task<IActionResult> DashBoard()
         {
-            var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);  
-
-            if (user == null)
-            {
-                return View("Error");   
-            }
-
-            var alerts = await _alertRepository.GetAlertsByUserIdAsync(user.Id);
+            var alerts = await _alertRepository.GetAllAlertsWithEmployee();
 
             var data = await _systemDataService.GetSystemDataAsync();
 
@@ -78,12 +75,12 @@ namespace GestaoEscolarWeb.Controllers
             {
                 UserMessages = alerts,
                 PassingGrade = data.PassingGrade,
-                AbsenceLimitPercentage = data.AbsenceLimit*100
+                AbsenceLimitPercentage = data.AbsenceLimit * 100
             };
 
             return View(model);
         }
 
-       
+
     }
 }

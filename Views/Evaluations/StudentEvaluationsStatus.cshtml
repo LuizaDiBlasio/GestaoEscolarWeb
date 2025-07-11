@@ -1,4 +1,6 @@
-﻿@model GestaoEscolarWeb.Models.StudentEvaluationsStatusViewModel
+﻿@using Syncfusion.EJ2.Charts
+@using Syncfusion.EJ2.Popups
+@model GestaoEscolarWeb.Models.StudentEvaluationsStatusViewModel
 @{
     ViewData["Title"] = "StudentEvaluationsStatus";
 }
@@ -69,8 +71,53 @@ else
             }
         </tbody>
     </table>
+    <br />
+   
+    <div class="control-section" align='center'>
+        <ejs-accumulationchart id="enrollmentStatusChart" load="loadChart" enableSmartLabels="true" enableBorderOnMouseMove="false">
+            <e-accumulationchart-legendsettings visible="true" position="@Syncfusion.EJ2.Charts.LegendPosition.Top">
+            </e-accumulationchart-legendsettings>
+            <e-accumulationchart-tooltipsettings enable="true" format="<b>${point.x}</b><br> ${point.y} % </b>" header=""></e-accumulationchart-tooltipsettings>
+            <e-accumulationchart-centerlabel text="Student<br>Progress" hoverTextFormat="${point.x}">
+            </e-accumulationchart-centerlabel>
+            <e-accumulation-series-collection>
+                <e-accumulation-series xName="Category" yName="Percentage" innerRadius="65%" name="Enrollment Status" borderRadius="3"
+                                       dataSource="@Model.EnrollmentStatusChartData" pointColorMapping="Color"> 
+
+                    <e-accumulationseries-datalabel visible="true" name="DataLabelMappingName" position="@Syncfusion.EJ2.Charts.AccumulationLabelPosition.Outside"
+                                                    template="<div style='font-weight:600;'>${point.x}: ${point.y}%</div>"> 
+                        <e-font fontWeight="600" size="12px"></e-font>
+                        <e-connectorstyle type="@Syncfusion.EJ2.Charts.ConnectorType.Curve" length="20px"></e-connectorstyle>
+                    </e-accumulationseries-datalabel>
+                    <e-accumulationseries-border width="1" color="#ffffff"></e-accumulationseries-border>
+
+
+                </e-accumulation-series>
+            </e-accumulation-series-collection>
+        </ejs-accumulationchart>
+    </div>
+
 }
+
+
 
 <div>
     <a asp-action="Index" asp-controller="Home">Back to Home</a>
 </div>
+
+@section Scripts {
+    <script>
+        function loadChart(args) {
+            
+            if (args.accumulation && args.accumulation.series && args.accumulation.series.length > 0) {
+                args.accumulation.series[0].radius = ej.base.Browser.isDevice ? "40%" : "70%";
+                args.accumulation.series[0].dataLabel.connectorStyle.length = ej.base.Browser.isDevice ? '10px' : '20px';
+                args.accumulation.series[0].dataLabel.font.size = ej.base.Browser.isDevice ? '8px' : '12px';
+            }
+            if (args.accumulation && args.accumulation.centerLabel && args.accumulation.centerLabel.textStyle) {
+                args.accumulation.centerLabel.textStyle.size = ej.base.Browser.isDevice ? "7px" : "15px";
+            }
+        }
+    </script>
+    <ejs-scripts></ejs-scripts> 
+}
