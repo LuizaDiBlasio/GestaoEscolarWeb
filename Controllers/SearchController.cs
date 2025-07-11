@@ -1,6 +1,7 @@
 ﻿using GestaoEscolarWeb.Data;
 using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
+using GestaoEscolarWeb.Helpers;
 using GestaoEscolarWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -33,10 +34,12 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IEnrollmentRepository _enrollmentRepository;
 
+        private readonly IUserHelper _userHelper;
+
         private readonly HttpClient _httpClient;
 
         public SearchController(DataContext context, ICourseRepository courseRepository, ISchoolClassRepository schoolClassRepository,
-           IFlashMessage flashMessage, IStudentRepository studentRepository, 
+           IFlashMessage flashMessage, IStudentRepository studentRepository, IUserHelper userHelper,
            ISubjectRepository subjectRepository, IEnrollmentRepository enrollmentRepository, HttpClient httpClient)
         {
             _context = context;
@@ -52,6 +55,8 @@ namespace GestaoEscolarWeb.Controllers
             _subjectRepository = subjectRepository;
             
             _enrollmentRepository = enrollmentRepository;
+
+            _userHelper = userHelper;
 
             _httpClient = httpClient;   
 
@@ -184,6 +189,19 @@ namespace GestaoEscolarWeb.Controllers
 
             if (string.IsNullOrEmpty(jwtToken)) //se não houve token, o login não foi feito por um user no role autorizado
             {
+                //checar se é um employee logado com cookies 
+
+                var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
+
+                var isEmployee = await _userHelper.IsUserInRoleAsync(user, "Employee");
+
+                if (isEmployee)
+                {
+                    _flashMessage.Danger("Access to this data has expired. Please, logout and login again.");
+                    return View(model);
+                }
+
+                //caso nãop seja employee:
                 _flashMessage.Danger("Anauthorized access, only employees have access to this information ");
             }
 

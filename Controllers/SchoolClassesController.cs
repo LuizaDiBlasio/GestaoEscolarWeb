@@ -6,6 +6,7 @@ using GestaoEscolarWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Crypto.Tls;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,14 +26,17 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IConverterHelper _converterHelper;
 
+        private readonly IStudentRepository _studentRepository;
+
         public SchoolClassesController(DataContext context, ICourseRepository courseRepository, ISchoolClassRepository schoolClassRepository,
-           IFlashMessage flashMessage, IConverterHelper converterHelper)
+           IFlashMessage flashMessage, IConverterHelper converterHelper, IStudentRepository studentRepository)
         {
             _context = context;
             _courseRepository = courseRepository;
             _schoolClassRepository = schoolClassRepository;
             _flashMessage = flashMessage;
             _converterHelper = converterHelper;
+            _studentRepository = studentRepository;
 
         }
 
@@ -299,7 +303,61 @@ namespace GestaoEscolarWeb.Controllers
 
         }
 
+        //Get AssignToClass
+        public async Task<IActionResult> AssignToClass()
+        {
+            var availableSchoolClasses = await _schoolClassRepository.GetComboSchoolClassesAsync();
 
+            var model = new AssignToClassViewModel()
+            {
+                AvailableSchoolClasses = availableSchoolClasses
+            };
+
+            return View(model);
+        }
+
+
+        //Post do AssignToClass
+        [HttpPost]
+        [Route("SchoolClasses/AssignToClass")]
+        public async Task<IActionResult> AssignToClass(AssignToClassViewModel model)
+        {
+            if(ModelState.IsValid)
+            {
+                var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(model.StudentId.Value);
+
+                if (student == null)
+                {
+                    _flashMessage.Danger("Unexpected error: not possible to assign student to school class");
+                    return View(model);
+                }
+
+                var schoolClass = await _schoolClassRepository.GetByIdAsync(model.SelectedSchoolClassId.Value);
+
+                if (schoolClass == null)
+                {
+                    _flashMessage.Danger("Unexpected error: not possible to assign student to school class");
+                    return View(model);
+                }
+
+                //atribuir schoolclass a student
+                student.SchoolClass = schoolClass;
+                student.SchoolClassId = schoolClass.Id;
+
+                
+
+                try
+                {
+                    await _studentRepository.UpdateAsync(student);
+                }
+                catch (Exception ex)
+                {
+                    _flashMessage.Danger($"Unexpected error: {ex}");
+                    return View(model);
+                }
+            }
+            return View(model); 
+        }
 
         public IActionResult SchoolClassNotFound()
         {

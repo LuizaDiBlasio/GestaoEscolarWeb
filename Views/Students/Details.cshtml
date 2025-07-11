@@ -107,7 +107,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var evaluation in Model.Evaluations.OrderBy(e => e.Subject))
+                        @foreach (var evaluation in Model.Evaluations.OrderBy(e => e.Subject.Name))
                         {
                             <tr>
                                 <td>@Html.DisplayFor(modelItem => evaluation.Subject.Name)</td>

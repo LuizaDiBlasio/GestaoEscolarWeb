@@ -1,0 +1,122 @@
+﻿@model GestaoEscolarWeb.Models.AssignToClassViewModel
+@{
+    ViewData["Title"] = "AssignToClass";
+}
+
+<h2>Assign student to class</h2>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AssignToClass" asp-controller="SchoolClasses" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="StudentId" class="control-label"></label>
+                <input asp-for="StudentId" class="form-control" id="studentIdInput" placeholder="insert student's Id"/>
+                <span asp-validation-for="StudentId" class="text-danger"></span>
+                <span id="studentErrorFeedback" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="StudentFullName" class="control-label"></label>
+                <input asp-for="StudentFullName" class="form-control" id="studentFullNameInput" />
+                <span asp-validation-for="StudentFullName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="SelectedSchoolClassId" class="control-label"></label>
+                <select asp-for="SelectedSchoolClassId" asp-items="Model.AvailableSchoolClasses" class="form-control"></select>
+                <span asp-validation-for="SelectedSchoolClassId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+        // OU APENAS $(function() {
+
+            const studentIdInput = $("#studentIdInput");
+            const studentFullNameInput = $("#studentFullNameInput");
+            const studentErrorFeedback = $("#studentErrorFeedback"); // Certifique-se que o span existe no HTML
+
+            function clearValidationMessages() {
+                studentErrorFeedback.text('');
+                studentIdInput.removeClass("input-validation-error");
+                var validator = $("form").validate();
+                // Verifique se validator é definido antes de chamar .element
+                if (validator && validator.element) {
+                    validator.element(studentIdInput); // validação
+                }
+            }
+
+            function fetchAndPopulateStudentName() {
+                const studentIdString = studentIdInput.val().trim();
+                let studentId = parseInt(studentIdString, 10);
+
+                clearValidationMessages(); // limpa buscas
+
+                if (studentIdString.length === 0 || isNaN(studentId) || studentId <= 0) {
+                    studentFullNameInput.val('');
+                    return; // Sai da função se o ID for inválido/vazio
+                }
+
+                // AJAX para carregar o nome do aluno
+                $.ajax({
+                    url: '@Url.Action("GetStudentFullNameByIdAsync", "Students")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { id: studentId },
+                    success: function (data) {
+                        if (data && data.fullName) {
+                            studentFullNameInput.val(data.fullName);
+                            studentFullNameInput.prop('readonly', true);
+                            clearValidationMessages(); // Limpa validações se obter sucesso
+                        } else {
+                            studentFullNameInput.val('Student not found');
+                            studentErrorFeedback.text('Student not found with the provided id.').addClass('text-danger');
+                            studentFullNameInput.prop('readonly', false);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Failed to retrieve student name', error);
+                        studentFullNameInput.val('Error loading student name');
+                        studentErrorFeedback.text('An error occurred while fetching student name.').addClass('text-danger');
+                        studentIdInput.prop('readonly', false);
+                        studentFullNameInput.prop('readonly', false);
+                    }
+                });
+            }
+
+            // Se StudentId não vem pré-preenchido
+            studentIdInput.on('blur', function() {
+                if (!$(this).prop('readonly')) {
+                    fetchAndPopulateStudentName();
+                }
+            });
+
+            // Limpar mensagens de erro após foco
+            studentIdInput.on('focus', function() {
+                if (!$(this).prop('readonly')) {
+                    clearValidationMessages();
+                    studentFullNameInput.val(''); // Limpar o nome ao começar a editar o ID
+                }
+            });
+        }); 
+    </script>
+}
