@@ -29,6 +29,17 @@ namespace GestaoEscolarWeb.Controllers
             _userHelper = userHelper;
         }
 
+
+        /// <summary>
+        /// Handles the POST request for updating system data settings.
+        /// This method receives updated system data from the Dashboard view.
+        /// It validates the input, updates the system data, and provides feedback to the user via flash messages.
+        /// </summary>
+        /// <param name="model">A "DashBoardViewModel" containing the updated system data settings.</param>
+        /// <returns>
+        /// If the model state is invalid, it reloads an error message. On successful update, it redirects to the Dashboard.
+        /// In case of an unexpected error during the update, it displays an error message and reloads the Dashboard view.
+        /// </returns>
         // POST: SystemDataController/Edit/5
         [HttpPost]
         public async Task<IActionResult> Edit(DashBoardViewModel model)

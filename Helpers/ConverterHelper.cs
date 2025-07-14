@@ -7,6 +7,10 @@ using System.Linq;
 
 namespace GestaoEscolarWeb.Helpers
 {
+
+    /// <summary>
+    /// Provides methods for converting between data entities and their corresponding view models.
+    /// </summary>
     public class ConverterHelper : IConverterHelper
     {
 

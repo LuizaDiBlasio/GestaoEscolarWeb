@@ -26,6 +26,10 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays a list of all subjects, ordered by name.
+        /// </summary>
+        /// <returns>A view displaying the ordered list of subjects.</returns>
         // GET: Subjects
         public IActionResult Index()
         {
@@ -33,14 +37,27 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the view for creating a new subject.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <returns>A view with a form to create a new subject.</returns>
         // GET: Subjects/Create
-
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
+
+        /// <summary>
+        /// Processes the creation of a new subject.
+        /// Validates the model and checks if a subject with the same name already exists.
+        /// If successful, it creates the subject and redirects to the Index view.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="subject">The subject object containing the new subject details.</param>
+        /// <returns>Redirects to the Index view on successful creation, or returns the view with validation errors and flash messages.</returns>
         // POST: Subjects/Create
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -65,6 +82,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the view for editing an existing subject.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the subject to edit.</param>
+        /// <returns>A view with a form to edit the subject, pre-populated with existing data, or a "Subject Not Found" view if the ID is null or the subject does not exist.</returns>
         // GET: Subjects/Edit/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
@@ -82,6 +105,15 @@ namespace GestaoEscolarWeb.Controllers
             return View(subject);
         }
 
+
+        /// <summary>
+        /// Processes the update of an existing subject.
+        /// Validates the model and handles concurrency exceptions during database updates.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the subject being edited.</param>
+        /// <param name="subject">The subject object containing the updated details.</param>
+        /// <returns>Redirects to the Index view on successful update, or returns the view with validation errors.</returns>
         // POST: Subjects/Edit/5
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -115,6 +147,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the confirmation view for deleting a subject.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the subject to delete.</param>
+        /// <returns>A view confirming the deletion, or a "Subject Not Found" view if the ID is null or the subject does not exist.</returns>
         // GET: Subjects/Delete/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
@@ -133,6 +171,15 @@ namespace GestaoEscolarWeb.Controllers
             return View(subject);   
         }
 
+
+        /// <summary>
+        /// Confirms and processes the deletion of a subject.
+        /// Clears any associated courses before attempting to delete the subject.
+        /// Handles database exceptions during deletion.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the subject to be deleted.</param>
+        /// <returns>Redirects to the Index view on successful deletion, or returns an error view if deletion fails.</returns>
         // POST: Subjects/Delete/5
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -148,7 +195,9 @@ namespace GestaoEscolarWeb.Controllers
 
             if (subject.SubjectCourses != null)
             {
-                subject.SubjectCourses.Clear(); // limpar tabela de join para relações desta subject
+                _flashMessage.Danger("Subject cannot be deleted, it belongs to a course");
+
+                return View();
             }
 
             try
@@ -174,6 +223,11 @@ namespace GestaoEscolarWeb.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Displays the "Subject Not Found" view when a requested subject cannot be located.
+        /// </summary>
+        /// <returns>The "Subject Not Found" view.</returns>
         public IActionResult SubjectNotFound()
         {
             return View();  

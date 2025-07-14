@@ -33,11 +33,13 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly ISchoolClassRepository _schoolClassRepository; 
 
+        private readonly IEnrollmentRepository _enrollmentRepository;
+
        
 
         public StudentsController(DataContext context, IUserHelper userHelper, IBlobHelper blobHelper,
             IStudentRepository studentRepository, IFlashMessage flashMessage, IConverterHelper converterHelper,
-            IMailHelper mailHelper, ISchoolClassRepository schoolClassRepository)
+            IMailHelper mailHelper, ISchoolClassRepository schoolClassRepository, IEnrollmentRepository enrollmentRepository)
         {
             _context = context;
             _userHelper = userHelper;
@@ -46,10 +48,16 @@ namespace GestaoEscolarWeb.Controllers
             _flashMessage = flashMessage;   
             _schoolClassRepository = schoolClassRepository; 
             _converterHelper = converterHelper; 
-            _mailHelper = mailHelper;   
+            _mailHelper = mailHelper; 
+            _enrollmentRepository = enrollmentRepository;
               
         }
 
+        /// <summary>
+        /// Displays a list of all students with their associated school classes.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <returns>A view containing a list of students.</returns>
         [Authorize(Roles = "Employee")]
         // GET: Students
         public async Task<IActionResult> Index()
@@ -59,8 +67,13 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        [Authorize(Roles = "Student")]
+        /// <summary>
+        /// Displays the profile of the currently logged-in student.
+        /// Only accessible by users with the "Student" role.
+        /// </summary>
+        /// <returns>A view displaying the student's profile information.</returns>
         //Get do MyProfile
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> MyProfile()
         {
             var username = this.User.Identity.Name; //pegar o username
@@ -92,6 +105,14 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Handles the POST request for updating the currently logged-in student's profile.
+        /// Allows students to update their personal information and profile image.
+        /// Only accessible by users with the "Student" role.
+        /// </summary>
+        /// <param name="id">The ID of the student to update.</param>
+        /// <param name="model">The view model containing the updated student information.</param>
+        /// <returns>Redirects to the MyProfile action on successful update, or returns the view with errors.</returns>
         // POST: Students/MyProfile/5
         [Authorize(Roles = "Student")]
         [HttpPost]
@@ -137,6 +158,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the detailed information of a specific student.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <param name="id">The ID of the student to display.</param>
+        /// <returns>A view displaying the student's details, or a "StudentNotFound" view if the student is not found.</returns>
         // GET: Students/Details/5
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Details(int? id)
@@ -156,6 +183,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the form for creating a new student.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <returns>A view with the student creation form, populated with available school classes.</returns>
         // GET: Students/Create
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Create()
@@ -172,6 +204,13 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Handles the POST request for creating a new student.
+        /// Creates a new user account for the student, assigns the "Student" role, sends a confirmation email, and saves the student details.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <param name="model">The view model containing the new student's information.</param>
+        /// <returns>Redirects to the Index action on success, or returns the view with errors.</returns>
         //POST: Students/Create
         [Authorize(Roles = "Employee")]
         [HttpPost]
@@ -250,6 +289,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the form for editing an existing student.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <param name="id">The ID of the student to edit.</param>
+        /// <returns>A view with the student editing form, populated with the student's current information and available school classes.</returns>
         // GET: Students/Edit/5
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Edit(int? id)
@@ -284,6 +329,16 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Handles the POST request for updating an existing student.
+        /// Updates the student's information, including their profile image and school class.
+        /// If the school class changes, it removes any enrollments the student had in subjects no longer part of their new class's course.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <param name="id">The ID of the student to update.</param>
+        /// <param name="model">The view model containing the updated student information.</param>
+        /// <returns>Redirects to the Index action on successful update, or returns the view with errors.</returns>
         // POST: Students/Edit/5
         [Authorize(Roles = "Employee")]
         [HttpPost]
@@ -305,20 +360,21 @@ namespace GestaoEscolarWeb.Controllers
                 }
 
                 //converter model para student
-                var student = _converterHelper.FromCreateEditToStudent(model, false, imageId);
+                var studentConvert = _converterHelper.FromCreateEditToStudent(model, false, imageId);
 
-                if (student == null)
+                if (studentConvert == null)
                 {
                     return new NotFoundViewResult("StudentNotFound");
                 }
 
+                //Fazer o update antes de checar os enrollments para conter a nova turma (se mudou)
                 try
                 {
-                    await _studentRepository.UpdateAsync(student);
+                    await _studentRepository.UpdateAsync(studentConvert);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!StudentExists(student.Id))
+                    if (!StudentExists(studentConvert.Id))
                     {
                         return new NotFoundViewResult("StudentNotFound");
                     }
@@ -328,12 +384,42 @@ namespace GestaoEscolarWeb.Controllers
                     }
                 }
 
+                //checar enrollments antigos 
+
+                var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(studentConvert.Id);
+
+                var newCourseSubjectIds = student.SchoolClass.Course.CourseSubjects.Select(s => s.Id).ToList();
+
+                foreach (var enrollment in student.Enrollments.ToList())
+                {
+                    if (!newCourseSubjectIds.Contains(enrollment.SubjectId)) // Se a SubjectId do enrollment está na nova turma
+                    {
+                        try
+                        {
+                            await _enrollmentRepository.DeleteAsync(enrollment);
+                        }
+                        catch (Exception ex)
+                        {
+                            _flashMessage.Danger("Unexpected error : " + ex.Message);
+                            return View(model);
+                        }
+                    }
+                }
+
+               
+
                 return RedirectToAction(nameof(Index)); //caso user seja funcionário
             }
             return View(model);
         }
 
 
+        /// <summary>
+        /// Displays the confirmation page for deleting a student.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <param name="id">The ID of the student to delete.</param>
+        /// <returns>A view displaying the student's details for deletion confirmation, or a "StudentNotFound" view if the student is not found.</returns>
         // GET: Students/Delete/5
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Delete(int? id)
@@ -353,6 +439,14 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Handles the POST request for confirming the deletion of a student.
+        /// Deletes the student and deactivates their associated user account.
+        /// Prevents deletion if the student has associated grades.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <param name="id">The ID of the student to delete.</param>
+        /// <returns>Redirects to the Index action on successful deletion, or returns the Delete view with an error message.</returns>
         // POST: Students/Delete/5
         [Authorize(Roles = "Employee")]
         [HttpPost, ActionName("Delete")]
@@ -410,7 +504,14 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        //Metodo chamado no ajax
+        /// <summary>
+        /// Retrieves the full name of a student by their ID.
+        /// This method is intended to be called via AJAX.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <param name="id">The ID of the student.</param>
+        /// <returns>A JSON object containing the student's full name, or a "StudentNotFound" view if the student is not found.</returns>
+        //Ajax
         [Authorize(Roles = "Employee")]
         [HttpGet("Students/GetStudentFullNameByIdAsync/{id?}")]
         public async Task<IActionResult> GetStudentFullNameByIdAsync(int id)
@@ -426,13 +527,22 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-
+        /// <summary>
+        /// Checks if a student with the specified ID exists in the database.
+        /// Only accessible by users with the "Employee" role.
+        /// </summary>
+        /// <param name="id">The ID of the student to check.</param>
+        /// <returns>True if the student exists, false otherwise.</returns>
         [Authorize(Roles = "Employee")]
         private bool StudentExists(int id)
         {
             return _context.Students.Any(e => e.Id == id);
         }
 
+        /// <summary>
+        /// Displays a generic "Student Not Found" view.
+        /// </summary>
+        /// <returns>The "StudentNotFound" view.</returns>
         public IActionResult StudentNotFound()
         {
             return View();

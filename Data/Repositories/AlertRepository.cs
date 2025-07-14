@@ -18,9 +18,15 @@ namespace GestaoEscolarWeb.Data.Repositories
         {
             _context = context;
         }
-       
 
 
+
+        /// <summary>
+        /// Retrieves a collection of alerts associated with a specific user.
+        /// </summary>
+        /// <param name="userAuditId">The unique identifier of the user (UserAuditId).</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains
+        /// an "IEnumerable{T}" of type "Alert" entities belonging to the specified user.</returns>
         public async Task<IEnumerable<Alert>> GetAlertsByUserIdAsync(string userAuditId)
         {
             return await _context.Alerts
@@ -29,11 +35,23 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         }
 
+
+        /// <summary>
+        /// Retrieves a collection of all alerts, including their associated employee (UserAudit) information.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation. The task result contains
+        /// an "IEnumerable{T}" of "Alert" entities, with the UserAudit navigation property loaded.</returns>
         public async Task<IEnumerable<Alert>> GetAllAlertsWithEmployee()
         {
             return await _context.Alerts.Include(a => a.UserAudit).ToListAsync();
         }
 
+
+        /// <summary>
+        /// Gets a list of "SelectListItem" representing the possible statuses from the "Status" enumeration.
+        /// This is typically used for populating dropdown lists in UI.
+        /// </summary>
+        /// <returns>A "List{T}" of "SelectListItem" where each item's Value and Text are the string representation of a "Status" enum member.</returns>
         public List<SelectListItem> GetStatusList()
         {
             return Enum.GetValues(typeof(Status)) //indicar o tipo do enum

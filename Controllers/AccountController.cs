@@ -43,11 +43,14 @@ namespace GestaoEscolarWeb.Controllers
             _configuration = configuration;
             _httpClient = httpClient;   
 
-            //_countryRepository = countryRepository;
 
         }
 
-        //Get do login para view onde inserir credenciais
+        /// <summary>
+        /// Displays the login view. If the user is already authenticated, redirects to the Home page.
+        /// </summary>
+        /// <returns>The login view or a redirection to the Home page.</returns>
+        //Get do login 
         public IActionResult Login() //precisar criar a view do Login - clicar com o botão direito aqui em cima de Login() Add View
         {
             if (User.Identity.IsAuthenticated) //caso usuário esteja autenticado
@@ -58,7 +61,14 @@ namespace GestaoEscolarWeb.Controllers
             return View(); //se login não funcionar, permanece na View 
         }
 
-        //action do login que checa as credencias na bd, faz o login de fato
+
+
+        /// <summary>
+        /// Handles the login POST request, authenticates the user, and redirects based on role.
+        /// Attempts to get a JWT token for 'Employee' roles from an external API.
+        /// </summary>
+        /// <param name="model">The LoginViewModel containing user credentials.</param>
+        /// <returns>A redirection to the appropriate page or the login view with error messages.</returns>
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -132,6 +142,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Attempts to retrieve a JWT token from a server-side API endpoint.
+        /// </summary>
+        /// <param name="model">The LoginViewModel containing credentials for API authentication.</param>
+        /// <returns>The JWT token string if successful, otherwise null.</returns>
         private async Task<string> GetJwtTokenFromServerSide(LoginViewModel model)
         {
             try
@@ -169,13 +184,22 @@ namespace GestaoEscolarWeb.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Logs out the current user and redirects to the Home page.
+        /// </summary>
+        /// <returns>A redirection to the Home page.</returns>
         public async Task<IActionResult> Logout()
         {
             await _userHelper.LogoutAsync();
             return RedirectToAction("Index", "Home");
         }
 
-
+        /// <summary>
+        /// Displays the user registration view. Only accessible by users with the "Admin" role.
+        /// Populates available roles for selection.
+        /// </summary>
+        /// <returns>The registration view with available roles.</returns>
         [Authorize(Roles = "Admin")]
         public IActionResult Register() //só mostra a view do Register
         {
@@ -188,7 +212,12 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
-
+        /// <summary>
+        /// Processes the registration of a new user.
+        /// Only users with the 'Admin' role can access this functionality.
+        /// </summary>
+        /// <param name="model">The model containing the data of the new user to be registered.</param>
+        /// <returns>An action result indicating success or failure of the registration.</returns>
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Register(RegisterNewUserViewModel model) // registra o user
@@ -309,6 +338,13 @@ namespace GestaoEscolarWeb.Controllers
             return View(model); //passa modelo de volta para não ficar campos em branco
         }
 
+
+        /// <summary>
+        /// Displays the view for resetting the user's password after email confirmation.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <param name="token">The email confirmation token.</param>
+        /// <returns>The password reset view or a "User Not Found" view if parameters are invalid.</returns>
         //Get do ResetPassword
         public async Task<IActionResult> ResetPassword(string userId, string token)
         {
@@ -345,6 +381,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Processes the user's password reset request.
+        /// </summary>
+        /// <param name="model">The model containing the username, reset token, and new password.</param>
+        /// <returns>The password reset view with a success or error message.</returns>
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model) //recebo modelo preechido com dados para reset da password
         {
@@ -371,7 +412,10 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-
+        /// <summary>
+        /// Displays the view for changing the logged-in user's profile data.
+        /// </summary>
+        /// <returns>The user change view with the current user's data.</returns>
         //GET do ChangeUser
         public async Task<IActionResult> ChangeUser()
         {
@@ -389,12 +433,57 @@ namespace GestaoEscolarWeb.Controllers
             return View(model); //retornar model novo para view
         }
 
+
+        /// <summary>
+        /// Processes the update of the user's profile data.
+        /// </summary>
+        /// <param name="model">The model containing the new user data.</param>
+        /// <returns>The user change view with a success or error message.</returns>
+        [HttpPost]
+        public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name); //buscar user por email
+
+                if (user != null) //caso user exista, user com propridades registradas no modelo
+                {
+
+                    user.FullName = model.FullName;
+                    user.Address = model.Address;
+                    user.PhoneNumber = model.PhoneNumber;
+
+                    var response = await _userHelper.UpdateUserAsync(user); //fazer update do user
+
+                    if (response.Succeeded)
+                    {
+                        ViewBag.UserMessage = "User updated";
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description); //pedir a primeira mensagem de erro
+                    }
+                }
+            }
+            return View(model); //retornar model novo para view
+        }
+
+
+        /// <summary>
+        /// Displays the view for password recovery.
+        /// </summary>
+        /// <returns>The password recovery view.</returns>
         public IActionResult RecoverPassword() //direciona para view de recover da password
         {
             return View();
         }
 
 
+        /// <summary>
+        /// Processes the password recovery request.
+        /// </summary>
+        /// <param name="model">The model containing the user's email for recovery.</param>
+        /// <returns>The password recovery view with a status message.</returns>
         [HttpPost]
         public async Task<IActionResult> RecoverPassword(RecoverPasswordViewModel model) //recebe modelo com dados recuperar password
         {
@@ -435,40 +524,22 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name); //buscar user por email
 
-                if (user != null) //caso user exista, user com propridades registradas no modelo
-                {
-
-                    user.FullName = model.FullName;
-                    user.Address = model.Address;
-                    user.PhoneNumber = model.PhoneNumber;
-
-                    var response = await _userHelper.UpdateUserAsync(user); //fazer update do user
-
-                    if (response.Succeeded)
-                    {
-                        ViewBag.UserMessage = "User updated";
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description); //pedir a primeira mensagem de erro
-                    }
-                }
-            }
-            return View(model); //retornar model novo para view
-        }
-
+        /// <summary>
+        /// Displays the view for changing the password.
+        /// </summary>
+        /// <returns>The change password view.</returns>
         public IActionResult ChangePassword()
         {
             return View();
         }
 
+
+        /// <summary>
+        /// Processes the user's password change.
+        /// </summary>
+        /// <param name="model">The model containing the old password and the new password.</param>
+        /// <returns>Redirects to the user change view on success or returns the view with errors.</returns>
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
@@ -498,6 +569,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the profile of the logged-in user.
+        /// Only users with 'Admin' or 'Employee' roles can access this functionality.
+        /// </summary>
+        /// <returns>The user profile view or an error message if the user is not found.</returns>
         [Authorize(Roles = "Admin, Employee")]
         //GET
         public async Task<IActionResult> MyUserProfile()
@@ -520,6 +596,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Processes the update of the logged-in user's profile.
+        /// Only users with 'Admin' or 'Employee' roles can access this functionality.
+        /// </summary>
+        /// <param name="model">The model containing the updated profile data.</param>
+        /// <returns>Redirects to the profile view with a success message or returns the view with errors.</returns>
         [Authorize(Roles = "Admin, Employee")]
         [HttpPost]
         public async Task<IActionResult> MyUserProfile(MyUserProfileViewModel model)
@@ -595,11 +677,21 @@ namespace GestaoEscolarWeb.Controllers
 
         }
 
+
+        // <summary>
+        /// Displays the "Not Authorized" view when a user tries to access a restricted area.
+        /// </summary>
+        /// <returns>The "Not Authorized" view.</returns>
         public IActionResult NotAuthorized()
         {
             return View();
         }
 
+
+        /// <summary>
+        /// Displays the "User Not Found" view when a user cannot be located.
+        /// </summary>
+        /// <returns>The "User Not Found" view.</returns>
         public IActionResult UserNotFound()
         {
             return View();

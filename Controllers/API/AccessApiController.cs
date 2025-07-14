@@ -25,6 +25,16 @@ namespace GestaoEscolarWeb.Controllers.API
             _configuration = configuration;
         }
 
+
+        /// <summary>
+        /// Authenticates a user and, if successful and the user is an "Employee", generates a JSON Web Token (JWT).
+        /// </summary>
+        /// <param name="model">The model "LoginViewModel" containing the user's username and password.</param>
+        /// <returns>
+        /// An "IActionResult" representing:
+        /// 201 Created - If authentication is successful and the user is an "Employee",returns a JSON object containing the generated JWT and its expiration date.
+        /// 400 Bad Request - If the model state is invalid or user credentials are incorrect.
+        /// </returns>
         [HttpPost]
         [Route("Login")] // Rota: /api/AccessApi/Login
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)

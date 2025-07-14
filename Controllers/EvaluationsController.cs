@@ -54,6 +54,12 @@ namespace GestaoEscolarWeb.Controllers
             _enrollmentRepository = enrollmentRepository;
         }
 
+
+        /// <summary>
+        /// Displays a list of all evaluations, including associated students and subjects.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <returns>A view displaying the list of evaluations.</returns>
         // GET: Evaluations
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Index()
@@ -62,6 +68,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+
+        /// <summary>
+        /// Displays the view for creating a new evaluation.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <returns>A view with a form to create a new evaluation.</returns>
         // GET: Evaluations/Create
         [Authorize(Roles = "Employee")]
         public IActionResult Create()
@@ -71,6 +83,14 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Processes the creation of a new evaluation.
+        /// Validates the student's enrollment, school year, exam date, and prevents duplicate evaluations.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="model">The view model containing the evaluation details.</param>
+        /// <returns>Redirects to the Index view on successful creation, or returns the view with validation errors and flash messages.</returns>
         // POST: Evaluations/Create
         [Authorize(Roles = "Employee")]
         [HttpPost]
@@ -96,9 +116,26 @@ namespace GestaoEscolarWeb.Controllers
                     return View(model);
                 }
 
+                //verificar datas válidas
+
                 if (student.SchoolClass.SchoolYear < DateTime.Now.Year)
                 {
                     _flashMessage.Danger("Cannot create evaluation after schoolyear end");
+                    return View(model);
+                }
+
+                var enrollment = await _enrollmentRepository.GetActiveEnrollment(model.StudentId, model.SelectedSubjectId);
+
+                if (model.ExamDate < enrollment.EnrollmentDate)
+                {
+                    
+                    _flashMessage.Danger($"The exam date cannot be before the enrollment date ({enrollment.EnrollmentDate:MM/dd/yyyy}) for this subject.");
+                    return View(model);
+                }
+
+                if(model.ExamDate > DateTime.Now)
+                {
+                    _flashMessage.Danger($"The exam date cannot be after today's date");
                     return View(model);
                 }
 
@@ -117,6 +154,14 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Displays the view for editing an existing evaluation.
+        /// Retrieves the evaluation along with student and subject details.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="id">The ID of the evaluation to edit.</param>
+        /// <returns>A view with a form to edit the evaluation, pre-populated with existing data.</returns>
         // GET: Evaluations/Edit/5
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Edit(int? id)
@@ -158,6 +203,15 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Processes the update of an existing evaluation.
+        /// Validates the school year and converts the view model to an entity before updating.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="id">The ID of the evaluation being edited.</param>
+        /// <param name="model">The view model containing the updated evaluation details.</param>
+        /// <returns>Redirects to the Index view on successful update, or returns the view with validation errors.</returns>
         //POST: Evaluations/Edit/5
         [Authorize(Roles = "Employee")]
         [HttpPost]
@@ -209,6 +263,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the evaluation status for the currently logged-in student.
+        /// Retrieves all enrollments and evaluations for the student, calculates their status and average scores.
+        /// This action is accessible only by users with the 'Student' role.
+        /// </summary>
+        /// <returns>A view displaying the student's evaluation status and enrollment chart data.</returns>
         //GET 
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> StudentEvaluationsStatus()
@@ -263,6 +323,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the confirmation view for deleting an evaluation.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="id">The ID of the evaluation to delete.</param>
+        /// <returns>A view confirming the deletion, or a "Evaluation Not Found" view if the evaluation does not exist.</returns>
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -281,6 +347,14 @@ namespace GestaoEscolarWeb.Controllers
             return View(evaluation);
         }
 
+
+        /// <summary>
+        /// Confirms and processes the deletion of an evaluation.
+        /// Prevents deletion if the school year has ended.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="id">The ID of the evaluation to be deleted.</param>
+        /// <returns>Redirects to the Index view on successful deletion, or returns an error view if deletion fails.</returns>
         // POST: Evaluations/Delete/5
         [Authorize(Roles = "Employee")]
         [HttpPost, ActionName("Delete")]
@@ -327,7 +401,14 @@ namespace GestaoEscolarWeb.Controllers
             
         }
 
-        //Chamada Ajax
+        /// <summary>
+        /// Retrieves a list of subjects available for evaluation for a specific student via an AJAX call.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="id">The ID of the student.</param>
+        /// <returns>A JSON array of <see cref="SelectListItem"/> representing the available subjects,
+        /// or an error message if the student is not found or not enrolled in any subject.</returns>
+        //Ajax
         [Authorize(Roles = "Employee")]
         [HttpGet]
         public async Task<IActionResult> GetSubjectsForStudentEvaluation(int id)
@@ -357,11 +438,22 @@ namespace GestaoEscolarWeb.Controllers
             return this.Json(subjects);
         }
 
+
+        /// <summary>
+        /// Checks if an evaluation with the specified ID exists in the database.
+        /// </summary>
+        /// <param name="id">The ID of the evaluation to check.</param>
+        /// <returns><c>true</c> if an evaluation with the given ID exists; otherwise, <c>false</c>.</returns>
         private bool EvaluationExists(int id)
         {
             return _context.Evaluations.Any(e => e.Id == id);
         }
 
+
+        /// <summary>
+        /// Displays the "Evaluation Not Found" view when a requested evaluation cannot be located.
+        /// </summary>
+        /// <returns>The "Evaluation Not Found" view.</returns>
         public IActionResult EvaluationNotFound()
         {
             return View();

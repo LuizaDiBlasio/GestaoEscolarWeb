@@ -17,6 +17,15 @@ namespace GestaoEscolarWeb.Data.Repositories
             _context = context;
         }
 
+
+        /// <summary>
+        /// Retrieves all school classes, including their associated course information.
+        /// This method performs eager loading of the related "Course" entity.
+        /// </summary>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation containing an "IEnumerable{T}" of "SchoolClass" entities,
+        /// with the "SchoolClass.Course" property loaded.
+        /// </returns>
         public async Task<IEnumerable<SchoolClass>> GetAllSchoolClassesWithCourseAsync()
         {
             return await _context.SchoolClasses
@@ -24,6 +33,17 @@ namespace GestaoEscolarWeb.Data.Repositories
                                  .ToListAsync();
         }
 
+
+        /// <summary>
+        /// Retrieves a list of school classes formatted for use in a dropdown.
+        /// Filters classes to include only the current or next school year.
+        /// Includes a placeholder item at the beginning of the list.
+        /// </summary>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation containing an "IEnumerable{T}" of "SelectListItem",
+        /// where each item represents a school class with its ID as Value and a descriptive string as Text,
+        /// ordered by course name, then by school year, and including a "Select a school class..." placeholder.
+        /// </returns>
         public async Task<IEnumerable<SelectListItem>> GetComboSchoolClassesAsync()
         {
             var schoolClasses = await _context.SchoolClasses
@@ -50,6 +70,15 @@ namespace GestaoEscolarWeb.Data.Repositories
             return selectListItems;
         }
 
+
+        /// <summary>
+        /// Retrieves a list of "SelectListItem" representing a range of school years, ordered in descending order (most recent first)
+        /// It includes a default selected placeholder.
+        /// </summary>
+        /// <returns>
+        /// An "IEnumerable{T}" of "SelectListItem" where each item's Value and Text
+        /// are the string representation of a year, and the first item is a "Select a year..." placeholder.
+        /// </returns>
         public IEnumerable<SelectListItem> GetComboSchoolYears()
         {
             // Definir o ano inicial e final para a lista
@@ -78,6 +107,14 @@ namespace GestaoEscolarWeb.Data.Repositories
             return SchoolYears;
         }
 
+
+        /// <summary>
+        /// Retrieves a list of "SelectListItem" representing school shifts.
+        /// </summary>
+        /// <returns>
+        /// An "IEnumerable{T}" of "SelectListItem" with the shifts  Morning, Afternoon, and Night,
+        /// including a "Select a shift..." placeholder.
+        /// </returns>
         public IEnumerable<SelectListItem> GetComboShifts()
         {
             var selectList = new List<SelectListItem> //converter para SelectListItem
@@ -90,6 +127,15 @@ namespace GestaoEscolarWeb.Data.Repositories
             return selectList;
         }
 
+        /// <summary>
+        /// Retrieves a single school class by its ID, including its associated course, subjects within the course, and students.
+        /// </summary>
+        /// <param name="id">The ID of the school class to retrieve.</param>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation that contains the "SchoolClass" entity if found,
+        /// including its "SchoolClass.Course" (with "Course.CourseSubjects")
+        /// and "SchoolClass.Students"  properties loaded, otherwise "null".
+        /// </returns>
         public async Task<SchoolClass> GetSchoolClassCourseAndStudentsAsync(int id)
         {
             var schoolClass = await _context.SchoolClasses

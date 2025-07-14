@@ -21,7 +21,15 @@ namespace GestaoEscolarWeb.Helpers
             _blobClient = storageAccount.CreateCloudBlobClient(); //ligação ao container
         }
 
-        ////mesmos metodos de upload só variam os parâmetreos: ficheiro, array de bytes e string
+        /// <summary>
+        /// Asynchronously uploads a file from an <see cref="IFormFile"/> to a specified Azure Blob Storage container.
+        /// A new unique GUID will be generated as the blob name.
+        /// </summary>
+        /// <param name="file">The "IFormFile" representing the file to upload.</param>
+        /// <param name="containerName">The name of the blob container where the file will be uploaded.</param>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation containing a "Guid" representing the unique name assigned to the uploaded blob.
+        /// </returns>
         public async Task<Guid> UploadBlobAsync(IFormFile file, string containerName)
         {
             Stream stream = file.OpenReadStream();//busca ficheiro
@@ -29,13 +37,15 @@ namespace GestaoEscolarWeb.Helpers
         }
 
 
-        public async Task<Guid> UploadBlobAsync(byte[] file, string containerName)
-        {
-            MemoryStream stream = new MemoryStream(file); //memory stream usado para bytes
-            return await UploadStreamAsync(stream, containerName);
-        }
-
-
+        /// <summary>
+        /// Asynchronously uploads a file from a local file path to a specified Azure Blob Storage container.
+        /// A new unique GUID will be generated as the blob name.
+        /// </summary>
+        /// <param name="image">The full path to the local image file to upload.</param>
+        /// <param name="containerName">The name of the blob container where the file will be uploaded.</param>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation containing a "Guid" representing the unique name assigned to the uploaded blob.
+        /// </returns>
         public async Task<Guid> UploadBlobAsync(string image, string containerName)
         {
             Stream stream = File.OpenRead(image);
@@ -43,6 +53,15 @@ namespace GestaoEscolarWeb.Helpers
         }
 
 
+        /// <summary>
+        /// Private helper method to perform the actual blob upload from a stream.
+        /// It generates a unique GUID for the blob name and uploads the stream content.
+        /// </summary>
+        /// <param name="stream">The "Stream" containing the content to upload.</param>
+        /// <param name="containerName">The name of the blob container where the stream content will be uploaded.</param>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation containing a "Guid" representing the unique name assigned to the uploaded blob.
+        /// </returns>
         private async Task<Guid> UploadStreamAsync(Stream stream, string containerName)
         {
             Guid name = Guid.NewGuid();

@@ -1,13 +1,11 @@
 ﻿using GestaoEscolarWeb.Data.Entities;
 using GestaoEscolarWeb.Data.Repositories;
 using GestaoEscolarWeb.Helpers;
-using GestaoEscolarWeb.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Crypto;
 using System;
 using System.Threading.Tasks;
+using GestaoEscolarWeb.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Vereyon.Web;
 
 namespace GestaoEscolarWeb.Controllers
@@ -24,7 +22,7 @@ namespace GestaoEscolarWeb.Controllers
         private readonly ISystemDataService _systemDataService;
 
 
-        public AlertsController(IAlertRepository alertRepository, IUserHelper userHelper, IFlashMessage flashMessage, ISystemDataService systemDataService )
+        public AlertsController(IAlertRepository alertRepository, IUserHelper userHelper, IFlashMessage flashMessage, ISystemDataService systemDataService)
         {
             _alertRepository = alertRepository;
 
@@ -35,6 +33,11 @@ namespace GestaoEscolarWeb.Controllers
             _systemDataService = systemDataService;
         }
 
+        /// <summary>
+        /// Displays a list of alerts specific to the currently logged-in user.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <returns>A view displaying the user's messages.</returns>
         // GET: AlertsController
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Index()
@@ -60,9 +63,15 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the details of a specific alert.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="id">The ID of the alert to display.</param>
+        /// <returns>A view displaying the alert details.</returns>
         [Authorize(Roles = "Employee")]
         // GET: AlertsController/Details/5
-        public async  Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var alert = await _alertRepository.GetByIdAsync(id);
 
@@ -70,6 +79,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the view for creating a new alert.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <returns>The alert creation view.</returns>
         [Authorize(Roles = "Employee")]
         // GET: AlertsController/Create
         public ActionResult Create()
@@ -78,8 +92,14 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        [Authorize(Roles = "Employee")]
+        /// <summary>
+        /// Processes the creation of a new alert.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="alert">The alert object containing the new message details.</param>
+        /// <returns>Redirects to the Index view on success, or returns the view with an error message on failure.</returns>
         // POST: AlertsController/Create
+        [Authorize(Roles = "Employee")]
         [HttpPost]
         public async Task<IActionResult> Create(Alert alert)
         {
@@ -112,18 +132,29 @@ namespace GestaoEscolarWeb.Controllers
 
         }
 
-
+        /// <summary>
+        /// Displays the view for editing an existing alert.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="id">The ID of the alert to edit.</param>
+        /// <returns>A view displaying the alert to be edited.</returns>
         [Authorize(Roles = "Employee")]
         // GET: AlertsController/Edit/5
         public async Task<ActionResult> Edit(int id)
         {
-            var alert = await _alertRepository.GetByIdAsync(id);   
+            var alert = await _alertRepository.GetByIdAsync(id);
 
             return View(alert);
         }
 
 
-
+        /// <summary>
+        /// Processes the update of an existing alert.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="id">The ID of the alert being edited.</param>
+        /// <param name="alert">The alert object containing the updated message details.</param>
+        /// <returns>Redirects to the Index view on success, or returns the view with an error message on failure.</returns>
         [Authorize(Roles = "Employee")]
         // POST: AlertsController/Edit/5
         [HttpPost]
@@ -160,6 +191,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the view for managing a specific alert (ticket).
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the alert (ticket) to manage.</param>
+        /// <returns>A view displaying the alert details for management.</returns>
         [Authorize(Roles = "Admin")]
         //Get ManageTicket
         public async Task<IActionResult> ManageTicket(int id)
@@ -179,11 +216,20 @@ namespace GestaoEscolarWeb.Controllers
                 Message = alert.Message
 
             };
-            return View(model);  
+            return View(model);
         }
 
+
+        /// <summary>
+        /// Processes the management and update of an alert (ticket) status.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="model">The view model containing the updated alert status and details.</param>
+        /// <param name="id">The ID of the alert (ticket) being managed.</param>
+        /// <returns>Redirects to the Dashboard on success, or returns the view with an error message on failure.</returns>
         [Authorize(Roles = "Admin")]
         //Post de ManageTicket
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> ManageTicket(ManageTicketViewModel model, int id)
         {
@@ -208,7 +254,7 @@ namespace GestaoEscolarWeb.Controllers
                         AbsenceLimitPercentage = data.AbsenceLimit * 100
                     };
 
-                    return View("~/Views/Home/DashBoard.cshtml", modelDashBoard); 
+                    return View("~/Views/Home/DashBoard.cshtml", modelDashBoard);
                 }
                 catch
                 {
@@ -219,8 +265,13 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
-       
-        
+
+        /// <summary>
+        /// Deletes a specific alert.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the alert to delete.</param>
+        /// <returns>Redirects to the Dashboard view with a success or error message.</returns>
         // GET: Subjects/Delete/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAlert(int id)
@@ -252,7 +303,7 @@ namespace GestaoEscolarWeb.Controllers
                     errorMessage = ex.InnerException.Message;
                 }
                 _flashMessage.Danger($"{errorMessage}");
-             
+
             }
 
             var alerts = _alertRepository.GetAll();
@@ -270,6 +321,10 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the "Alert Not Found" view when a requested alert is not found.
+        /// </summary>
+        /// <returns>The "Alert Not Found" view.</returns>
         public IActionResult AlertNotFound()
         {
             return View();

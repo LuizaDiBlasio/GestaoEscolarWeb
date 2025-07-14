@@ -27,6 +27,16 @@ namespace GestaoEscolarWeb.Controllers.API
         }
 
 
+        /// <summary>
+        /// Retrieves a list of students belonging to a specific school class.
+        /// This endpoint requires authentication via a JWT Bearer token.
+        /// </summary>
+        /// <param name="SchoolClassId">The unique identifier of the school class.</param>
+        /// <returns>
+        /// An "IActionResult" representing:
+        /// 200 OK - If students are found for the specified school class, returns a JSON array of student objects.
+        /// 404 Not Found - If no school class matches the provided ID, or if the school class exists but contains no students.
+        /// </returns>
         [HttpGet("{SchoolClassId}")]
         public async Task<IActionResult> GetSchoolClassStudents(int SchoolClassId)
         {  

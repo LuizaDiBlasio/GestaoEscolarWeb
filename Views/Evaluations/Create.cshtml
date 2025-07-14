@@ -26,16 +26,16 @@
                 <span asp-validation-for="StudentFullName" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="SelectedSubjectId" class="control-label"></label>
+                <select asp-for="SelectedSubjectId" asp-items="Model.Subjects" class="form-control" id="subjectDropdown"></select>
+                <span asp-validation-for="SelectedSubjectId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="ExamDate" class="control-label"></label>
                 <div>
                     <input type="text" id="examDateInput" asp-for="ExamDate" class="form-control" />
                 </div>
                 <span asp-validation-for="ExamDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SelectedSubjectId" class="control-label"></label>
-                <select asp-for="SelectedSubjectId" asp-items="Model.Subjects" class="form-control" id="subjectDropdown"></select>
-                <span asp-validation-for="SelectedSubjectId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Score" class="control-label"></label>
@@ -54,27 +54,30 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
             // Inicializa o DatePicker para ExamDate
             var examDatePicker = new ej.calendars.DatePicker({
                 format: 'MM/dd/yyyy',
-                placeholder: 'Select a date'
+                placeholder: 'Select a date',
+                maxDate: new Date()
             });
-            examDatePicker.appendTo('#examDateInput'); //ligação ao elemento de ExamDate         
+            examDatePicker.appendTo('#examDateInput'); //ligação ao elemento de ExamDate
 
             const studentIdInput = $("#studentIdInput");
             const subjectDropdown = $("#subjectDropdown");
             const studentFullNameInput = $("#StudentFullName"); // para preencher o nome automatico
             const idValidationSpan = $('span[data-valmsg-for="StudentId"]'); // Span do asp-validation-for="StudentId"
-            const studentErrorFeedback = $("#studentErrorFeedback"); 
+            const studentErrorFeedback = $("#studentErrorFeedback");
 
             // limpar mensagens de erro
             function clearValidationMessages() {
-                idValidationSpan.text(''); 
-                studentErrorFeedback.text(''); 
+                idValidationSpan.text('');
+                studentErrorFeedback.text('');
                 studentIdInput.removeClass("input-validation-error");
                 var validator = $("form").validate();
                 validator.element(studentIdInput);
@@ -91,8 +94,8 @@
                 // Limpar e adicionar placeholder caso id inválido
                 if (studentIdString.length === 0 || isNaN(studentId) || studentId <= 0) {
                     studentFullNameInput.val('');
-                   
-                    return; 
+
+                    return;
                 }
 
 
@@ -101,7 +104,7 @@
                     url: '@Url.Action("GetSubjectsForStudentEvaluation", "Evaluations")',
                     type: 'GET',
                     dataType: 'json',
-                    data: { id: studentId }, 
+                    data: { id: studentId },
                     success: function (subjects) {
                         subjectDropdown.empty(); // Limpa o dropdown
 
@@ -123,13 +126,13 @@
 
                         subjectDropdown.empty().append('<option value="">Failed to retrieve subjects</option>'); // Mensagem no dropdown
 
-                        // Exibir a mensagem de erro 
+                        // Exibir a mensagem de erro
                         if (xhr.responseText) {
                             studentErrorFeedback.text(xhr.responseText).addClass('text-danger');
                         } else {
                             studentErrorFeedback.text('An unknown error occurred while retrieving subjects.').addClass('text-danger');
                         }
-                        studentFullNameInput.val('Error fetching student'); 
+                        studentFullNameInput.val('Error fetching student');
                     }
                 });
 
@@ -166,10 +169,10 @@
             }
 
 
-            // Ativar a busca quando perde o foco 
+            // Ativar a busca quando perde o foco
             studentIdInput.on('blur', fetchAndPopulateSubjects);
 
-            // Limpar mensagens de erro 
+            // Limpar mensagens de erro
             studentIdInput.on('focus', clearValidationMessages);
 
             //inicializar a view

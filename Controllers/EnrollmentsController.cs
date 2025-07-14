@@ -47,7 +47,12 @@ namespace GestaoEscolarWeb.Controllers
             _converterHelper = converterHelper;
         }
 
-        
+
+        /// <summary>
+        /// Displays a list of all enrollments, including student and subject details,
+        /// along with calculated student status and average scores.
+        /// </summary>
+        /// <returns>A view displaying the list of enrollments.</returns>
         // GET: Enrollments
         public async Task<IActionResult> Index()
         {
@@ -64,6 +69,13 @@ namespace GestaoEscolarWeb.Controllers
 
 
 
+        /// <summary>
+        /// Displays the view for creating a new enrollment.
+        /// If a student ID is provided, it pre-populates the student's name and available subjects.
+        /// Handles scenarios where the student is not found, not enrolled in a school class, or the class's course has no subjects.
+        /// </summary>
+        /// <param name="studentId">Optional. The ID of the student for whom to create the enrollment.</param>
+        /// <returns>A view with a form to create a new enrollment.</returns>
         // GET: Enrollments/Create
         public async Task<IActionResult> Create(int? studentId)
         {
@@ -136,6 +148,13 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);  
         }
 
+
+        /// <summary>
+        /// Processes the creation of a new enrollment.
+        /// Validates student existence, school year, and prevents duplicate enrollments.
+        /// </summary>
+        /// <param name="model">The view model containing the enrollment details.</param>
+        /// <returns>Redirects to the Index view on success, or returns the view with validation errors and flash messages.</returns>
         // POST: Enrollments/Create
         [HttpPost]
         public async Task<IActionResult> Create(CreateEnrollmentViewModel model)
@@ -168,6 +187,12 @@ namespace GestaoEscolarWeb.Controllers
                     return View(model); 
                 }
 
+                if (model.EnrollmentDate.Value.Year != student.SchoolClass.SchoolYear)
+                {
+                    _flashMessage.Danger("Enrollment date needs to be during schoolyear");
+                    return View(model);
+                }
+
                 //criar nova inscrição
                 var enrollment = new Enrollment()
                 {
@@ -182,6 +207,14 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Displays the view for editing an existing enrollment.
+        /// Retrieves the enrollment along with student and subject details.
+        /// Handles scenarios where the enrollment or associated student/subjects are not found.
+        /// </summary>
+        /// <param name="id">The ID of the enrollment to edit.</param>
+        /// <returns>A view with a form to edit the enrollment, pre-populated with existing data.</returns>
         // GET: Enrollments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -235,6 +268,15 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Processes the update of an existing enrollment.
+        /// Validates the school year and converts the view model to an entity before updating.
+        /// Handles concurrency issues during database updates.
+        /// </summary>
+        /// <param name="id">The ID of the enrollment being edited.</param>
+        /// <param name="model">The view model containing the updated enrollment details.</param>
+        /// <returns>Redirects to the Index view on successful update, or returns the view with validation errors.</returns>
         //POST: Enrollments/Edit/5
         [HttpPost]
         public async Task<IActionResult> Edit(int id, EditEnrollmentViewModel model)
@@ -284,6 +326,12 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Displays the confirmation view for deleting an enrollment.
+        /// </summary>
+        /// <param name="id">The ID of the enrollment to delete.</param>
+        /// <returns>A view confirming the deletion, or a "Enrollment Not Found" view if the enrollment does not exist.</returns>
         // GET: Enrollments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -302,6 +350,12 @@ namespace GestaoEscolarWeb.Controllers
             return View(enrollment);
         }
 
+
+        /// <summary>
+        /// Confirms and processes the deletion of an enrollment.
+        /// </summary>
+        /// <param name="id">The ID of the enrollment to be deleted.</param>
+        /// <returns>Redirects to the Index view on successful deletion, or returns an error view if deletion fails.</returns>
         // POST: Enrollments/Delete/5
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -337,16 +391,23 @@ namespace GestaoEscolarWeb.Controllers
             }      
         }
 
-        // chamada AJAX
+
+        /// <summary>
+        /// Retrieves a list of subjects available for enrollment for a specific student via an AJAX call.
+        /// </summary>
+        /// <param name="id">The ID of the student.</param>
+        /// <returns>A JSON array of <see cref="SelectListItem"/> representing the available subjects,
+        /// or an error message if the student is not found or not enrolled in a school class.</returns>
+        //  AJAX
         [HttpGet]
-        public async Task<IActionResult> GetSubjectsForStudent([FromQuery]int id)
+        public async Task<IActionResult> GetSubjectsForStudent([FromQuery] int id)
         {
             var student = await _studentRepository.GetStudentWithSchoolClassAsync(id);
 
             if (student == null)
             {
                 return NotFound("Student not found with the provided id.");
-            }    
+            }
 
 
             if (student.SchoolClass == null)
@@ -354,7 +415,7 @@ namespace GestaoEscolarWeb.Controllers
                 return BadRequest("Enrollment failed, student needs to be enrolled in a school class first.");
             }
 
-            var subjects = await _subjectRepository.GetComboSubjectsToEnrollAsync(student); 
+            var subjects = await _subjectRepository.GetComboSubjectsToEnrollAsync(student);
 
             // Se subjects for null ou vazia
             if (subjects == null || subjects.Count == 0)
@@ -367,11 +428,21 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Checks if an enrollment with the specified ID exists in the database.
+        /// </summary>
+        /// <param name="id">The ID of the enrollment to check.</param>
+        /// <returns><c>true</c> if an enrollment with the given ID exists; otherwise, <c>false</c>.</returns>
         private bool EnrollmentExists(int id)
         {
             return _context.Enrollments.Any(e => e.Id == id);
         }
 
+
+        /// <summary>
+        /// Displays the "Enrollment Not Found" view when a requested enrollment cannot be located.
+        /// </summary>
+        /// <returns>The "Enrollment Not Found" view.</returns>
         public IActionResult EnrollmentNotFound()
         {
             return View();

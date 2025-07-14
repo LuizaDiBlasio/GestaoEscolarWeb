@@ -62,6 +62,11 @@ namespace GestaoEscolarWeb.Controllers
 
         }
 
+        /// <summary>
+        /// Displays the search form for enrollments.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <returns>A view with a form to search for enrollments.</returns>
         // GET: Search/Enrollments
         [Authorize(Roles = "Employee")]
         public IActionResult Enrollments()
@@ -71,6 +76,16 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Processes the search for enrollments based on a student's full name.
+        /// If multiple students with the same name are found, it presents them as homonyms.
+        /// Otherwise, it retrieves and displays the enrollments for the unique student,
+        /// including their status.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="model">The view model containing the student's full name for the search.</param>
+        /// <returns>A view displaying the search results, homonyms, or an error message.</returns>
         // POST: Search/Enrollments
         [Authorize(Roles = "Employee")]
         [HttpPost]
@@ -117,6 +132,13 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Retrieves and displays enrollments for a specific student identified by their ID.
+        /// This is typically used when a student has been selected from a list of homonyms.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="studentId">The ID of the student whose enrollments are to be retrieved.</param>
+        /// <returns>A view displaying the student's enrollments or an error message if the student is not found.</returns>
         [Authorize(Roles = "Employee")]
         [HttpGet] // GET para mostrar os enrollments
         public async Task<IActionResult> GetEnrollmentsByStudentId(int studentId)
@@ -145,6 +167,13 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+
+        /// <summary>
+        /// Displays the search form for school classes.
+        /// Initializes the model with an empty list of students.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <returns>A view with a form to search for school classes.</returns>
         // GET: Search/SchoolClasses
         [Authorize(Roles = "Employee")]
         public IActionResult SchoolClass()
@@ -158,6 +187,13 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Processes the search for a school class by its ID and retrieves its associated students via an API call.
+        /// It validates the user's authorization token and handles various API response statuses.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="model">The view model containing the school class ID for the search.</param>
+        /// <returns>A view displaying the school class details and its students, or an error/redirection based on the outcome.</returns>
         // POST: Search/SchoolClasses
         [Authorize(Roles = "Employee")]
         [HttpPost]
@@ -254,6 +290,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the search form for student grades (evaluations).
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <returns>A view with a form to search for grades.</returns>
         // GET: Search/Grades
         [Authorize(Roles = "Employee")]
         public IActionResult Grades()
@@ -265,6 +306,14 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Processes the search for student grades (evaluations) based on a student's full name.
+        /// If multiple students with the same name are found, it presents them as homonyms.
+        /// Otherwise, it retrieves and displays the evaluations for the unique student.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="model">The view model containing the student's full name for the search.</param>
+        /// <returns>A view displaying the search results, homonyms, or an error message.</returns>
         //POST
         [Authorize(Roles = "Employee")]
         [HttpPost]
@@ -305,6 +354,14 @@ namespace GestaoEscolarWeb.Controllers
 
         }
 
+
+        /// <summary>
+        /// Retrieves and displays evaluations (grades) for a specific student identified by their ID.
+        /// This is typically used when a student has been selected from a list of homonyms.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="studentId">The ID of the student whose evaluations are to be retrieved.</param>
+        /// <returns>A view displaying the student's evaluations or an error message if the student is not found.</returns>
         [Authorize(Roles = "Employee")]
         [HttpGet] // GET para mostrar as evaluations
         public async Task<IActionResult> GetEvaluationsByStudentId(int studentId)
@@ -328,6 +385,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the search form for student profiles.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <returns>A view with a form to search for students.</returns>
         // GET: Search/Students
         [Authorize(Roles = "Employee")]
         public IActionResult Student()
@@ -337,6 +399,15 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Processes the search for a student profile based on their full name.
+        /// If multiple students with the same name are found, it presents them as homonyms.
+        /// Otherwise, it retrieves and displays the full profile details for the unique student.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="model">The view model containing the student's full name for the search.</param>
+        /// <returns>A view displaying the student's profile, homonyms, or an error message.</returns>
         // POST: Search/Student
         [Authorize(Roles = "Employee")]
         [HttpPost]
@@ -381,7 +452,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        // GET: Search/Courses
+        /// <summary>
+        /// Displays the search form for courses.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <returns>A view with a form to search for courses.</returns>
         [Authorize(Roles = "Admin")]
         public IActionResult Courses()
         {
@@ -391,6 +466,13 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Processes the search for a course by its ID.
+        /// Retrieves and displays details of the course, including its subjects, school classes, and enrolled students.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="model">The view model containing the course ID for the search.</param>
+        /// <returns>A view displaying the course details or an error message if the course is not found.</returns>
         // POST: Search/Courses
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -419,7 +501,14 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        //Chamada Ajax
+        /// <summary>
+        /// Retrieves and displays the profile of a specific student identified by their ID.
+        /// This is typically used when a student has been selected from a list of homonyms or for quick access.
+        /// This action is accessible only by users with the 'Employee' role.
+        /// </summary>
+        /// <param name="studentId">The ID of the student whose profile is to be retrieved.</param>
+        /// <returns>A view displaying the student's profile or an error message if the student is not found.</returns>
+        //Ajax
         [Authorize(Roles = "Employee")]
         [HttpGet] // GET para mostrar o profile do student
         public async Task<IActionResult> GetStudentById(int studentId)
@@ -451,6 +540,11 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the search form for subjects.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <returns>A view with a form to search for subjects.</returns>
         //GET
         [Authorize(Roles = "Admin")]
         public IActionResult Subjects()
@@ -461,6 +555,13 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Processes the search for a subject by its name.
+        /// Retrieves and displays details of the subject, including its associated courses and credit hours.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="model">The view model containing the subject name for the search.</param>
+        /// <returns>A view displaying the subject details or an error message if the subject is not found.</returns>
         //POST
         [Authorize(Roles = "Admin")]
         [HttpPost]

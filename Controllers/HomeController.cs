@@ -32,6 +32,12 @@ namespace GestaoEscolarWeb.Controllers
             _systemDataService = systemDataService;
         }
 
+
+        /// <summary>
+        /// Displays the application's home page. If the user is authenticated and has the 'Admin' role,
+        /// they will be redirected to the Dashboard. Otherwise, the default home view is displayed.
+        /// </summary>
+        /// <returns>An asynchronous task that returns an "IActionResult" representing the home page or a redirect.</returns>
         public async Task<IActionResult> Index()
         {
             if (User.Identity.IsAuthenticated)
@@ -56,6 +62,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+
+        /// <summary>
+        /// Displays a custom 404 Not Found error page.
+        /// This action handles requests for routes that result in a 404 status.
+        /// </summary>
+        /// <returns>An "IActionResult" representing the 404 error view.</returns>
         [Route ("error/404")]
         public IActionResult Error404()
         {
@@ -63,8 +75,14 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Displays the admin dashboard. This dashboard shows system alerts
+        /// and system data such as passing grade and absence limit.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <returns>An asynchronous task that returns an "IActionResult" representing the dashboard view.</returns>
         //GET da view DashBoard
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DashBoard()
         {
             var alerts = await _alertRepository.GetAllAlertsWithEmployee();

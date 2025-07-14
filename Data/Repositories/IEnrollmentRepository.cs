@@ -19,5 +19,7 @@ namespace GestaoEscolarWeb.Data.Repositories
         Task<decimal> GetAverageScoreAsync(int enrollmentId);
 
         Task<List<ChartDataPoint>> GetStudentEnrollmentStatusPercentagesAsync(int studentId);
+
+        Task<Enrollment> GetActiveEnrollment(int studentId, int subjectId);
     }
 }

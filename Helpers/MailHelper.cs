@@ -12,6 +12,19 @@ namespace GestaoEscolarWeb.Helpers
         {
             _configuration = configuration;
         }
+
+
+        /// <summary>
+        /// Sends an email to a specified recipient with a given subject and HTML body.
+        /// </summary>
+        /// <param name="to">The email address of the recipient.</param>
+        /// <param name="subject">The subject line of the email.</param>
+        /// <param name="body">The HTML content of the email body.</param>
+        /// <returns>
+        /// A "Response" object indicating the success or failure of the email sending operation.
+        /// If successful,"Response.IsSuccess" will be "true".
+        /// If an error occurs, "Response.IsSuccess" will be "false" and "Response.Message" will contain the exception details.
+        /// </returns>
         public Response SendEmail(string to, string subject, string body)
         {
             //buscar dados

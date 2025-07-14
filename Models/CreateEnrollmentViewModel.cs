@@ -8,16 +8,18 @@ namespace GestaoEscolarWeb.Models
 {
     public class CreateEnrollmentViewModel
     {
-        //[Range(1, int.MaxValue, ErrorMessage = "The student Id cannot be 0")]
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "The student Id cannot be 0")]
+        [Display(Name = "Student Id")]
         public int StudentId { get; set; }
 
 
         [Required]
-        [Display(Name = "Student")]
+        [Display(Name = "Full Name")]
         public string StudentFullName { get; set; }
 
 
-        [Display(Name = "Subjects")]
+        [Display(Name = "Subjects to enroll")]
         [Range(1, int.MaxValue, ErrorMessage = "You must select a subject.")]
         public int SelectedSubjectId { get; set; }
 

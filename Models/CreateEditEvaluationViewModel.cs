@@ -7,9 +7,10 @@ namespace GestaoEscolarWeb.Models
 {
     public class CreateEditEvaluationViewModel
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
 
-
+        [Required]
+        [Display(Name = "Student Id")]
         [Range(1, int.MaxValue, ErrorMessage = "The student Id cannot be 0")]
         public int StudentId { get; set; }
 

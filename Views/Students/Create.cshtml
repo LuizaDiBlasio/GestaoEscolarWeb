@@ -78,7 +78,8 @@
             // Inicializa o DatePicker para BirthDate
             var birthDatePicker = new ej.calendars.DatePicker({
                 format: 'MM/dd/yyyy',
-                placeholder: 'Select a date'
+                placeholder: 'Select a date',
+                max: new Date()
             });
             birthDatePicker.appendTo('#birthDateInput'); //ligação ao elemento de BirthDate
            });

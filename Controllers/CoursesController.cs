@@ -42,12 +42,23 @@ namespace GestaoEscolarWeb.Controllers
             _flashMessage = flashMessage;
         }
 
+
+        /// <summary>
+        /// Displays a list of all courses, ordered by name.
+        /// </summary>
+        /// <returns>A view displaying the list of courses.</returns>
         // GET: Courses
         public async Task<IActionResult> Index()
         {
             return  View(_courseRepository.GetAll().OrderBy(c => c.Name));
         }
 
+
+        /// <summary>
+        /// Displays the details of a specific course, including its associated subjects and school classes.
+        /// </summary>
+        /// <param name="id">The ID of the course to display details for.</param>
+        /// <returns>A view displaying the course details, or a "Course Not Found" view if the course does not exist.</returns>
         // GET: Courses/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -66,8 +77,13 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Displays the view for creating a new course.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <returns>A view with a form to create a new course, pre-populated with available subjects.</returns>
         // GET: Courses/Create
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             var model = new CourseViewModel();
@@ -77,6 +93,13 @@ namespace GestaoEscolarWeb.Controllers
             return View(model); // Passar a ViewModel populada
         }
 
+
+        /// <summary>
+        /// Processes the creation of a new course.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="model">The view model containing the course details and selected subjects.</param>
+        /// <returns>Redirects to the Index view on successful creation, or returns the view with validation errors.</returns>
         // POST: Courses/Create
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -116,6 +139,12 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Displays the view for editing an existing course.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the course to edit.</param>
+        /// <returns>A view with a form to edit the course, pre-populated with existing data and available subjects.</returns>
         // GET: Courses/Edit/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
@@ -138,6 +167,14 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Processes the update of an existing course.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the course being edited.</param>
+        /// <param name="model">The view model containing the updated course details and selected subjects.</param>
+        /// <returns>Redirects to the Index view on successful update, or returns the view with validation errors.</returns>
         // POST: Courses/Edit/5
         [HttpPost]
         [Authorize(Roles = "Admin")]
@@ -206,6 +243,13 @@ namespace GestaoEscolarWeb.Controllers
            
         }
 
+
+        /// <summary>
+        /// Displays the confirmation view for deleting a course.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the course to delete.</param>
+        /// <returns>A view confirming the deletion, or a "Course Not Found" view if the course does not exist.</returns>
         // GET: Courses/Delete/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
@@ -224,6 +268,13 @@ namespace GestaoEscolarWeb.Controllers
             return View(course);
         }
 
+
+        /// <summary>
+        /// Confirms and processes the deletion of a course.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="id">The ID of the course to be deleted.</param>
+        /// <returns>Redirects to the Index view on successful deletion, or returns an error view if deletion fails due to related entities.</returns>
         // POST: Courses/Delete/5
         [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
@@ -270,6 +321,11 @@ namespace GestaoEscolarWeb.Controllers
            
         }
 
+
+        /// <summary>
+        /// Displays the "Course Not Found" view when a requested course does not exist.
+        /// </summary>
+        /// <returns>The "Course Not Found" view.</returns>
         public IActionResult CourseNotFound()
         {
             return View();  

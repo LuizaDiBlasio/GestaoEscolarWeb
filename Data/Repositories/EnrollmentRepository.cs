@@ -27,11 +27,47 @@ namespace GestaoEscolarWeb.Data.Repositories
             _evaluationRepository = evaluationRepository;   
         }
 
+
+        /// <summary>
+        /// Checks if an enrollment already exists for a specific student in a given subject.
+        /// </summary>
+        /// <param name="student">The "Student" entity.</param>
+        /// <param name="model">The "CreateEnrollmentViewModel" containing the selected subject ID.</param>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation that contains "true" if an enrollment exists, otherwise "false".
+        /// </returns>
         public async Task<bool> ExistingEnrollmentAsync(Entities.Student student, CreateEnrollmentViewModel model)
         {
             return await _context.Enrollments.AnyAsync(e => e.StudentId == student.Id && e.SubjectId == model.SelectedSubjectId);
         }
 
+
+        /// <summary>
+        /// Retrieves an active enrollment for a specific student in a given subject.
+        /// An active enrollment is defined as one where the "Enrollment.StudentStatus" is "StudentStatus.Enrolled".
+        /// </summary>
+        /// <param name="studentId">The ID of the student.</param>
+        /// <param name="subjectId">The ID of the subject.</param>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation that contains the "Enrollment" entity if found, otherwise "null".
+        /// </returns>
+        public async Task<Enrollment> GetActiveEnrollment(int studentId, int subjectId)
+        {
+            return await _context.Enrollments.FirstOrDefaultAsync(
+                      e => e.StudentId == studentId &&
+                      e.SubjectId == subjectId &&
+                      e.StudentStatus == StudentStatus.Enrolled);
+        }
+
+
+        /// <summary>
+        /// Calculates the average score for a student in a specific subject based on their evaluations.
+        /// </summary>
+        /// <param name="enrollmentId">The ID of the enrollment.</param>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation that contains the average score. 
+        /// Returns 0 if the enrollment or evaluations are not found, or if there are no evaluations for the subject.
+        /// </returns>
         public async Task<decimal> GetAverageScoreAsync(int enrollmentId)
         {
             var enrollment = await GetEnrollmentWithStudentAndSubjectByIdAsync(enrollmentId);
@@ -73,6 +109,15 @@ namespace GestaoEscolarWeb.Data.Repositories
             return 0;     
         }
 
+
+        /// <summary>
+        /// Retrieves all enrollments, including their associated student and subject entities.
+        /// This method performs eager loading of related entities.
+        /// </summary>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation that contains an "IEnumerable{T}" of "Enrollment" entities,
+        /// with the "Enrollment.Student" and "Enrollment.Subject" properties loaded.
+        /// </returns>
         public async Task<IEnumerable<Enrollment>> GetEnrollmentsWithStudentAndSubjectAsync()
         {
             return await _context.Set<Enrollment>()
@@ -82,6 +127,15 @@ namespace GestaoEscolarWeb.Data.Repositories
         }
 
 
+        /// <summary>
+        /// Retrieves a single enrollment by its ID, including its associated student and subject entities.
+        /// This method performs eager loading of related entities.
+        /// </summary>
+        /// <param name="id">The ID of the enrollment to retrieve.</param>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation that  contains the "Enrollment" entity if found,
+        /// including its "Enrollment.Student" and "Enrollment.Subject" properties, otherwise "null".
+        /// </returns>
         public async Task<Enrollment> GetEnrollmentWithStudentAndSubjectByIdAsync(int id)
         {
             return await _context.Set<Enrollment>()
@@ -90,6 +144,17 @@ namespace GestaoEscolarWeb.Data.Repositories
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
+
+        /// <summary>
+        /// Calculates the percentage distribution of a student's enrollment statuses (Failed/Absent, Approved, Not Assessed)
+        /// based on the credit hours of their subjects. This data is intended for use in charts.
+        /// </summary>
+        /// <param name="studentId">The ID of the student.</param>
+        /// <returns>
+        /// A "Task{TResult}" that represents the asynchronous operation that contains a "List{T}" of "ChartDataPoint" objects,
+        /// each representing a category (Failed, Approved, Not Assessed) with its percentage and a recommended color.
+        /// Returns an empty list if no enrollments are found for the student or if total credit hours are zero.
+        /// </returns>
         public async Task<List<ChartDataPoint>> GetStudentEnrollmentStatusPercentagesAsync(int studentId)
         {
             var DataPointFailed = new ChartDataPoint();
@@ -169,6 +234,16 @@ namespace GestaoEscolarWeb.Data.Repositories
             return ChartDataPoints; 
         }
 
+
+        /// <summary>
+        /// Determines the academic status of a student for a specific enrollment based on
+        /// absence records and average evaluation scores, compared against system-defined limits.
+        /// </summary>
+        /// <param name="enrollmentSearch">An "Enrollment" entity to determine the status for. It should contain at least the Id.</param>
+        /// <returns>
+        /// A Task{TResult}" that represents the asynchronous operation that contains the determined "StudentStatus" (Enrolled, Approved, Failed, Absent, or Unknown).
+        /// Returns StudentStatus.Unknown" if the enrollment, subject, or student data cannot be found.
+        /// </returns>
         public async Task<StudentStatus> GetStudentStatusAsync(Enrollment enrollmentSearch)
         {
             var enrollment = await _context.Enrollments
