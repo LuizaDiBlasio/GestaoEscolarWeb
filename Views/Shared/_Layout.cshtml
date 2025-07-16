@@ -117,6 +117,7 @@
                             </li>
                         }
 
+                        @*Se user for anônimo, não autenticado*@
                         @if (!this.User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
@@ -124,6 +125,9 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="SchoolClasses" asp-action="IndexAnonym">School Classes</a>
                             </li>
                         }
 

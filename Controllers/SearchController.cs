@@ -38,12 +38,10 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly HttpClient _httpClient;
 
-        public SearchController(DataContext context, ICourseRepository courseRepository, ISchoolClassRepository schoolClassRepository,
+        public SearchController(ICourseRepository courseRepository, ISchoolClassRepository schoolClassRepository,
            IFlashMessage flashMessage, IStudentRepository studentRepository, IUserHelper userHelper,
            ISubjectRepository subjectRepository, IEnrollmentRepository enrollmentRepository, HttpClient httpClient)
         {
-            _context = context;
-
             _courseRepository = courseRepository;
 
             _schoolClassRepository = schoolClassRepository;

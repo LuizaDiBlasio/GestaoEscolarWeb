@@ -28,11 +28,9 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IFlashMessage _flashMessage;
 
-        public CoursesController(DataContext context, ISubjectRepository subjectRepository, ICourseRepository courseRepository, 
+        public CoursesController(ISubjectRepository subjectRepository, ICourseRepository courseRepository, 
             IConverterHelper converterHelper, IFlashMessage flashMessage)
         {
-            _context = context;
-
             _subjectRepository = subjectRepository;
 
             _courseRepository = courseRepository;

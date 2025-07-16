@@ -30,15 +30,19 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IEnrollmentRepository _enrollmentRepository;
 
-        public SchoolClassesController(DataContext context, ICourseRepository courseRepository, ISchoolClassRepository schoolClassRepository,
+        public SchoolClassesController(ICourseRepository courseRepository, ISchoolClassRepository schoolClassRepository,
            IFlashMessage flashMessage, IConverterHelper converterHelper, IStudentRepository studentRepository, IEnrollmentRepository enrollmentRepository)
         {
-            _context = context;
             _courseRepository = courseRepository;
+
             _schoolClassRepository = schoolClassRepository;
+
             _flashMessage = flashMessage;
+
             _converterHelper = converterHelper;
+
             _studentRepository = studentRepository;
+
             _enrollmentRepository = enrollmentRepository;
 
         }
@@ -51,6 +55,23 @@ namespace GestaoEscolarWeb.Controllers
         public async Task<IActionResult> Index()
         {
             var schoolClasses = (await _schoolClassRepository.GetAllSchoolClassesWithCourseAsync()).OrderBy(sc => sc.SchoolYear); //listar todas as turmas
+
+            return View(schoolClasses);
+        }
+
+
+        /// <summary>
+        /// Displays a list of all available school classes.
+        /// </summary>
+        /// <returns>A view displaying list of school classes ordered by Course name.</returns>
+        // GET: SchoolClasses
+        public async Task<IActionResult> IndexAnonym()
+        {
+            //listar todas as turmas do ano atual e próximo 
+
+            var schoolClasses = (await _schoolClassRepository.GetAllSchoolClassesWithCourseAsync())
+                .Where(sc => sc.SchoolYear == DateTime.Now.Year || sc.SchoolYear == DateTime.Now.Year + 1)
+                .OrderBy(sc => sc.Course.Name); 
 
             return View(schoolClasses);
         }

@@ -37,18 +37,24 @@ namespace GestaoEscolarWeb.Controllers
 
        
 
-        public StudentsController(DataContext context, IUserHelper userHelper, IBlobHelper blobHelper,
+        public StudentsController(IUserHelper userHelper, IBlobHelper blobHelper,
             IStudentRepository studentRepository, IFlashMessage flashMessage, IConverterHelper converterHelper,
             IMailHelper mailHelper, ISchoolClassRepository schoolClassRepository, IEnrollmentRepository enrollmentRepository)
         {
-            _context = context;
             _userHelper = userHelper;
+
             _blobHelper = blobHelper;
+
             _studentRepository = studentRepository;
-            _flashMessage = flashMessage;   
-            _schoolClassRepository = schoolClassRepository; 
+
+            _flashMessage = flashMessage;  
+            
+            _schoolClassRepository = schoolClassRepository;
+            
             _converterHelper = converterHelper; 
+
             _mailHelper = mailHelper; 
+
             _enrollmentRepository = enrollmentRepository;
               
         }

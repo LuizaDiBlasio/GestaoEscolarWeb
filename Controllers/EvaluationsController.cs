@@ -33,12 +33,10 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IEnrollmentRepository _enrollmentRepository;
 
-        public EvaluationsController(DataContext context, IEvaluationRepository evaluationRepository, IStudentRepository studentRepository, 
+        public EvaluationsController(IEvaluationRepository evaluationRepository, IStudentRepository studentRepository, 
             IFlashMessage flashMessage, ISubjectRepository subjectRepository, IConverterHelper converterHelper, IUserHelper userHelper,
             IEnrollmentRepository enrollmentRepository)
         {
-            _context = context;
-
             _evaluationRepository = evaluationRepository;
 
             _studentRepository = studentRepository;

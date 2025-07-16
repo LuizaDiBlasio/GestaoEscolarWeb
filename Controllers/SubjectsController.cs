@@ -18,10 +18,10 @@ namespace GestaoEscolarWeb.Controllers
         private readonly DataContext _context;
         private readonly ISubjectRepository _subjectRepository;
         private readonly IFlashMessage _flashMessage;
-        public SubjectsController(DataContext context, ISubjectRepository subjectRepository, IFlashMessage flashMessage)
+        public SubjectsController(ISubjectRepository subjectRepository, IFlashMessage flashMessage)
         {
-            _context = context;
             _subjectRepository = subjectRepository;
+
             _flashMessage = flashMessage;
         }
 

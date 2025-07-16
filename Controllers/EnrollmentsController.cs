@@ -19,7 +19,6 @@ namespace GestaoEscolarWeb.Controllers
     [Authorize(Roles = "Employee")]
     public class EnrollmentsController : Controller
     {
-        private readonly DataContext _context;
 
         private readonly IEnrollmentRepository _enrollmentRepository; 
         
@@ -31,11 +30,9 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IConverterHelper _converterHelper;
 
-        public EnrollmentsController(DataContext context, IEnrollmentRepository enrollmentRepository, IStudentRepository studentRepository, 
+        public EnrollmentsController(IEnrollmentRepository enrollmentRepository, IStudentRepository studentRepository, 
             ISubjectRepository subjectRepository, IFlashMessage flashMessage, IConverterHelper converterHelper)
         {
-            _context = context;
-
             _enrollmentRepository = enrollmentRepository;
 
             _studentRepository = studentRepository;
@@ -312,7 +309,7 @@ namespace GestaoEscolarWeb.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EnrollmentExists(enrollment.Id))
+                    if (!_enrollmentRepository.EnrollmentExists(enrollment.Id))
                     {
                         return new NotFoundViewResult("EnrollmentNotFound");
                     }
@@ -425,17 +422,6 @@ namespace GestaoEscolarWeb.Controllers
 
             // Retorna a lista de SelectListItem como JSON
             return this.Json(subjects);
-        }
-
-
-        /// <summary>
-        /// Checks if an enrollment with the specified ID exists in the database.
-        /// </summary>
-        /// <param name="id">The ID of the enrollment to check.</param>
-        /// <returns><c>true</c> if an enrollment with the given ID exists; otherwise, <c>false</c>.</returns>
-        private bool EnrollmentExists(int id)
-        {
-            return _context.Enrollments.Any(e => e.Id == id);
         }
 
 

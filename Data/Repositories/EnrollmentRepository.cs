@@ -2,7 +2,6 @@
 using GestaoEscolarWeb.Data.Entities.Enums;
 using GestaoEscolarWeb.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,7 +23,12 @@ namespace GestaoEscolarWeb.Data.Repositories
             _context = context;
             _studentRepository = studentRepository;
             _systemDataService = systemDataService;
-            _evaluationRepository = evaluationRepository;   
+            _evaluationRepository = evaluationRepository;
+        }
+
+        public bool EnrollmentExists(int id)
+        {
+            return _context.Enrollments.Any(e => e.Id == id);
         }
 
 
@@ -74,20 +78,20 @@ namespace GestaoEscolarWeb.Data.Repositories
 
             if (enrollment == null)
             {
-                return 0;    
+                return 0;
             }
 
             var evaluations = await _evaluationRepository.GetStudentEvaluationsAsync(enrollment.Student);
 
             if (evaluations == null)
             {
-                return 0;    
+                return 0;
             }
 
             decimal totalScore = 0;
             int count = 0;
 
-            var evaluationsFromSubject = evaluations.Where(e => e.SubjectId == enrollment.SubjectId).ToList(); 
+            var evaluationsFromSubject = evaluations.Where(e => e.SubjectId == enrollment.SubjectId).ToList();
 
             if (evaluationsFromSubject.Any())
             {
@@ -99,14 +103,14 @@ namespace GestaoEscolarWeb.Data.Repositories
                 }
             }
 
-            if(count > 0)
+            if (count > 0)
             {
                 decimal average = totalScore / count;
 
                 return average;
             }
 
-            return 0;     
+            return 0;
         }
 
 
@@ -160,9 +164,9 @@ namespace GestaoEscolarWeb.Data.Repositories
             var DataPointFailed = new ChartDataPoint();
             var DataPointApproved = new ChartDataPoint();
             var DataPointNotAssessed = new ChartDataPoint();
-            var ChartDataPoints = new List<ChartDataPoint>(); 
+            var ChartDataPoints = new List<ChartDataPoint>();
 
-            int totalCreditHours = 0;  
+            int totalCreditHours = 0;
             int failedOrAbsentHours = 0;
             int approvedHours = 0;
             int notAssessedHours = 0;
@@ -170,7 +174,7 @@ namespace GestaoEscolarWeb.Data.Repositories
             //buscar enrollments
             var enrollments = await _context.Enrollments
                 .Include(e => e.Subject)
-                .Where(e => e.StudentId == studentId)   
+                .Where(e => e.StudentId == studentId)
                 .ToListAsync();
 
             if (!enrollments.Any())
@@ -182,17 +186,17 @@ namespace GestaoEscolarWeb.Data.Repositories
             {
                 totalCreditHours += enrollment.Subject.CreditHours;
 
-                if(enrollment.StudentStatus == StudentStatus.Absent || enrollment.StudentStatus == StudentStatus.Failed)
+                if (enrollment.StudentStatus == StudentStatus.Absent || enrollment.StudentStatus == StudentStatus.Failed)
                 {
                     failedOrAbsentHours += enrollment.Subject.CreditHours;
                 }
 
-                if(enrollment.StudentStatus == StudentStatus.Approved)
+                if (enrollment.StudentStatus == StudentStatus.Approved)
                 {
                     approvedHours += enrollment.Subject.CreditHours;
                 }
 
-                if(enrollment.StudentStatus == StudentStatus.Enrolled)
+                if (enrollment.StudentStatus == StudentStatus.Enrolled)
                 {
                     notAssessedHours += enrollment.Subject.CreditHours;
                 }
@@ -204,7 +208,7 @@ namespace GestaoEscolarWeb.Data.Repositories
                 return new List<ChartDataPoint>(); // evitar divisão por 0
             }
 
-            if(failedOrAbsentHours > 0) //se repetiu ou abandonou alguma materia
+            if (failedOrAbsentHours > 0) //se repetiu ou abandonou alguma materia
             {
                 DataPointFailed.Percentage = ((decimal)failedOrAbsentHours / totalCreditHours) * 100M;
                 DataPointFailed.Category = "Failed";
@@ -212,8 +216,8 @@ namespace GestaoEscolarWeb.Data.Repositories
 
                 ChartDataPoints.Add(DataPointFailed);
             }
-            
-            if(approvedHours > 0)
+
+            if (approvedHours > 0)
             {
                 DataPointApproved.Percentage = ((decimal)approvedHours / totalCreditHours) * 100M;
                 DataPointApproved.Category = "Approved";
@@ -221,8 +225,8 @@ namespace GestaoEscolarWeb.Data.Repositories
 
                 ChartDataPoints.Add(DataPointApproved);
             }
-            
-            if(notAssessedHours > 0)
+
+            if (notAssessedHours > 0)
             {
                 DataPointNotAssessed.Percentage = ((decimal)notAssessedHours / totalCreditHours) * 100M;
                 DataPointNotAssessed.Category = "Not Assessed";
@@ -230,8 +234,8 @@ namespace GestaoEscolarWeb.Data.Repositories
 
                 ChartDataPoints.Add(DataPointNotAssessed);
             }
-     
-            return ChartDataPoints; 
+
+            return ChartDataPoints;
         }
 
 
@@ -249,22 +253,22 @@ namespace GestaoEscolarWeb.Data.Repositories
             var enrollment = await _context.Enrollments
                 .Include(e => e.Student)
                 .Include(e => e.Subject)
-                .FirstOrDefaultAsync(e => e.Id == enrollmentSearch.Id);  
+                .FirstOrDefaultAsync(e => e.Id == enrollmentSearch.Id);
 
             var systemData = await _systemDataService.GetSystemDataAsync();
 
-            if (enrollment == null || enrollment.Subject == null || enrollment.Student == null )
+            if (enrollment == null || enrollment.Subject == null || enrollment.Student == null)
             {
                 return StudentStatus.Unknown;
             }
 
-            if(enrollment.Subject.CreditHours > 0)
+            if (enrollment.Subject.CreditHours > 0)
             {
                 if (enrollment.AbscenceRecord / (decimal)enrollment.Subject.CreditHours > systemData.AbsenceLimit)
                 {
                     return StudentStatus.Absent | StudentStatus.Failed;
                 }
-            }            
+            }
 
             var student = await _studentRepository.GetStudentWithEvaluationsAsync(enrollment.Student.Id);
 
@@ -305,7 +309,7 @@ namespace GestaoEscolarWeb.Data.Repositories
             return StudentStatus.Enrolled;
         }
 
-        
+
 
     }
 }

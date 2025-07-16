@@ -21,5 +21,7 @@ namespace GestaoEscolarWeb.Data.Repositories
         Task<List<ChartDataPoint>> GetStudentEnrollmentStatusPercentagesAsync(int studentId);
 
         Task<Enrollment> GetActiveEnrollment(int studentId, int subjectId);
+
+        bool EnrollmentExists(int id);
     }
 }
