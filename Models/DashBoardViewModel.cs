@@ -8,7 +8,7 @@ namespace GestaoEscolarWeb.Models
     public class DashBoardViewModel
     {
         [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = false)]
-        [Display(Name = "Absence Limit")]
+        [Display(Name = "Absence Limit (%)")]
         [Range(0, 100, ErrorMessage = "Please insert a valid number")]
         public decimal AbsenceLimitPercentage { get; set; }
 

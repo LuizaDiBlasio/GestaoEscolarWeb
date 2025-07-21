@@ -12,6 +12,8 @@
         <form asp-action="MyUserProfile" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ImageId" />
+            <input type="hidden" asp-for="Email" />
+            <input type="hidden" asp-for="UserName" />
 
             <div class="form-group">
                 <label asp-for="FullName" class="control-label"></label>
@@ -58,7 +60,7 @@
 </div>
 <flash dismissable="true" />
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" asp-controller="Home" >Back to Home</a>
 </div>
 
 

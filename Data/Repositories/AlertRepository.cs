@@ -35,6 +35,19 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         }
 
+        /// <summary>
+        /// Retrieves an alert with its User
+        /// </summary>
+        /// <param name="id">The unique identifier of the alert</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains
+        /// an object of type "Alert" with its user loaded</returns>
+        public async Task<Alert> GetAlertWithUserAsync(int id)
+        {
+            return await _context.Alerts
+                .Include(a => a.UserAudit)
+                .FirstOrDefaultAsync(a => a.Id == id);
+        }
+
 
         /// <summary>
         /// Retrieves a collection of all alerts, including their associated employee (UserAudit) information.

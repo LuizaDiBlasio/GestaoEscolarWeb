@@ -66,6 +66,8 @@ namespace GestaoEscolarWeb.Data
 
             var systemData = await _context.SystemData.FirstOrDefaultAsync(sd => sd.Id == 1); //verificar se já existe
 
+
+
             if (systemData == null)
             {
                 var newSystemData = new SystemData();
@@ -73,7 +75,6 @@ namespace GestaoEscolarWeb.Data
                 await _context.SystemData.AddAsync(newSystemData);
                 await _context.SaveChangesAsync();
             }
-
         }
     }
 }

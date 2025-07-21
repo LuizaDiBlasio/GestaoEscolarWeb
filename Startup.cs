@@ -31,7 +31,7 @@ namespace GestaoEscolarWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2XFhhQlJHfVhdX2NWfFN0QHNRdV5wfldPcC0sT3RfQFhjT3xXd0ZmX3xdcnxdQmteWA ==");
+            SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JEaF5cXmRCdkx0RXxbf1x1ZFFMZVxbR3VPMyBoS35Rc0VkW35ednVVR2VUVU11VEFd");
 
             services.AddIdentity<User, IdentityRole>(cfg => //adicionar serviço de Identiy para ter o user e configurar o serviço
             {

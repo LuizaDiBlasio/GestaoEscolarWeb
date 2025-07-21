@@ -193,11 +193,11 @@ namespace GestaoEscolarWeb.Controllers
                 return new NotFoundViewResult("SubjectNotFound");
             }
 
-            if (subject.SubjectCourses != null)
+            if (subject.SubjectCourses.Any())
             {
                 _flashMessage.Danger("Subject cannot be deleted, it belongs to a course");
 
-                return View();
+                return View("~/Views/Subjects/Delete.cshtml", subject);
             }
 
             try

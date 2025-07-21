@@ -5,12 +5,9 @@
 }
 
 <h1>Subjects</h1>
-@if (this.User.IsInRole("Admin"))
-{
     <p>
         <a asp-action="Create">Add subjects</a>
     </p>
-}
 
 <table class="table">
     <thead>
@@ -33,13 +30,10 @@
             <td>
                 @Html.DisplayFor(modelItem => item.CreditHours)
             </td>
-                @if (this.User.IsInRole("Admin"))
-                {
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                    </td>
-                }
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
         </tr>
 }
     </tbody>

@@ -58,7 +58,9 @@ namespace GestaoEscolarWeb.Controllers
             foreach (var enrollment in enrollments)
             {
                 enrollment.StudentStatus = await _enrollmentRepository.GetStudentStatusAsync(enrollment);
+
                 enrollment.AvarageScore = await _enrollmentRepository.GetAverageScoreAsync(enrollment.Id);
+               
             }
 
             return View(enrollments);

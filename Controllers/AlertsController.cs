@@ -203,7 +203,7 @@ namespace GestaoEscolarWeb.Controllers
         {
             var statusList = _alertRepository.GetStatusList();
 
-            var alert = await _alertRepository.GetByIdAsync(id);
+            var alert = await _alertRepository.GetAlertWithUserAsync(id);
 
             var model = new ManageTicketViewModel()
             {
@@ -292,7 +292,7 @@ namespace GestaoEscolarWeb.Controllers
 
             try
             {
-                await _alertRepository.DeleteAsync(alert); // Assumindo que DeleteAsync é o método de exclusão
+                await _alertRepository.DeleteAsync(alert); 
                 _flashMessage.Confirmation("Alert deleted successfully!");
             }
             catch (Exception ex)

@@ -142,7 +142,24 @@ namespace GestaoEscolarWeb.Controllers
 
                     var student = _converterHelper.FromMyProfileToStudent(model, false, profileImageId);
 
-                    await _studentRepository.UpdateAsync(student);
+                    // Atribuir nova guid ou guid antiga
+                    student.ProfileImageId = profileImageId != Guid.Empty ? profileImageId : model.ProfileImageId;
+
+                    await _studentRepository.UpdateAsync(student); //atualizar student
+
+                    //atualizar user 
+
+                    var user = await _userHelper.GetUserByEmailAsync(model.Email);  
+
+                    //adicionar propriedades modificadas
+
+                    user.BirthDate = model.BirthDate;   
+                    user.FullName = model.FullName;
+                    user.PhoneNumber = model.PhoneNumber;
+                    user.Address = model.Address;   
+
+                    await _userHelper.UpdateUserAsync(user); //atualizar user correspondente à student
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -224,13 +241,14 @@ namespace GestaoEscolarWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new User //user vai ser sempre null antes de criar o student
+                var user = new User //criar user antes de criar o student
                 {
                     FullName = model.FullName,
                     Email = model.Email,
                     UserName = model.Email,
                     Address = model.Address,
-                    PhoneNumber = model.PhoneNumber
+                    PhoneNumber = model.PhoneNumber,
+                    BirthDate = model.BirthDate
                 };
 
                 var result = await _userHelper.AddUserAsync(user, "123456"); //add user depois de criado
@@ -354,9 +372,18 @@ namespace GestaoEscolarWeb.Controllers
             {
                 return new NotFoundViewResult("StudentNotFound");
             }
+            
 
             if (ModelState.IsValid)
             {
+                //buscar estudante 
+                var student = await _studentRepository.GetByIdAsync(id);
+
+                if (student == null)
+                {
+                    return new NotFoundViewResult("StudentNotFound");
+                }
+
                 //Ver se imagem foi inserida
                 Guid imageId = Guid.Empty; // identificador da imagem no blob (ainda não identificada)
 
@@ -364,23 +391,28 @@ namespace GestaoEscolarWeb.Controllers
                 {
                     imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "imagens"); //manda gravar o ficheiros na pasta imagens 
                 }
+                else
+                { 
+                    imageId = student.ProfileImageId;
+                }
 
                 //converter model para student
-                var studentConvert = _converterHelper.FromCreateEditToStudent(model, false, imageId);
-
-                if (studentConvert == null)
-                {
-                    return new NotFoundViewResult("StudentNotFound");
-                }
+                student.ProfileImageId = imageId;
+                student.SchoolClassId = model.SelectedSchoolClassId;
+                student.Address = model.Address;
+                student.BirthDate = model.BirthDate.Value;
+                student.Email = model.Email;
+                student.PhoneNumber = model.PhoneNumber;
+                student.FullName = model.FullName;  
 
                 //Fazer o update antes de checar os enrollments para conter a nova turma (se mudou)
                 try
                 {
-                    await _studentRepository.UpdateAsync(studentConvert);
+                    await _studentRepository.UpdateAsync(student);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!StudentExists(studentConvert.Id))
+                    if (!StudentExists(student.Id))
                     {
                         return new NotFoundViewResult("StudentNotFound");
                     }
@@ -392,11 +424,11 @@ namespace GestaoEscolarWeb.Controllers
 
                 //checar enrollments antigos 
 
-                var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(studentConvert.Id);
+                var studentWithEnrollments = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(student.Id);
 
-                var newCourseSubjectIds = student.SchoolClass.Course.CourseSubjects.Select(s => s.Id).ToList();
+                var newCourseSubjectIds = studentWithEnrollments.SchoolClass.Course.CourseSubjects.Select(s => s.Id).ToList();
 
-                foreach (var enrollment in student.Enrollments.ToList())
+                foreach (var enrollment in studentWithEnrollments.Enrollments.ToList())
                 {
                     if (!newCourseSubjectIds.Contains(enrollment.SubjectId)) // Se a SubjectId do enrollment está na nova turma
                     {
@@ -416,6 +448,7 @@ namespace GestaoEscolarWeb.Controllers
 
                 return RedirectToAction(nameof(Index)); //caso user seja funcionário
             }
+            model.AvailableSchoolClasses = await _schoolClassRepository.GetComboSchoolClassesAsync();
             return View(model);
         }
 
@@ -476,18 +509,21 @@ namespace GestaoEscolarWeb.Controllers
             //anular a propriedade SchoolClass
             student.SchoolClass = null;
 
+            //tornar o user do estudante inativo 
+            var userStudent = await _userHelper.GetUserByEmailAsync(student.Email);
+
+            if (userStudent != null)
+            {
+                userStudent.IsActive = false;
+            }
+
             try
             {
                 await _studentRepository.DeleteAsync(student);
 
-                //tornar o user do estudante inativo 
-
-                var userStudent = await _userHelper.GetUserByEmailAsync(student.Email);
-
-                if (userStudent != null)
-                {
-                    userStudent.IsActive = false; 
-                }
+               //fazer update do user após modificação
+                await _userHelper.UpdateUserAsync(userStudent);
+               
 
                 return RedirectToAction(nameof(Index));
             }

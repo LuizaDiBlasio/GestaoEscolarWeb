@@ -85,6 +85,11 @@
                             <tr>
                                 <td>@Html.DisplayFor(modelItem => enrollment.Subject.Name)</td>
                                 <td>@Html.DisplayFor(modelItem => enrollment.StudentStatus)</td>
+                                <td>
+                                    <a asp-action="Create" asp-controller="Evaluations" asp-route-id="@enrollment.Id">Add Evaluation</a> |
+                                    <a asp-action="Edit" asp-controller="Enrollments" asp-route-id="@enrollment.Id">Edit</a> |
+                                    <a asp-action="Delete"  asp-controller="Enrollments" asp-route-id="@enrollment.Id">Delete</a>
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -113,6 +118,10 @@
                                 <td>@Html.DisplayFor(modelItem => evaluation.Subject.Name)</td>
                                 <td>@Html.DisplayFor(modelItem => evaluation.Score)</td>
                                 <td>@Html.DisplayFor(modelItem => evaluation.ExamDate)</td>
+                                <td>
+                            <a asp-action="Edit" asp-controller="Evaluations" asp-route-id="@evaluation.Id">Edit</a> |
+                                    <a asp-action="Delete" asp-controller="Evaluations" asp-route-id="@evaluation.Id">Delete</a>
+                                </td>
                             </tr>
                         }
                     </tbody>

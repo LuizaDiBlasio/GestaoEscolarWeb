@@ -171,6 +171,7 @@ namespace GestaoEscolarWeb.Data.Repositories
                 .Include(s=> s.Enrollments)
                     .ThenInclude(e => e.Subject)
                 .Include(s=> s.Evaluations)
+                    .ThenInclude (e => e.Subject)
                 .FirstOrDefaultAsync(s => s.Id == id);  
         }
 

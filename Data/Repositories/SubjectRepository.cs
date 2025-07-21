@@ -107,16 +107,23 @@ namespace GestaoEscolarWeb.Data.Repositories
         /// </returns>
         public async Task<List<SelectListItem>> GetComboSubjectsToEvaluateAsync(Student studentWithEnrollments)
         {
-            var subjects = await _context.Enrollments
-                                .Where(e => e.Student.Id == studentWithEnrollments.Id)   
-                                .Select(e => e.Subject)
-                                .Select(s => new SelectListItem
-                                {
-                                    Value = s.Id.ToString(),
-                                    Text = s.Name
-                                })
-                                 .OrderBy(s => s.Text) // Ordenar lista
-                                 .ToListAsync();
+
+            if (studentWithEnrollments?.Enrollments == null || !studentWithEnrollments.Enrollments.Any())
+            {
+                return new List<SelectListItem>(); //retornar lista vazia caso não haja inscrições
+            }
+
+            var subjects = studentWithEnrollments.Enrollments //buscar já da lista de enrollments do aluno
+                                                 .Select(e => e.Subject) 
+                                                 .Where(s => s != null) 
+                                                 .Select(s => new SelectListItem
+                                                 {
+                                                     Value = s.Id.ToString(),
+                                                     Text = s.Name
+                                                 })
+                                                 .OrderBy(s => s.Text)
+                                                 .ToList(); 
+
             return subjects;
 
         }

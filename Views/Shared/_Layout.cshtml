@@ -37,9 +37,7 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="MyUserProFile">My Profile</a>
-                            </li>
+                          
 
                             <li class="nav-item dropdown">
 
@@ -50,6 +48,20 @@
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Courses">Courses</a></li>
 
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Subjects">Subjects</a></li>
+
+                                </ul>
+
+                            </li>
+
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+                                    <li> <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="MyUserProFile">Edit Profile</a> </li>
+
+                                    <li> <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ChangePassword">Change password</a></li>
 
                                 </ul>
 
@@ -71,10 +83,7 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Enrollments" asp-action="Index">Enrollments</a>
                             </li>
-                            
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="MyUserProFile">My Profile</a>
-                            </li>
+                             
 
                             <li class="nav-item dropdown">
 
@@ -93,27 +102,33 @@
                                 </ul>
 
                             </li>
+
                             <li class="nav-item dropdown">
 
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Messages</a>
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownEmployeeAccount" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownEmployeeAccount">
+
+                                    <li> <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="MyUserProFile">Edit Profile</a> </li>
+
+                                    <li> <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="ChangePassword">Change password</a></li>
 
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Alerts" asp-action="Index">My messages</a></li>
 
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Alerts" asp-action="Create">Contact Admin</a></li>
                                 </ul>
-
                             </li>
+                            
                         }
 
                         @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Student"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Students" asp-action="MyProfile">My Profile</a>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Evaluations" asp-action="StudentEvaluationsStatus">Grades & Status</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Students" asp-action="MyProfile">My Profile</a>
                             </li>
                         }
 
@@ -124,26 +139,25 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="SchoolClasses" asp-action="IndexAnonym">School Classes</a>
                             </li>
                         }
 
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        @if (this.User.Identity.IsAuthenticated && (this.User.IsInRole("Employee") || this.User.IsInRole("Admin") || this.User.IsInRole("Student")))
+                        
+
+                        @if (this.User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ChangeUser">@this.User.Identity.Name</a>
+                                <span class="nav-link text-dark">@this.User.Identity.Name</span>
                             </li>
+
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                             </li>
                         }
-
-                        @if (!this.User.Identity.IsAuthenticated)
+                        else
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>

@@ -45,9 +45,9 @@
             <td>
                 @Html.DisplayFor(modelItem => item.AbscenceRecord)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AvarageScore)
-            </td>
+                <td>
+                    @(item.AvarageScore.HasValue ? item.AvarageScore.Value.ToString("N2") : "No evaluations")
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.StudentStatus)
                 </td>

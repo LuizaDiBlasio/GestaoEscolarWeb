@@ -15,6 +15,6 @@ namespace GestaoEscolarWeb.Data.Repositories
 
         List<SelectListItem> GetStatusList();
 
-
+        Task<Alert> GetAlertWithUserAsync(int id);
     }
 }

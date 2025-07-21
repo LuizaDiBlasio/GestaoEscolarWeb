@@ -62,7 +62,7 @@ namespace GestaoEscolarWeb.Controllers.API
     }
 }
 //explicando o flow do codigo:
-//O Login é feito no AccountController, caso o user seja um Employee, ele terá acess á API. Para isso, é chamado o metodo GetJwtTokenFromServerSide() no AccountController que irá criar 
+//O Login é feito no AccountController, caso o user seja um Employee, ele terá acesso á API. Para isso, é chamado o metodo GetJwtTokenFromServerSide() no AccountController que irá criar 
 //um json do model com as informações do login que o utilizador colocar, e irá mandar uma requisição http post para a api com esse conteudo json.
-//A api por sua vez, dentro do AccessApiController, no metodo Login(), irá receber [frombody] , o conteúdo json desse login e criar o token.
+//A api por sua vez, dentro do AccessApiController, no metodo Login(), irá receber [frombody] o conteúdo json desse login e criar o token.
 //Ainda dentro do metodo GetJwtTokenFromServerSide(), a resposta da requisição http post volta com o token criado para poder ser usado no acesso à api quando for realizar o GetSchoolClassStudents.

@@ -448,10 +448,25 @@ namespace GestaoEscolarWeb.Controllers
 
                 if (user != null) //caso user exista, user com propridades registradas no modelo
                 {
-
                     user.FullName = model.FullName;
                     user.Address = model.Address;
                     user.PhoneNumber = model.PhoneNumber;
+
+                    //fazer update do que foi mudado no user no estudante 
+
+                    if (this.User.IsInRole("Student"))
+                    {
+                        var student = await _studentRepository.GetStudentByEmailAsync(user.Email);
+
+                        if (student != null)
+                        {
+                            student.FullName = model.FullName;
+                            student.Address = model.Address;
+                            student.PhoneNumber = model.PhoneNumber;
+
+                           await _studentRepository.UpdateAsync(student);
+                        }
+                    }
 
                     var response = await _userHelper.UpdateUserAsync(user); //fazer update do user
 
@@ -514,7 +529,7 @@ namespace GestaoEscolarWeb.Controllers
 
                 if (response.IsSuccess) //se correr tudo bem
                 {
-                    this.ViewBag.Message = "The instructions to recover your password has been sent to email.";
+                    this.ViewBag.Message = "The instructions to recover your password have been sent to email.";
                 }
 
                 return this.View();
@@ -640,7 +655,7 @@ namespace GestaoEscolarWeb.Controllers
                     user.Address = model.Address;
 
                     // Atribuir nova guid ou guid antiga
-                    user.ImageId = currentImageId != Guid.Empty ? currentImageId : (Guid?)null;
+                    user.ImageId = currentImageId != Guid.Empty ? currentImageId : model.ImageId;
 
 
                     var result = await _userHelper.UpdateUserAsync(user);

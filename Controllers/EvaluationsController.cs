@@ -74,8 +74,35 @@ namespace GestaoEscolarWeb.Controllers
         /// <returns>A view with a form to create a new evaluation.</returns>
         // GET: Evaluations/Create
         [Authorize(Roles = "Employee")]
-        public IActionResult Create()
+        public async Task<IActionResult>  Create(int? id)
         {
+            if (id != null)
+            {
+                var enrollment = await _enrollmentRepository.GetEnrollmentWithStudentAndSubjectByIdAsync(id.Value);
+
+                if(enrollment == null)
+                {
+                    _flashMessage.Danger("Not possible to carry on with evaluation");
+                    var modelEmpty = new CreateEditEvaluationViewModel();
+                    return View(modelEmpty);
+                }
+
+                var student = await _studentRepository.GetStudentWithEnrollmentsAsync(enrollment.Student.Id);
+
+                var subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
+
+                var modelExistingStudent = new CreateEditEvaluationViewModel()
+                {
+                    StudentId = enrollment.Student.Id,
+                    StudentFullName = enrollment.Student.FullName,
+                    Subjects = subjects,
+                    SelectedSubjectId = enrollment.SubjectId
+
+                };
+
+                return View(modelExistingStudent);  
+            }
+
             var model = new CreateEditEvaluationViewModel();
 
             return View(model);
@@ -101,6 +128,7 @@ namespace GestaoEscolarWeb.Controllers
                 if (student == null)
                 {
                     _flashMessage.Danger("Not possible the complete evaluation, you need to enroll student first");
+                    model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
                     return View(model);
                 }
 
@@ -110,7 +138,7 @@ namespace GestaoEscolarWeb.Controllers
                 if (existingEvaluation)
                 {
                     _flashMessage.Warning("Evaluation is already registered.");
-
+                    model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
                     return View(model);
                 }
 
@@ -119,6 +147,7 @@ namespace GestaoEscolarWeb.Controllers
                 if (student.SchoolClass.SchoolYear < DateTime.Now.Year)
                 {
                     _flashMessage.Danger("Cannot create evaluation after schoolyear end");
+                    model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
                     return View(model);
                 }
 
@@ -128,12 +157,14 @@ namespace GestaoEscolarWeb.Controllers
                 {
                     
                     _flashMessage.Danger($"The exam date cannot be before the enrollment date ({enrollment.EnrollmentDate:MM/dd/yyyy}) for this subject.");
+                    model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
                     return View(model);
                 }
 
                 if(model.ExamDate > DateTime.Now)
                 {
                     _flashMessage.Danger($"The exam date cannot be after today's date");
+                    model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
                     return View(model);
                 }
 

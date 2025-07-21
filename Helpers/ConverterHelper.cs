@@ -47,7 +47,8 @@ namespace GestaoEscolarWeb.Helpers
                 Address = model.Address,
                 PhoneNumber = model.PhoneNumber,
                 BirthDate = model.BirthDate.Value,
-                ProfileImageId = imageId
+                ProfileImageId = imageId,
+                Email = model.Email
             };
 
         }
@@ -61,7 +62,8 @@ namespace GestaoEscolarWeb.Helpers
                 Address = student.Address,
                 PhoneNumber = student.PhoneNumber,
                 BirthDate = student.BirthDate,
-                ProfileImageId = student.ProfileImageId
+                ProfileImageId = student.ProfileImageId,
+                Email = student.Email
             };
         }
 
@@ -201,8 +203,7 @@ namespace GestaoEscolarWeb.Helpers
         public MyUserProfileViewModel ToMyUserProfileViewModel(User user)
         {
             var model = new MyUserProfileViewModel()
-            {
-                
+            {  
                 UserName = user.UserName,   
                 FullName = user.FullName,
                 BirthDate = user.BirthDate,

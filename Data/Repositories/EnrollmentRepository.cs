@@ -72,7 +72,7 @@ namespace GestaoEscolarWeb.Data.Repositories
         /// A "Task{TResult}" that represents the asynchronous operation that contains the average score. 
         /// Returns 0 if the enrollment or evaluations are not found, or if there are no evaluations for the subject.
         /// </returns>
-        public async Task<decimal> GetAverageScoreAsync(int enrollmentId)
+        public async Task<decimal?> GetAverageScoreAsync(int enrollmentId)
         {
             var enrollment = await GetEnrollmentWithStudentAndSubjectByIdAsync(enrollmentId);
 
@@ -110,7 +110,7 @@ namespace GestaoEscolarWeb.Data.Repositories
                 return average;
             }
 
-            return 0;
+            return null;
         }
 
 

@@ -8,6 +8,8 @@ namespace GestaoEscolarWeb.Models
 {
     public class SearchCourseViewModel
     {
+        [Required]
+        [Display(Name="Insert Course Id:")]
         public int SearchId { get; set; }
 
         public int Id { get; set; }

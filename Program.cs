@@ -9,6 +9,8 @@ namespace GestaoEscolarWeb
     {
         public static void Main(string[] args)
         {
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NjE4MjgyQDMxMzg0OTM0MmUzMFVWOHVIYzVIdHFIVVBFb25Md05Pdy9pdmZnaVB3d0JDSi9HVVFIWlRlNUVGdw==");
+
             var host = CreateHostBuilder(args).Build(); // constrói host, ambiente onde a aplicação roda com as configurações estabelecidas no CreateHostBuilder
 
             RunSeeding(host); // rodar o Seeding no host, que irá popular o banco de dados com dados iniciais antes de a aplicação começar a rodar
