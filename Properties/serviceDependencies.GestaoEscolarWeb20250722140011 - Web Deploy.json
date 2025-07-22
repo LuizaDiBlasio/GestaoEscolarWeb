@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "storage1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.Web/sites/GestaoEscolarWeb20250722140011/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString_437B5F811E, /subscriptions/d5ab7f2e-f214-4706-8921-890c20b74beb/resourcegroups/GestaoEscolarResourceGroup/providers/Microsoft.Web/sites/GestaoEscolarWeb20250722140011/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString_953118BC3E",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/gestaoescolar",
+      "type": "storage.azure",
+      "connectionId": "Blob:ConnectionString"
+    },
+    "mssql1": {
+      "secretStore": "AzureAppSettings",
+      "type": "mssql.onprem",
+      "connectionId": "ConnectionStrings:DefaultConnection",
+      "dynamicId": null
+    }
+  }
+}

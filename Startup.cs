@@ -15,6 +15,11 @@ using System;
 using System.Text;
 using System.Text.Json.Serialization;
 using Vereyon.Web;
+using Microsoft.Extensions.Azure;
+using Azure.Data.Tables;
+using Azure.Storage.Queues;
+using Azure.Storage.Blobs;
+using Azure.Core.Extensions;
 
 
 namespace GestaoEscolarWeb

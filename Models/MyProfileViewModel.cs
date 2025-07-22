@@ -42,7 +42,7 @@ namespace GestaoEscolarWeb.Models
 
 
         public string ImageFullPath => ProfileImageId == Guid.Empty
-              ? $"/imagens/noImage.jpg" // caminho relativo à raiz da aplicação!
+              ? $"/imagens/noImage.jpg" // caminho relativo à raiz da aplicação
     : $"https://gestaoescolar.blob.core.windows.net/imagens/{ProfileImageId}";
     }
 }

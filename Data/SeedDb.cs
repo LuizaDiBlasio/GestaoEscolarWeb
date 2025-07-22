@@ -30,7 +30,7 @@ namespace GestaoEscolarWeb.Data
 
             await _userHelper.CheckRoleAsync("Admin"); //verificar se já existe um role de admin, se não existir cria
 
-            var user = await _userHelper.GetUserByEmailAsync("Luizabandeira90@gmail.com"); //ver se user já existe 
+            var user = await _userHelper.GetUserByEmailAsync("luizabandeira90@gmail.com"); //ver se user já existe 
 
             if (user == null) // caso não encontre o utilizador 
             {
@@ -42,7 +42,8 @@ namespace GestaoEscolarWeb.Data
                     PhoneNumber = "12345678",
                     Address = "Fonte da Saudade",
                     BirthDate = new DateTime(1990, 04, 06),
-                    IsActive = true
+                    IsActive = true,
+                    EmailConfirmed = true
                 };
 
                 var result = await _userHelper.AddUserAsync(user, "123456"); //criar utilizador, mandar utilizador e password
