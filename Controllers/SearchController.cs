@@ -243,7 +243,7 @@ namespace GestaoEscolarWeb.Controllers
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken); //criar cabeçalho de autorização com o token para as requisições http
 
-                string apiUrl = $"https://localhost:44385/api/SchoolClassStudents/{model.SearchId}"; //definir o url da api com o id de busca
+                string apiUrl = $"https://gestaoescolarweb20250722140011-dnb0f3b5d8hegqdk.canadacentral-01.azurewebsites.net/api/SchoolClassStudents/{model.SearchId}"; //definir o url da api com o id de busca
 
                 var response = await _httpClient.GetAsync(apiUrl); //busca conteudo na api
 

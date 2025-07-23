@@ -153,17 +153,39 @@ namespace GestaoEscolarWeb.Controllers
 
                 var enrollment = await _enrollmentRepository.GetActiveEnrollment(model.StudentId, model.SelectedSubjectId);
 
-                if (model.ExamDate < enrollment.EnrollmentDate)
-                {
-                    
-                    _flashMessage.Danger($"The exam date cannot be before the enrollment date ({enrollment.EnrollmentDate:MM/dd/yyyy}) for this subject.");
-                    model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
-                    return View(model);
-                }
 
-                if(model.ExamDate > DateTime.Now)
+                if (enrollment != null)
                 {
-                    _flashMessage.Danger($"The exam date cannot be after today's date");
+                    if (enrollment.EnrollmentDate > DateTime.Now)  //pré inscrição
+                    {
+                       
+                        if (model.ExamDate > DateTime.Now)
+                        {
+                            _flashMessage.Danger($"Pre-enrolled student, classes haven't started yet. Evaluations can be registered only after enrollment date ({enrollment.EnrollmentDate})");
+                            model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
+                            return View(model);
+                        }
+                    }
+                    else 
+                    {
+                        if (model.ExamDate < enrollment.EnrollmentDate)
+                        {
+                            _flashMessage.Danger($"The exam date cannot be before the enrollment date ({enrollment.EnrollmentDate:MM/dd/yyyy}) for this subject.");
+                            model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
+                            return View(model);
+                        }
+
+                        if (model.ExamDate > DateTime.Now)
+                        {
+                            _flashMessage.Danger($"The exam date cannot be after today's date.");
+                            model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
+                            return View(model);
+                        }
+                    }
+                }
+                else
+                {
+                    _flashMessage.Danger("No active enrollment found for the student and selected subject.");
                     model.Subjects = await _subjectRepository.GetComboSubjectsToEvaluateAsync(student);
                     return View(model);
                 }

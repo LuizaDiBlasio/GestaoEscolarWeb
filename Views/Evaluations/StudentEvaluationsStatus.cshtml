@@ -58,16 +58,30 @@ else
                 <th>Subject</th>
                 <th>Average</th>
                 <th>Status</th>
+                <th>Absence</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var enrollment in Model.Enrollments.OrderBy(e => e.Subject.Name))
             {
-                <tr>
-                    <td>@Html.DisplayFor(modelItem => enrollment.Subject.Name)</td>
-                    <td>@Html.DisplayFor(modelItem => enrollment.AvarageScore)</td>
-                    <td>@Html.DisplayFor(modelItem => enrollment.StudentStatus)</td>
-                </tr>
+                if (enrollment.AvarageScore != null)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => enrollment.Subject.Name)</td>
+                        <td>@Html.DisplayFor(modelItem => enrollment.AvarageScore)</td>
+                        <td>@Html.DisplayFor(modelItem => enrollment.StudentStatus)</td>
+                        <td>@Html.DisplayFor(modelItem => enrollment.AbscenceRecord)</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => enrollment.Subject.Name)</td>
+                        <td>Not assessed</td>
+                        <td>@Html.DisplayFor(modelItem => enrollment.StudentStatus)</td>
+                        <td>@Html.DisplayFor(modelItem => enrollment.AbscenceRecord)</td>
+                    </tr>
+                }
             }
         </tbody>
     </table>

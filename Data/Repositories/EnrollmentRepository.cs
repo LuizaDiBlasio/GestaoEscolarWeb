@@ -78,14 +78,14 @@ namespace GestaoEscolarWeb.Data.Repositories
 
             if (enrollment == null)
             {
-                return 0;
+                return null;
             }
 
             var evaluations = await _evaluationRepository.GetStudentEvaluationsAsync(enrollment.Student);
 
             if (evaluations == null)
             {
-                return 0;
+                return null;
             }
 
             decimal totalScore = 0;
@@ -186,21 +186,20 @@ namespace GestaoEscolarWeb.Data.Repositories
             {
                 totalCreditHours += enrollment.Subject.CreditHours;
 
-                if (enrollment.StudentStatus == StudentStatus.Absent || enrollment.StudentStatus == StudentStatus.Failed)
+                if (enrollment.StudentStatus.HasFlag(StudentStatus.Absent) || enrollment.StudentStatus.HasFlag(StudentStatus.Failed))
                 {
                     failedOrAbsentHours += enrollment.Subject.CreditHours;
                 }
-
-                if (enrollment.StudentStatus == StudentStatus.Approved)
+               
+                else if (enrollment.StudentStatus == StudentStatus.Approved) 
                 {
                     approvedHours += enrollment.Subject.CreditHours;
                 }
-
-                if (enrollment.StudentStatus == StudentStatus.Enrolled)
+                
+                else if (enrollment.StudentStatus == StudentStatus.Enrolled) 
                 {
                     notAssessedHours += enrollment.Subject.CreditHours;
                 }
-
             }
 
             if (totalCreditHours == 0)
@@ -221,7 +220,7 @@ namespace GestaoEscolarWeb.Data.Repositories
             {
                 DataPointApproved.Percentage = ((decimal)approvedHours / totalCreditHours) * 100M;
                 DataPointApproved.Category = "Approved";
-                DataPointNotAssessed.Color = "#4CAF50"; //verde 
+                DataPointApproved.Color = "#4CAF50"; //verde 
 
                 ChartDataPoints.Add(DataPointApproved);
             }
