@@ -6,7 +6,7 @@
 <h1>Register</h1>
 
 <div class="row">
-    <div class="col-md-4 offset-md-4">
+    <div class="col-md-6 offset-md-3">
         <form method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly"></div>
             <div class="form-group">
@@ -48,12 +48,12 @@
 
             <div class="form-group">
                 <label asp-for="ImageFile" class="control-label"></label> 
-                <input asp-for="ImageFile" class="form-control" type="file" /> @*ajustar tipo de input para file, para poder receber um ficheiro*@
+                <input asp-for="ImageFile" class="form-control" type="file" /> 
                 <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Register New User" class="btn btn-primary" />
+                <input type="submit" value="Register User" class="btn btn-action-primary" />
             </div>
         </form>
     </div>

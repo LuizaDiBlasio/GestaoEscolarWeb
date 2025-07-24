@@ -2,20 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
     <title>@ViewData["Title"] - GestaoEscolarWeb</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/29.2.11/bootstrap5.css" />
-
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Escola Cinel</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/imagens/cinel_logo.JPG" alt="Logo Escola Cinel" class="logo-navbar" />
+                </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -28,8 +29,12 @@
 
                         @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Admin"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register User</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Users</a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Register">Register</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="ChangeUser">Update</a></li>
+                                </ul>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a>
@@ -37,36 +42,22 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
                             </li>
-                          
 
                             <li class="nav-item dropdown">
-
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Search</a>
-
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Courses">Courses</a></li>
-
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Subjects">Subjects</a></li>
-
                                 </ul>
-
                             </li>
 
                             <li class="nav-item dropdown">
-
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
-
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-
-                                    <li> <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="MyUserProFile">Edit Profile</a> </li>
-
-                                    <li> <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ChangePassword">Change password</a></li>
-
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAccount" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownAccount">
+                                    <li> <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="MyUserProFile">Edit Profile</a> </li>
+                                    <li> <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="ChangePassword">Change password</a></li>
                                 </ul>
-
                             </li>
-                           
                         }
 
                         @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Employee"))
@@ -83,42 +74,26 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Enrollments" asp-action="Index">Enrollments</a>
                             </li>
-                             
 
                             <li class="nav-item dropdown">
-
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Search</a>
-
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSearch" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Search</a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownSearch">
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Student">Student profile</a></li>
-
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="SchoolClass">School class students </a></li>
-
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Grades">Student's evaluations'</a></li>
-
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Search" asp-action="Enrollments">Student's enrollments</a></li>
-
                                 </ul>
-
                             </li>
 
                             <li class="nav-item dropdown">
-
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownEmployeeAccount" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
-
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownEmployeeAccount">
-
                                     <li> <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="MyUserProFile">Edit Profile</a> </li>
-
                                     <li> <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="ChangePassword">Change password</a></li>
-
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Alerts" asp-action="Index">My messages</a></li>
-
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Alerts" asp-action="Create">Contact Admin</a></li>
                                 </ul>
                             </li>
-                            
                         }
 
                         @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("Student"))
@@ -126,7 +101,6 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Evaluations" asp-action="StudentEvaluationsStatus">Grades & Status</a>
                             </li>
-
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Students" asp-action="MyProfile">My Profile</a>
                             </li>
@@ -142,25 +116,21 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="SchoolClasses" asp-action="IndexAnonym">School Classes</a>
                             </li>
                         }
-
                     </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        
-
+                    <ul class="navbar-nav ml-auto">
                         @if (this.User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
                                 <span class="nav-link text-dark">@this.User.Identity.Name</span>
                             </li>
-
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                                <a class="btn-logout-navbar" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="btn-login-navbar" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                         }
                     </ul>

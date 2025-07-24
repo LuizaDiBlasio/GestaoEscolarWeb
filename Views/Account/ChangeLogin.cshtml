@@ -1,15 +1,14 @@
 ﻿@model GestaoEscolarWeb.Models.LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "ChangeLogin";
 }
-
 
 
 <h1>Login</h1>
 <flash dismissable="true" />
 <div class="row">
     <div class="col-md-4 offset-md-4">
-        <form method="post">
+        <form asp-controller="Account" asp-action="Login" method="post">
             <div asp-validation-summary="ModelOnly"></div>
             <div class="form-group">
                 @*form para username*@
@@ -32,7 +31,7 @@
                 <span asp-validation-for="RememberMe" class="text-warning"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Login" class="btn-action-primary" /> @*submit não especificado faz o action com o mesmo nome da view, login neste caso*@
+                <input type="submit" value="Login" class="btn-action-primary" />
                 <a asp-action="RecoverPassword" class="btn-action-secondary">Forgot your password?</a> @*link para recuperar password*@
             </div>
         </form>

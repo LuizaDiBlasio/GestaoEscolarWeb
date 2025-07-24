@@ -4,7 +4,7 @@
     ViewData["Title"] = "Delete";
 }
 
-<h2>Delete course</h2>
+<h1>Delete course</h1>
 
 <flash dismissable="true" />
 <div>
@@ -18,10 +18,31 @@
             @Html.DisplayFor(model => model.Name)
         </dd>
     </dl>
+
+    <br />
+    <h4>Subjects</h4>
+    @if (Model.CourseSubjects == null || Model.CourseSubjects.Count == 0)
+    {
+        <h5>No subjects for this course</h5>
+    }
+    else
+    {
+        <table class="table">
+           
+            <tbody>
+                @foreach (var subject in Model.CourseSubjects.OrderBy(s => s.Name))
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => subject.Name)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Delete" class="btn-action-danger" /> 
+        <a asp-action="Index" class="btn-action-secondary">Back to List</a>
     </form>
 </div>

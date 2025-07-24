@@ -51,7 +51,7 @@ namespace GestaoEscolarWeb.Controllers
         /// </summary>
         /// <returns>The login view or a redirection to the Home page.</returns>
         //Get do login 
-        public IActionResult Login() //precisar criar a view do Login - clicar com o botão direito aqui em cima de Login() Add View
+        public IActionResult Login() 
         {
             if (User.Identity.IsAuthenticated) //caso usuário esteja autenticado
             {
@@ -61,6 +61,16 @@ namespace GestaoEscolarWeb.Controllers
             return View(); //se login não funcionar, permanece na View 
         }
 
+        /// <summary>
+        /// Displays the login view. If the user is already authenticated, redirects to the Home page.
+        /// </summary>
+        /// <returns>The login view or a redirection to the Home page.</returns>
+        //Get do login 
+        public IActionResult ChangeLogin() 
+        {
+            
+            return View(); 
+        }
 
 
         /// <summary>
@@ -147,6 +157,7 @@ namespace GestaoEscolarWeb.Controllers
         /// </summary>
         /// <param name="model">The LoginViewModel containing credentials for API authentication.</param>
         /// <returns>The JWT token string if successful, otherwise null.</returns>
+        [Authorize(Roles = "Employee")]
         private async Task<string> GetJwtTokenFromServerSide(LoginViewModel model)
         {
             try
@@ -191,6 +202,7 @@ namespace GestaoEscolarWeb.Controllers
         /// Logs out the current user and redirects to the Home page.
         /// </summary>
         /// <returns>A redirection to the Home page.</returns>
+        [Authorize] // todos os roles autenticados
         public async Task<IActionResult> Logout()
         {
             await _userHelper.LogoutAsync();
@@ -348,6 +360,7 @@ namespace GestaoEscolarWeb.Controllers
         /// <param name="token">The email confirmation token.</param>
         /// <returns>The password reset view or a "User Not Found" view if parameters are invalid.</returns>
         //Get do ResetPassword
+        [Authorize]
         public async Task<IActionResult> ResetPassword(string userId, string token)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token)) //verificar parâmetros
@@ -388,6 +401,7 @@ namespace GestaoEscolarWeb.Controllers
         /// </summary>
         /// <param name="model">The model containing the username, reset token, and new password.</param>
         /// <returns>The password reset view with a success or error message.</returns>
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model) //recebo modelo preechido com dados para reset da password
         {
@@ -415,24 +429,16 @@ namespace GestaoEscolarWeb.Controllers
 
 
         /// <summary>
-        /// Displays the view for changing the logged-in user's profile data.
+        /// Displays ChangeUser Views.
         /// </summary>
-        /// <returns>The user change view with the current user's data.</returns>
+        /// <returns>Model for ChangeUserViewModel.</returns>
         //GET do ChangeUser
-        public async Task<IActionResult> ChangeUser()
+        [Authorize(Roles = "Admin")]
+        public  IActionResult ChangeUser()
         {
-            var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name); //buscar user por email
-
-            var model = new ChangeUserViewModel(); //criar modelo para mostrar dados
-
-            if (user != null) //caso user exista, preencher novo modelo com dados do user
-            {
-                model.FullName = user.FullName;
-                model.Address = user.Address;
-                model.PhoneNumber = user.PhoneNumber;
-            }
-
-            return View(model); //retornar model novo para view
+            var model = new ChangeUserViewModel();
+            model.IsSearchSuccessful = false; 
+            return View(model);
         }
 
 
@@ -441,48 +447,104 @@ namespace GestaoEscolarWeb.Controllers
         /// </summary>
         /// <param name="model">The model containing the new user data.</param>
         /// <returns>The user change view with a success or error message.</returns>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name); //buscar user por email
+                _flashMessage.Danger("There are errors in the form. Please correct them.");
+                model.IsSearchSuccessful = true; // Garante que o formulário de edição permaneça visível
+                return View(model);
+            }
 
-                if (user != null) //caso user exista, user com propridades registradas no modelo
+            var user = await _userHelper.GetUserByEmailAsync(model.Email); // Usar model.Email para buscar o usuário a ser atualizado
+
+            if (user == null)
+            {
+                _flashMessage.Danger("User to be updated not found."); 
+                model.IsSearchSuccessful = false; // Se o usuário não existe, o formulário de edição deve desaparecer.
+                return View(model);
+            }
+
+
+            // ver se já tem imagem
+            Guid currentImageId = user.ImageId ?? Guid.Empty;
+
+            // confirmar se carregou image file
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                currentImageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "imagens");
+            }
+            else
+            {
+                //se não houver imagem
+                if (model.ProfileImageId == Guid.Empty)
                 {
-                    user.FullName = model.FullName;
-                    user.Address = model.Address;
-                    user.PhoneNumber = model.PhoneNumber;
-
-                    //fazer update do que foi mudado no user no estudante 
-
-                    if (this.User.IsInRole("Student"))
-                    {
-                        var student = await _studentRepository.GetStudentByEmailAsync(user.Email);
-
-                        if (student != null)
-                        {
-                            student.FullName = model.FullName;
-                            student.Address = model.Address;
-                            student.PhoneNumber = model.PhoneNumber;
-
-                           await _studentRepository.UpdateAsync(student);
-                        }
-                    }
-
-                    var response = await _userHelper.UpdateUserAsync(user); //fazer update do user
-
-                    if (response.Succeeded)
-                    {
-                        ViewBag.UserMessage = "User updated";
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description); //pedir a primeira mensagem de erro
-                    }
+                    currentImageId = Guid.Empty; // zerar guid por garantia
                 }
             }
-            return View(model); //retornar model novo para view
+
+
+            // Atualizar as propriedades do usuário com os dados do modelo
+            user.FullName = model.FullName;
+            user.Address = model.Address;
+            user.PhoneNumber = model.PhoneNumber;
+            user.BirthDate = model.BirthDate;
+            user.Email = model.Email;
+
+            // Atribuir nova guid ou guid antiga
+            user.ImageId = currentImageId != Guid.Empty ? currentImageId : model.ProfileImageId;
+
+            //atualizar o student que também é user
+            var student = await _studentRepository.GetStudentByEmailAsync(user.Email);
+            if (student != null)
+            {
+                student.FullName = model.FullName;
+                student.Address = model.Address;
+                student.PhoneNumber = model.PhoneNumber;
+                student.Email = model.Email;
+                if (model.BirthDate.HasValue)
+                {
+                    student.BirthDate = model.BirthDate.Value;
+                }
+                await _studentRepository.UpdateAsync(student);
+            }
+
+            var response = await _userHelper.UpdateUserAsync(user);
+
+            if (response.Succeeded)
+            {
+                _flashMessage.Confirmation("User updated successfully!"); 
+                model.IsSearchSuccessful = true;
+                // Recarregar o model com os dados mais recentes do user após o update para garantir consistência
+                var updatedUser = await _userHelper.GetUserByEmailAsync(model.Email);
+                if (updatedUser != null)
+                {
+                    model.FullName = updatedUser.FullName;
+                    model.Address = updatedUser.Address;
+                    model.Email = updatedUser.Email;
+                    model.ProfileImageId = updatedUser.ImageId.HasValue ? updatedUser.ImageId.Value : Guid.Empty;
+                    model.BirthDate = updatedUser.BirthDate;
+                    model.PhoneNumber = updatedUser.PhoneNumber;
+                    model.SearchUserName = updatedUser.UserName; // Ou o username real, se for diferente
+                }
+            }
+            else
+            {
+                // Adiciona os erros do IdentityResult 
+                foreach (var error in response.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                // mensagem geral de erro via flash message
+                _flashMessage.Danger("Error updating user. Please check the details.");
+                model.IsSearchSuccessful = true; 
+            }
+
+            //  retorna a view com o model atualizado
+            return View(model);
+
         }
 
 
@@ -490,6 +552,7 @@ namespace GestaoEscolarWeb.Controllers
         /// Displays the view for password recovery.
         /// </summary>
         /// <returns>The password recovery view.</returns>
+        [Authorize]
         public IActionResult RecoverPassword() //direciona para view de recover da password
         {
             return View();
@@ -501,6 +564,7 @@ namespace GestaoEscolarWeb.Controllers
         /// </summary>
         /// <param name="model">The model containing the user's email for recovery.</param>
         /// <returns>The password recovery view with a status message.</returns>
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> RecoverPassword(RecoverPasswordViewModel model) //recebe modelo com dados recuperar password
         {
@@ -546,6 +610,7 @@ namespace GestaoEscolarWeb.Controllers
         /// Displays the view for changing the password.
         /// </summary>
         /// <returns>The change password view.</returns>
+        [Authorize]
         public IActionResult ChangePassword()
         {
             return View();
@@ -557,6 +622,7 @@ namespace GestaoEscolarWeb.Controllers
         /// </summary>
         /// <param name="model">The model containing the old password and the new password.</param>
         /// <returns>Redirects to the user change view on success or returns the view with errors.</returns>
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
@@ -569,7 +635,8 @@ namespace GestaoEscolarWeb.Controllers
 
                     if (result.Succeeded)
                     {
-                        return this.RedirectToAction("ChangeUser"); //redireciona para view ChangeUser
+                        _flashMessage.Confirmation("Password changed successfully!");
+                        return View(); 
                     }
                     else
                     {

@@ -4,7 +4,7 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Course details</h2>
+<h1>Course details</h1>
 
 <div>
     <hr />
@@ -78,11 +78,11 @@ else
 <div>
     @if (this.User.Identity.IsAuthenticated)
     {
-        <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> <span> | </span> <a asp-action="Index">Back to List</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-action-primary">Edit</a> <a asp-action="Index" class="btn-action-secondary">Back to List</a>
     }
     else
     {
-        <a asp-action="Index">Back to List</a>
+        <a asp-action="Index" class="btn-action-secondary">Back to List</a>
     }
     
 </div>

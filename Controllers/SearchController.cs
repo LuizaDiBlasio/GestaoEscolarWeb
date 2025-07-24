@@ -585,5 +585,42 @@ namespace GestaoEscolarWeb.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// Processes the search for a user by its email.
+        /// Retrieves and displays details of the user.
+        /// This action is accessible only by users with the 'Admin' role.
+        /// </summary>
+        /// <param name="model">The view model containing the user's email for the search.</param>
+        /// <returns>A view displaying the user's details or an error message if the usert is not found.</returns>
+        //POST
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> SearchUser(ChangeUserViewModel model)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(model.SearchUserName);
+
+            if (user == null)
+            {
+                _flashMessage.Danger("User not found, please try another username");
+                model.IsSearchSuccessful = false;
+                return View("~/Views/Account/ChangeUser.cshtml", model);
+            }
+
+            //atribuir propriedades ao model
+
+            model.IsSearchSuccessful = true;
+            model.FullName = user.FullName;
+            model.Address = user.Address;
+            model.Email = user.Email;
+            model.ProfileImageId = user.ImageId.HasValue ? user.ImageId.Value : Guid.Empty;
+            model.BirthDate = user.BirthDate;   
+            model.PhoneNumber = user.PhoneNumber;
+        
+
+            return View("~/Views/Account/ChangeUser.cshtml", model);
+        }
+
+
+
     }
 }

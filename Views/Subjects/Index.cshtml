@@ -6,7 +6,7 @@
 
 <h1>Subjects</h1>
     <p>
-        <a asp-action="Create">Add subjects</a>
+    <a asp-action="Create" class="btn-add">Add subjects</a>
     </p>
 
 <table class="table">
@@ -31,13 +31,13 @@
                 @Html.DisplayFor(modelItem => item.CreditHours)
             </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn-action-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn-action-danger">Delete</a>
                 </td>
         </tr>
 }
     </tbody>
 </table>
 <div>
-    <a asp-action="Index" asp-controller="Home">Back to Home</a>
+    <a asp-action="Index" asp-controller="Home" class="btn-action-secondary">Back to Home</a>
 </div>

@@ -1,49 +1,100 @@
-﻿@{
-    ViewData["Title"] = "Home - Gestão Escolar";
+﻿
+@{
+    ViewData["Title"] = "Home - School Management";
 }
 
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f4;
-        color: #333;
-        text-align: center;
-    }
-
-
-    .container {
-        max-width: 900px;
-        margin: 30px auto;
-        padding: 20px;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-
-    h1, h2 { 
-        color: #333;
-    }
-
-    img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-        margin-top: 25px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    p {
-        line-height: 1.6;
-        margin-bottom: 15px;
-    }
-</style>
-
-
-<div class="container">
-    <h2>Langley Highschool</h2>
-    <p>Inspiring Minds, Building Dreams</p>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Langley_High_School_main_entrance_McLean_VA_2023-12-22_08-27-31.jpg/640px-Langley_High_School_main_entrance_McLean_VA_2023-12-22_08-27-31.jpg" alt="Imagem de uma escola">
-    <p style="font-size: 0.9em; color: #777; margin-top: 15px;"></p>
+<div class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="display-4 mb-3">Welcome to CINEL School!</h1>
+        <p class="lead">Inspiring Minds, Building Dreams</p>
+        <img src="/imagens/cinel.JPG"
+        alt="CINEL School Logo" class="img-fluid rounded shadow-lg">
+        <p class="text-muted mt-3">Your learning journey begins here.</p>
+    </div>
 </div>
+
+@if (this.User.Identity.IsAuthenticated)
+{
+        <h2 class="text-center mb-5 section-title">What can we do for you?</h2>
+
+    <div class="row text-center feature-cards">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 p-4 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-user-graduate fa-3x text-info mb-3"></i>
+                    <h3 class="card-title">For Students</h3>
+                    <p class="card-text">Track your grades, enrollment status, and academic progress in real-time. Get easy access to your results and important information.</p>
+                   
+                        @if (this.User.IsInRole("Student"))
+                        {
+                            <a asp-controller="Evaluations" asp-action="StudentEvaluationsStatus" class="btn btn-outline-info mt-3">View My Progress</a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="ChangeLogin" class="btn btn-outline-success mt-3">Student Access</a>
+                        }
+                  
+                    
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 p-4 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-users-cog fa-3x text-success mb-3"></i>
+                    <h3 class="card-title">For Staff</h3>
+                    <p class="card-text">Manage students, record evaluations, organize classes, and control enrollments efficiently and intuitively.</p>
+                    @if (this.User.IsInRole("Employee"))
+                    {
+                        <a asp-controller="Students" asp-action="Index" class="btn btn-outline-info mt-3">School Management</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="ChangeLogin" class="btn btn-outline-success mt-3">Employee Access</a>
+                    }
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 p-4 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-user-shield fa-3x text-danger mb-3"></i>
+                    <h3 class="card-title">For Admins</h3>
+                    <p class="card-text">Full control over users and general settings. Manage permissions and keep the platform secure.</p>
+                    @if (this.User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Home" asp-action="DashBoard" class="btn btn-outline-info mt-3">Admin Access</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="ChangeLogin" class="btn btn-outline-success mt-3">Admin Access</a>
+                    }
+               
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+
+<div class="container my-5">
+    <div class="text-center mt-5 py-5 call-to-action">
+        @if (!this.User.Identity.IsAuthenticated)
+        {
+            <p class="lead">Already have an account? Log in to access all features.</p>
+            <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg">Log In Now</a>
+            <p class="mt-3">Don't have an account yet? Contact admin at <a href="mailto:amomeuskimonos@gmail.com">amomeuskimonos@gmail.com</a>.</p>
+        }
+        else
+        {
+            <p class="lead">Welcome back, @this.User.Identity.Name!</p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    }

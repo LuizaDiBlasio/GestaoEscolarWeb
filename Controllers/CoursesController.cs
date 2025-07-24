@@ -257,7 +257,7 @@ namespace GestaoEscolarWeb.Controllers
                 return new NotFoundViewResult("CourseNotFound");
             }
 
-            var course = await _courseRepository?.GetByIdAsync(id.Value);
+            var course = await _courseRepository?.GetCourseSubjectsAndSchoolClassesByIdAsync(id.Value);
             if (course == null)
             {
                 return new NotFoundViewResult("CourseNotFound");

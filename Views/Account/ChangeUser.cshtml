@@ -3,40 +3,110 @@
     ViewData["Title"] = "ChangeUser";
 }
 
-<h2>Update user </h2>
+<h1>Update user information </h1>
+
 
 <div class="row">
-    <div class="col-md-4 offset-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly"></div>
+    <div class="col-md-8">
+        <form asp-controller="Search" asp-action="SearchUser" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="FullName">Full Name</label>
-                <input asp-for="FullName" class="form-control" />
-                <span asp-validation-for="FullName" class="text-warning"></span>
+                <label asp-for="SearchUserName" class="control-label"></label>
+                <input asp-for="SearchUserName" class="form-control" />
+                <span asp-validation-for="SearchUserName" class="text-danger"></span>
             </div>
-
-            <div class="form-group">
-                <label asp-for="Address">Address</label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-warning"></span>
+            <div class="form-group mt-2">
+                <input type="submit" value="Search User" class="btn btn-action-primary" />
             </div>
-            <div class="form-group">
-                <label asp-for="PhoneNumber">Phone Number</label>
-                <input asp-for="PhoneNumber" class="form-control" />
-                <span asp-validation-for="PhoneNumber" class="text-warning"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Update" class="btn btn-primary" />
-                <a asp-action="ChangePassword" class="btn btn-success">Change Password</a>
-            </div>
-            <div class="text-success">@ViewBag.UserMessage</div>
+            <flash dismissable="true" />
         </form>
     </div>
 </div>
+
+<hr />
+
+@if (Model.IsSearchSuccessful == true)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-controller="Account" asp-action="ChangeUser" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="SearchUserName" />
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="ProfileImageId" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div> @* erros gerais de validação *@
+
+                <div class="form-group">
+                    <label asp-for="FullName">Full Name</label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-warning"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="BirthDate" class="control-label"></label>
+                    <div>
+                        <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" />
+                    </div>
+                    <span asp-validation-for="BirthDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Address">Address</label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-warning"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Email">Email</label>
+                    <input asp-for="Email" class="form-control" readonly />
+                    <span asp-validation-for="Email" class="text-warning"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="PhoneNumber">Phone Number</label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-warning"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ImageFile" class="control-label"></label>
+                    <input asp-for="ImageFile" class="form-control" type="file" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
+
+
+                <div class="form-group">
+                    <input type="submit" value="Update User" class="btn btn-action-primary" />
+                </div>     
+            </form>
+        </div>
+        <div class="col-md-4">
+            <img src="@Url.Content(Model.ImageFullPath)" alt="Image" style="width:300px;height:450px;max-width:100%;height:auto" />@*manda o link e carrega o seu conteúdo (imagem)*@
+        </div>
+    </div>
+}
+@* A mensagem "User not found" só aparece se uma busca foi feita E falhou. *@
+else if (!string.IsNullOrEmpty(Model.SearchUserName) && !Model.IsSearchSuccessful)
+{
+    <h5>User not found. Please try searching again.</h5>
+}
+
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            var birthDatePicker = new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select a date',
+                max: new Date()
+            });
+            birthDatePicker.appendTo('#birthDateInput');
+        });
+    </script>
 }
+
+
+

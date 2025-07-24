@@ -4,8 +4,8 @@
     ViewData["Title"] = "IndexAnonym";
 }
 
-<h2>School Classes</h2>
-
+<h1>School Classes</h1>
+<br />
 
 <table class="table">
     <thead>
@@ -42,7 +42,7 @@
                     @Html.DisplayFor(modelItem => item.Shift)
                 </td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> 
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn-action-primary">Details</a>
                 </td>
             </tr>
         }
@@ -50,4 +50,4 @@
 </table>
 
 <br />
-<a asp-action="Index" asp-controller="Home">Back to Home</a>
+<a asp-action="Index" asp-controller="Home" class="btn-action-secondary">Back to Home</a>

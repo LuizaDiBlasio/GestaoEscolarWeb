@@ -1,71 +1,455 @@
-﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
+﻿
 
-a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Open+Sans:wght@300;400;600&display=swap');
+
+
+body {
+    font-family: 'Open Sans', sans-serif; 
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; 
+    color: #333;
 }
 
-/* Provide sufficient contrast against white background */
-a {
-  color: #0366d6;
+/*Regras para titulos*/
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    color: #0F2C6B;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    text-align: center; 
+}
+
+p {
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%); 
+    color: white;
+    padding: 80px 0; 
+    border-bottom-left-radius: 50% 20px; 
+    border-bottom-right-radius: 50% 20px;
+    margin-bottom: 30px;
+}
+
+    .hero-section h1 {
+        color: white; 
+        font-weight: 700;
+        font-size: 3.5rem; 
+    }
+
+    .hero-section p.lead {
+        font-weight: 300;
+        font-size: 1.5rem; 
+    }
+
+    .hero-section img {
+        max-width: 50%; 
+        height: auto;
+        border-radius: .5rem; 
+        margin-top: 30px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3); 
+    }
+
+
+.container {
+    max-width: 960px; 
+    margin: 30px auto;
+    padding: 20px;
+}
+
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    position: relative;
+    margin-bottom: 4rem; 
+    color: #343a40;
+}
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -15px; 
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px; 
+        height: 4px; 
+        background-color: #007bff; 
+        border-radius: 2px;
+    }
+
+
+.hero-section p.text-muted {
+    color: rgba(255, 255, 255, 0.7) !important; /* Branco com 90% de opacidade */
+    font-weight: 500;
+}
+
+.feature-cards .card {
+    background-color: white;
+    border: none; 
+    border-radius: .75rem; 
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1); 
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+    .feature-cards .card:hover {
+        transform: translateY(-5px); 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+.feature-cards .card-body {
+    padding: 30px;
+}
+
+.feature-cards .card-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #343a40;
+    margin-top: 15px;
+}
+
+.feature-cards .card-text {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+/* Botões Customizados */
+.btn-outline-info,
+.btn-outline-success,
+.btn-outline-danger {
+    border-width: 2px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 50px; /* Botões mais arredondados */
+    transition: all 0.3s ease;
+}
+
+    .btn-outline-info:hover {
+        background-color: #17a2b8; 
+        color: white;
+    }
+
+    .btn-outline-success:hover {
+        background-color: #28a745; 
+        color: white;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545; 
+        color: white;
+    }
+
+/* Call to Action Section */
+.call-to-action {
+    padding: 40px 0;
+    background-color: #e9ecef; 
+    border-radius: .5rem; 
+    margin-top: 50px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    background-color: #007bff; 
+    border-color: #007bff;
+    font-weight: 600;
+    padding: 12px 30px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
 }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    .btn-primary:hover {
+        background-color: #0056b3;  Darker primary 
+        border-color: #0056b3;
+    }
+
+
+.btn-login-navbar {
+    background-color: #007bff;
+    background-image: linear-gradient(to right, #007bff, #0056b3); 
+    color: white;
+    border: none; 
+    padding: 6px 15px; 
+    border-radius: 20px; 
+    font-size: 14px; 
+    font-weight: 600; 
+    text-decoration: none; 
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    display: inline-block; 
+    margin-left: 10px; 
 }
 
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  font-size: 14px;
+    .btn-login-navbar:hover {
+        background-color: #0056b3;
+        background-image: linear-gradient(to right, #0056b3, #007bff); 
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25); 
+        color: white; 
+    }
+
+.btn-logout-navbar {
+    background-color: #dc3545; 
+    background-image: linear-gradient(to right, #dc3545, #c82333); 
+    color: white;
+    border: none;
+    padding: 6px 15px; 
+    border-radius: 20px; 
+    font-size: 14px; 
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); 
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-left: 10px; 
 }
-@media (min-width: 768px) {
-  html {
+
+    .btn-logout-navbar:hover {
+        background-color: #c82333; 
+        background-image: linear-gradient(to right, #c82333, #dc3545); 
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+        color: white;
+    }
+
+
+.logo-navbar {
+    height: 40px; 
+    width: auto; 
+}
+
+/* Espaçamento para ícones e texto (Bootstrap 4) */
+.fas {
+    margin-right: .5rem; /* mr-2 no BS4 */
+}
+
+/* Footer */
+footer {
+    padding: 20px 0;
+    margin-top: 50px;
+    background-color: #f8f9fa; /* Mesma cor do body, ou um pouco mais escura */
+    text-align: center;
+}
+
+/*Botões*/
+
+/* NOVO: Estilos para botões de ação (Edit, Details, Back to Home) */
+.btn-action-primary {
+    background-color: #6a11cb; /* Roxo mais escuro (início do seu hero-section) */
+    background-image: linear-gradient(to right, #6a11cb, #2575fc); /* Gradiente roxo-azul */
+    color: white;
+    border: none;
+    padding: 6px 15px; /* Tamanho similar aos botões da navbar */
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin: 0 5px; /* Espaçamento entre os botões na mesma linha */
+}
+
+    .btn-action-primary:hover {
+        background-color: #2575fc;
+        background-image: linear-gradient(to right, #2575fc, #6a11cb); /* Inverte o gradiente no hover */
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+        color: white !important;
+    }
+
+.btn-action-secondary {
+    background-color: #17a2b8; /* Azul teal (do seu btn-outline-info) */
+    background-image: linear-gradient(to right, #17a2b8, #138496); /* Gradiente azul teal */
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin: 0 5px;
+}
+
+    .btn-action-secondary:hover {
+        background-color: #138496;
+        background-image: linear-gradient(to right, #138496, #17a2b8);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+        color: white !important;
+    }
+
+/* NOVO: Estilos para o botão Delete (vermelho) */
+.btn-action-danger {
+    background-color: #dc3545; /* Vermelho padrão (do seu btn-logout-navbar) */
+    background-image: linear-gradient(to right, #dc3545, #c82333); /* Gradiente de vermelho */
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin: 0 5px; /* Espaçamento entre os botões */
+}
+
+    .btn-action-danger:hover {
+        background-color: #c82333;
+        background-image: linear-gradient(to right, #c82333, #dc3545);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+        color: white !important;
+    }
+
+/* Estilo para o botão "Add " */
+.btn-add {
+    background-color: #6a11cb; 
+    background-image: linear-gradient(to right, #6a11cb 0%, #2575fc 130%); 
+    color: white;
+    border: none;
+    padding: 8px 25px; /* Um pouco maior que os botões de ação na tabela */
+    border-radius: 5px;
     font-size: 16px;
-  }
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-bottom: 2px; /* Espaço abaixo do botão */
 }
 
-.border-top {
-  border-top: 1px solid #e5e5e5;
-}
-.border-bottom {
-  border-bottom: 1px solid #e5e5e5;
+    .btn-add:hover {
+        background-color: #2575fc;
+        background-image: linear-gradient(to right, #2575fc, #6a11cb);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        color: white !important;
+    }
+
+
+/* --- Estilos para Tabelas --- */
+
+.table {
+    /* Mantém as propriedades gerais da tabela */
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #333;
+    background-color: #fff;
+    border-radius: .5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-}
+    .table thead {
+        /* Mantém o gradiente e a cor do texto para o cabeçalho */
+        background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+        color: white;
+        display: table-header-group;
+    }
 
-button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
-}
+        /* Regra MESTRE SIMPLIFICADA para linhas (TR) e células (TH, TD) */
+        .table thead tr,
+        .table tbody tr {
+            display: flex; /* ESSENCIAL: Transforma as linhas em contêineres flexíveis */
+            width: 100%; /* Garante que a linha ocupe 100% da largura da tabela */
+            /* Borda entre as linhas do corpo */
+            border-top: 1px solid #dee2e6;
+            transition: background-color 0.3s ease; /* Para o hover nas linhas */
+        }
 
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
-}
+            /* Remove a borda superior da primeira linha de dados */
+            .table tbody tr:first-child {
+                border-top: none;
+            }
 
-body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
-}
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px; /* Vertically center the text there */
-}
+    .table th,
+    .table td {
+        /* ESSENCIAL: Cada célula vai crescer e encolher igualmente */
+        flex-grow: 1; /* Permite que a célula cresça para preencher o espaço disponível */
+        flex-basis: 0; /* Base de tamanho inicial da célula antes de crescer/encolher */
+        flex-shrink: 1; /* Permite que a célula encolha se não houver espaço suficiente */
+
+        padding: 12px 20px; /* Padding padrão para todas as células */
+        vertical-align: middle;
+        text-align: left; /* Alinhamento padrão: esquerda */
+
+        white-space: nowrap; /* Evita que o texto quebre por padrão, permitindo scroll horizontal se necessário */
+        overflow: hidden; /* Esconde o conteúdo que ultrapassa */
+        text-overflow: ellipsis; /* Adiciona '...' se o texto for cortado */
+    }
+
+    /* Sobrescreve padding para THs para um pouco mais de altura */
+    .table th {
+        padding: 15px 20px;
+        font-weight: 600;
+        border-bottom: none; /* Remove a borda inferior do cabeçalho */
+    }
+
+        /* Ajuste o alinhamento de texto para colunas de ação ou ID se necessário */
+        /* Geralmente, IDs e botões de ação ficam melhor centralizados ou à direita */
+        /* Adapte esses seletores se suas colunas de ação não forem sempre a última, por exemplo */
+        .table th:first-child,
+        .table td:first-child {
+            text-align: center; /* Exemplo: Centraliza a primeira coluna (geralmente Id) */
+            flex-grow: 0.5; /* Faz a primeira coluna crescer menos, se for um ID curto */
+            flex-shrink: 0; /* Evita que ela encolha muito */
+            min-width: 50px; /* Largura mínima para IDs */
+        }
+
+        .table th:last-child,
+        .table td:last-child {
+            text-align: center; /* Exemplo: Centraliza a última coluna (geralmente ações) */
+            flex-grow: 1; /* Permite que a última coluna cresça para acomodar botões */
+            min-width: 120px; /* Largura mínima para botões de ação */
+        }
+
+
+        /* Bordas arredondadas para os cantos do cabeçalho */
+        .table th:first-child {
+            border-top-left-radius: .5rem;
+        }
+
+        .table th:last-child {
+            border-top-right-radius: .5rem;
+        }
+
+    /* Estilo para linhas pares */
+    .table tbody tr:nth-of-type(even) {
+        background-color: #f2f2f2;
+    }
+
+    /* Hover nas linhas */
+    .table tbody tr:hover {
+        background-color: #e9ecef;
+    }
+
+    /* Ajustes para a última linha e células para manter as bordas arredondadas inferiores */
+    .table tbody tr:last-child td:first-child {
+        border-bottom-left-radius: .5rem;
+    }
+
+    .table tbody tr:last-child td:last-child {
+        border-bottom-right-radius: .5rem;
+    }
+
+        .table td a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
