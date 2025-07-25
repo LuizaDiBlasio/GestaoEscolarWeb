@@ -47,13 +47,13 @@
         </div>
 
         <div class="col-md-4 text-center">
-            <img src="@Url.Content(Model.ImageFullPath)" alt="Profile Image" class="img-thumbnail" style="max-width:200px; max-height:250px; object-fit: cover;" />
+            <img src="@Url.Content(Model.ImageFullPath)" alt="Profile Image" class="img-fluid rounded-circle" style="width:200px; height:200px; object-fit:cover;" />
         </div>
     </div>
 
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Delete" class="btn btn-action-danger" /> 
+        <a asp-action="Index" class="btn btn-action-secondary">Back to List</a>
     </form>
 </div>

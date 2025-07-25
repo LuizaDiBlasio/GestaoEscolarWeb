@@ -9,7 +9,7 @@
 @if (this.User.IsInRole("Employee"))
 {
     <p>
-        <a asp-action="Create">Add evaluations</a>
+        <a asp-action="Create" class="btn btn-add">Add evaluations</a>
     </p>
 }
 
@@ -50,8 +50,8 @@
                 @if (this.User.IsInRole("Employee"))
                 {
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-action-primary">Edit</a> 
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-action-danger">Delete</a>
                     </td>
                 }
             

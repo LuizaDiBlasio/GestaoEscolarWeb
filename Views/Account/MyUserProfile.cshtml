@@ -7,8 +7,19 @@
 
 <hr />
 <flash dismissable="true" />
-<div class="row">
-    <div class="col-md-4">
+
+<div class="row justify-content-center">
+    @* Use justify-content-center to center the content *@
+    <div class="col-md-8 col-lg-6">
+        @* This column will contain both the image and the form, centered on the page *@
+
+        @* Seção da Imagem de Perfil - Colocada antes do formulário no fluxo HTML *@
+        <div class="d-flex justify-content-center mb-4">
+            @* Flexbox para centralizar a imagem e adicionar margem inferior *@
+            <img src="@Url.Content(Model.ImageFullPath)" alt="Profile Image" class="img-fluid rounded-circle" style="width:200px; height:200px; object-fit:cover;" />
+        </div>
+
+        @* Formulário de Perfil do Usuário *@
         <form asp-action="MyUserProfile" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ImageId" />
@@ -37,16 +48,16 @@
                 <input asp-for="Address" class="form-control" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
-           
+
             <div class="form-group">
                 <label asp-for="ImageFile" class="control-label"></label>
                 <input asp-for="ImageFile" class="form-control" type="file" />
                 <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
-            
+
             <div class="form-group mt-3 d-flex justify-content-start align-items-center">
                 <input type="submit" value="Save" class="btn btn-action-primary me-2" />
-                <a asp-action="Index" asp-controller="Home" class="btn-action-secondary">Back to DashBoard</a>
+                <a asp-action="Index" asp-controller="Home" class="btn btn-action-secondary">Back to DashBoard</a> @* Corrigido a classe 'bnt' para 'btn' aqui também, se ainda não o fez. *@
             </div>
             @if (ViewBag.ErrorMessage != null)
             {
@@ -56,15 +67,8 @@
             }
         </form>
     </div>
-    <div class="col-md-4">
-        <img src="@Url.Content(Model.ImageFullPath)" alt="Image" style="width:300px;height:450px;max-width:100%;height:auto" />@*manda o link e carrega o seu conteúdo (imagem)*@
-    </div>
 </div>
 <flash dismissable="true" />
-@* <div>
-    <a asp-action="Index" asp-controller="Home" >Back to Home</a>
-</div> *@
-
 
 
 @section Scripts {
@@ -84,4 +88,3 @@
         });
     </script>
 }
-

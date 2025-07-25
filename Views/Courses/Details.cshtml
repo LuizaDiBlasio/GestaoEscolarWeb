@@ -32,11 +32,7 @@
     else
     {
         <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                </tr>
-            </thead>
+           
             <tbody>
                 @foreach (var subject in Model.CourseSubjects.OrderBy(s => s.Name))
                 {

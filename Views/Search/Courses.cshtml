@@ -16,7 +16,7 @@
                 <span asp-validation-for="SearchId" class="text-danger"></span>
             </div>
             <div class="form-group mt-2">
-                <input type="submit" value="search" class="btn btn-primary" />
+                <input type="submit" value="search" class="btn btn-action-primary" />
             </div>
             <flash dismissable="true" />
         </form>
@@ -48,18 +48,6 @@
                 </dt>
                 <dd class="col-sm-9">
                     @Html.DisplayFor(model => model.CourseHours)
-                </dd>
-                <dt class="col-sm-3">
-                    @Html.DisplayNameFor(model => model.StartDate)
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.StartDate)
-                </dd>
-                <dt class="col-sm-3">
-                    @Html.DisplayNameFor(model => model.EndDate)
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.EndDate)
                 </dd>
             </dl>
         </div>
@@ -114,14 +102,7 @@
     else
     {
         <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                        @Html.DisplayNameFor(model => model.CourseSubjects.FirstOrDefault().Name)
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
+           
             <tbody>
                 @foreach (var item in Model.CourseSubjects.OrderBy(s => s.Name))
                 {
@@ -134,6 +115,7 @@
             </tbody>
         </table>
     }
+    <br />
     <h4>Students</h4>
     @if (Model.CourseStudents.Count == 0)
     {
@@ -145,15 +127,20 @@
             <thead>
                 <tr>
                     <th>
-                        @Html.DisplayNameFor(model => model.CourseStudents.FirstOrDefault().FullName)
+                        Id
                     </th>
-                    <th></th>
+                    <th>
+                        Name
+                    </th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model.CourseStudents.OrderBy(s => s.FullName))
-                {
+                {       
                     <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.FullName)
                         </td>

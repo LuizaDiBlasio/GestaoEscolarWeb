@@ -256,7 +256,7 @@ footer {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
     display: inline-block;
-    margin: 0 5px; /* Espaçamento entre os botões na mesma linha */
+    margin: 0 5px 8px 5px; /* Espaçamento entre os botões na mesma linha */
 }
 
     .btn-action-primary:hover {
@@ -280,7 +280,7 @@ footer {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
     display: inline-block;
-    margin: 0 5px;
+    margin: 0 5px 8px 5px;
 }
 
     .btn-action-secondary:hover {
@@ -305,12 +305,38 @@ footer {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
     display: inline-block;
-    margin: 0 5px; /* Espaçamento entre os botões */
+    margin: 0 5px 8px 5px; /* Espaçamento entre os botões */
 }
 
     .btn-action-danger:hover {
         background-color: #c82333;
         background-image: linear-gradient(to right, #c82333, #dc3545);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+        color: white !important;
+    }
+
+
+.btn-action-enroll {
+    background-color: #28a745; /* Um verde padrão */
+    background-image: linear-gradient(to right, #28a745, #218838); /* Gradiente de verde */
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    display: inline-block;
+    /* Adiciona margem inferior e lateral. A margem superior será controlada globalmente. */
+    margin: 0 5px 8px 5px; /* Margem: top right bottom left (0px 5px 8px 5px) */
+}
+
+    .btn-action-enroll:hover {
+        background-color: #218838;
+        background-image: linear-gradient(to right, #218838, #28a745);
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
         color: white !important;
     }
@@ -356,6 +382,18 @@ footer {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
+    /*Imagem arredondada*/
+    .table td img {
+        width: 100px; /* Desired display width */
+        height: 100px; /* Desired display height (making it square) */
+        object-fit: cover; /* ESSENTIAL: Scales image to cover container, maintaining aspect ratio */
+        border-radius: 50%; /* Makes images circular */
+        vertical-align: middle;
+        max-width: 100%; /* Ensures image doesn't break out of its cell */
+        display: block; /* Allows margin auto for centering */
+        margin: 0 auto;
+    }
+
     .table thead {
         /* Mantém o gradiente e a cor do texto para o cabeçalho */
         background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
@@ -388,10 +426,7 @@ footer {
         padding: 12px 20px; /* Padding padrão para todas as células */
         vertical-align: middle;
         text-align: left; /* Alinhamento padrão: esquerda */
-
-        white-space: nowrap; /* Evita que o texto quebre por padrão, permitindo scroll horizontal se necessário */
-        overflow: hidden; /* Esconde o conteúdo que ultrapassa */
-        text-overflow: ellipsis; /* Adiciona '...' se o texto for cortado */
+        /*white-space: nowrap;*/ /* Evita que o texto quebre por padrão, permitindo scroll horizontal se necessário */
     }
 
     /* Sobrescreve padding para THs para um pouco mais de altura */
@@ -399,6 +434,7 @@ footer {
         padding: 15px 20px;
         font-weight: 600;
         border-bottom: none; /* Remove a borda inferior do cabeçalho */
+        text-align: left;
     }
 
         /* Ajuste o alinhamento de texto para colunas de ação ou ID se necessário */
@@ -410,6 +446,7 @@ footer {
             flex-grow: 0.5; /* Faz a primeira coluna crescer menos, se for um ID curto */
             flex-shrink: 0; /* Evita que ela encolha muito */
             min-width: 50px; /* Largura mínima para IDs */
+            text-align: left;
         }
 
         .table th:last-child,
@@ -417,6 +454,7 @@ footer {
             text-align: center; /* Exemplo: Centraliza a última coluna (geralmente ações) */
             flex-grow: 1; /* Permite que a última coluna cresça para acomodar botões */
             min-width: 120px; /* Largura mínima para botões de ação */
+            text-align: left;
         }
 
 
@@ -448,8 +486,106 @@ footer {
         border-bottom-right-radius: .5rem;
     }
 
-        .table td a:hover {
-            color: #0056b3;
-            text-decoration: underline;
-        }
+    .table td a:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
 
+/*Students table*/
+.students-table th:first-child,
+.students-table td:first-child { /* Id Column */
+    flex: 0 0 50px; /* Fixed width for ID, no grow/shrink */
+    text-align: center;
+}
+
+.students-table th:nth-child(2),
+.students-table td:nth-child(2) { /* Full Name Column */
+    flex: 1 1 150px; /* Allows growth, preferred 150px base */
+}
+
+.students-table th:nth-child(3),
+.students-table td:nth-child(3) { /* Date of Birth Column */
+    flex: 0 0 120px; /* Fixed width for dates */
+    text-align: center;
+}
+
+.students-table th:nth-child(4),
+.students-table td:nth-child(4) { /* Email Column */
+    flex: 2 1 200px; /* Grows more, preferred 200px base */
+}
+
+.students-table th:nth-child(5),
+.students-table td:nth-child(5) { /* Profile Image Column */
+    flex: 0 0 120px; /* Fixed width for the image column */
+    text-align: center;
+    overflow: visible; /* Allow image to be fully visible */
+    padding: 5px 10px; /* Reduced padding for image cell */
+}
+
+/* Specific image size for the students table (larger) */
+.students-table td img {
+    width: 100px; /* Larger image size for students table */
+    height: 100px;
+}
+
+
+.students-table th:last-child,
+.students-table td:last-child { /* Actions Column */
+    flex: 0 0 250px; /* Fixed width for buttons on THIS table. ADJUST THIS VALUE! */
+    text-align: center;
+    white-space: normal; /* Allow buttons to wrap */
+    overflow: visible; /* Ensure buttons are not hidden */
+    text-overflow: clip; /* No ellipsis for buttons */
+    /* If your "Edit | Details | Delete | Enroll" links are not fitting on one line on large screens,
+       INCREASE the 250px above. If they are too spread out, DECREASE it. */
+}
+
+/* Estilos para a tabela de Enrollments  */
+.enrollments-table {
+    margin-top: 20px; /* Adiciona uma margem superior para espaçamento */
+}
+.enrollments-table th:nth-child(1),
+.enrollments-table td:nth-child(1) { /* Student Full Name Column */
+    flex: 2 1 200px;
+    padding-right: 15px;
+    min-width: 150px;
+}
+
+.enrollments-table th:nth-child(2),
+.enrollments-table td:nth-child(2) { /* Subject Name Column */
+    flex: 1.5 1 150px;
+    padding-left: 15px;
+    min-width: 100px;
+}
+
+.enrollments-table th:nth-child(3),
+.enrollments-table td:nth-child(3) { /* Date Column */
+    flex: 0 0 120px;
+    text-align: center;
+}
+
+.enrollments-table th:nth-child(4),
+.enrollments-table td:nth-child(4) { /* Abscence Record Column */
+    flex: 0 0 120px;
+    text-align: center;
+}
+
+.enrollments-table th:nth-child(5),
+.enrollments-table td:nth-child(5) { /* Average Score Column */
+    flex: 0 0 120px;
+    text-align: center;
+}
+
+.enrollments-table th:nth-child(6),
+.enrollments-table td:nth-child(6) { /* Student Status Column */
+    flex: 1 1 150px;
+    text-align: center;
+}
+
+.enrollments-table th:last-child,
+.enrollments-table td:last-child { /* Actions Column (Edit | Delete) */
+    flex: 0 0 200px; /* Aumentado de 150px para 200px */
+    text-align: center;
+    white-space: nowrap; /* Tenta manter "Edit | Delete" na mesma linha */
+    padding: 8px; /* Ajuste o padding se necessário para dar mais espaço interno */
+}

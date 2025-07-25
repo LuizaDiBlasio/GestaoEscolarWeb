@@ -6,56 +6,59 @@
 
 <h1>Enrollments</h1>
 
-<a asp-area="" asp-controller="Enrollments" asp-action="Create" >Enroll a student</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Student.FullName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Subject.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EnrollmentDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AbscenceRecord)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AvarageScore)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StudentStatus)
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Student.FullName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Subject.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EnrollmentDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AbscenceRecord)
-            </td>
+<a asp-area="" asp-controller="Enrollments" asp-action="Create" class="btn-add">Enroll a student</a>
+<div class="custom-wide-container">
+    <table class="table enrollments-table">
+        <thead>
+            <tr>
+                <th>
+                    Student
+                </th>
+                <th>
+                    Subject
+                </th>
+                <th>
+                    Date
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.AbscenceRecord)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.AvarageScore)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.StudentStatus)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model) {
+            <tr>
                 <td>
-                    @(item.AvarageScore.HasValue ? item.AvarageScore.Value.ToString("N2") : "No evaluations")
+                    @Html.DisplayFor(modelItem => item.Student.FullName)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.StudentStatus)
+                    @Html.DisplayFor(modelItem => item.Subject.Name)
                 </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EnrollmentDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AbscenceRecord)
+                </td>
+                    <td>
+                        @(item.AvarageScore.HasValue ? item.AvarageScore.Value.ToString("N2") : "No evaluations")
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StudentStatus)
+                    </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-action-primary">Edit</a> 
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-action-danger">Delete</a>
+                </td>
+            </tr>
+    }
+        </tbody>
+    </table>
+</div>

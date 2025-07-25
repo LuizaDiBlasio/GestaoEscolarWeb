@@ -17,7 +17,7 @@
                 <span asp-validation-for="SearchSubjectName" class="text-danger"></span>
             </div>
             <div class="form-group mt-2">
-                <input type="submit" value="search" class="btn btn-primary" />
+                <input type="submit" value="search" class="btn btn-action-primary" />
             </div>
             <flash dismissable="true" />
         </form>
@@ -47,7 +47,7 @@
             </dl>
         </div>
     </div>
-
+    <br />
     <h4>Courses that have this subject:</h4>
     @if (Model.SubjectCourses.Count == 0)
     {
@@ -58,8 +58,8 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Name</th>
                     <th>Id</th>
+                    <th>Name</th>
                     <th>Course hours</th>
                 </tr>
             </thead>
@@ -68,12 +68,11 @@
                 {
                     <tr>
                         <td>
-                            @Html.DisplayFor(modelItem => item.Name)
-                        </td>
-                        <td>
                             @Html.DisplayFor(modelItem => item.Id)
                         </td>
-                        
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.CourseHours)
                         </td>
