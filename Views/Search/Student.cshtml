@@ -19,7 +19,7 @@
                 <span asp-validation-for="SearchFullName" class="text-danger"></span>
             </div>
             <div class="form-group mt-2">
-                <input type="submit" value="search" class="btn btn-primary" />
+                <input type="submit" value="search" class="btn btn-action-primary" />
             </div>
             <flash dismissable="true" />
         </form>
@@ -74,7 +74,7 @@
         </div>
 
         <div class="col-md-4">
-            <img src="@Url.Content(Model.ImageFullPath)" alt="Image" style="width:100%;height:auto;max-width:300px;max-height:450px;" />
+            <img src="@Url.Content(Model.ImageFullPath)" alt="Profile Image" class="img-fluid rounded-circle" style="width:200px; height:200px; object-fit:cover;" />
         </div>
     </div>
 

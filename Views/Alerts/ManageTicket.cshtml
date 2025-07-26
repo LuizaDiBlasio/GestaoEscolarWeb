@@ -7,7 +7,7 @@
 
 <br />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6 offset-md-3">
         <form asp-action="ManageTicket">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
@@ -36,13 +36,11 @@
                 <select asp-for="SelectedStatus" asp-items="Model.StatusList" class="form-control" id="subjectDropdown"></select>
                 <span asp-validation-for="SelectedStatus" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-
-                <button type="button" class="btn btn-danger" id="btnDeleteAlert" data-id="@Model.Id">Delete</button>
-            </div>
-            <div>
-                <a asp-action="Index" asp-controller="Home">Back to List</a>
+       
+            <div class="form-group mt-3 d-flex justify-content-start align-items-center">
+                <input type="submit" value="Save" class="btn-action-primary" />
+                <button type="button" id="btnDeleteAlert" data-id="@Model.Id" class="btn btn-action-danger">Delete</button>
+                <a asp-action="Index" asp-controller="Home"  class="btn-action-secondary">Back to List</a>
             </div>
             
 

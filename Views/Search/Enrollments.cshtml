@@ -29,36 +29,51 @@
 
 @if (Model.IsSearchSuccessful)
 {
-    <h4>@Model.StudentFullName enrollment details:</h4>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Subject</th>
-                <th>Enrollment date</th>
-                <th>Absense record</th>
-                <th>Student status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Results)
-            {
+    @if (Model.Results != null && Model.Results.Any())
+    {
+        <h4>@Model.StudentFullName enrollment details:</h4>
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Subject.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.EnrollmentDate)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.AbscenceRecord)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.StudentStatus)
-                    </td>
+                    <th>Subject</th>
+                    <th>Enrollment date</th>
+                    <th>Absense record</th>
+                    <th>Average grade</th>
+                    <th>Student status</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Results)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Subject.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EnrollmentDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AbscenceRecord)
+                        </td>
+                        <td>
+                            @(item.AvarageScore.HasValue ? item.AvarageScore.Value.ToString("N2") : "Not assessed")
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.StudentStatus)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <flash dismissable="true" />
+    }
+}
+else
+{
+    <flash dismissable="true" />
 }
 
 <div id="homonymDialog" class="modal fade" data-backdrop="static" data-keyboard="false">

@@ -5,13 +5,14 @@
 
 <h1>Messages history</h1>
 
-
+<br />
 <table class="table">
     <thead>
         <tr>
             <th>Id</th>
             <th>Title</th>
             <th>Date</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -34,15 +35,14 @@
                         @item.AlertTime.ToString("dd/MM/yyyy HH:mm")
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-action-primary">Edit</a> 
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-action-secondary">Details</a>
                     </td>
                 </tr>
             }
         }
-        
     </tbody>
 </table>
 <div>
-    <a asp-action="Index" asp-controller="Home">Back to Home</a>
+    <a asp-action="Index" asp-controller="Home" class="btn-action-secondary">Back to Home</a>
 </div>

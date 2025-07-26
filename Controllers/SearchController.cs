@@ -27,7 +27,6 @@ namespace GestaoEscolarWeb.Controllers
 
         private readonly IFlashMessage _flashMessage;
 
-
         private readonly IStudentRepository _studentRepository;
 
         private readonly ISubjectRepository _subjectRepository;
@@ -56,7 +55,7 @@ namespace GestaoEscolarWeb.Controllers
 
             _userHelper = userHelper;
 
-            _httpClient = httpClient;   
+            _httpClient = httpClient;  
 
         }
 
@@ -118,11 +117,18 @@ namespace GestaoEscolarWeb.Controllers
                     foreach (var enrollment in studentWithEnrollments.Enrollments)
                     {
                         enrollment.StudentStatus = await _enrollmentRepository.GetStudentStatusAsync(enrollment);
+                        enrollment.AvarageScore = await _enrollmentRepository.GetAverageScoreAsync(enrollment.Id);
                     }
 
                     model.Results = studentWithEnrollments.Enrollments;
                     model.IsSearchSuccessful = true;
-                    model.StudentFullName = studentWithEnrollments.FullName; 
+                    model.StudentFullName = studentWithEnrollments.FullName;
+
+                    if (!studentWithEnrollments.Enrollments.Any())
+                    {
+                        _flashMessage.Danger("Student not enrolled in any subject");
+                    }
+
                     return View(model);
                 }
             }
@@ -146,6 +152,7 @@ namespace GestaoEscolarWeb.Controllers
             foreach (var enrollment in student.Enrollments)
             {
                 enrollment.StudentStatus = await _enrollmentRepository.GetStudentStatusAsync(enrollment);
+                enrollment.AvarageScore = await _enrollmentRepository.GetAverageScoreAsync(enrollment.Id);
             }
 
             if (student == null)
@@ -160,6 +167,11 @@ namespace GestaoEscolarWeb.Controllers
                 Results = student.Enrollments,
                 IsSearchSuccessful = true
             };
+
+            if (!student.Enrollments.Any())
+            {
+                _flashMessage.Danger("Student not enrolled in any subject");
+            }
 
             return View("Enrollments", model); // Retorna a mesma View de inscrições com os resultados
         }
@@ -345,6 +357,13 @@ namespace GestaoEscolarWeb.Controllers
                     model.Results = studentWithEvaluations.Evaluations;
                     model.IsSearchSuccessful = true;
                     model.StudentFullName = studentWithEvaluations.FullName;
+
+                    if (student.Evaluations == null || student.Evaluations.Count == 0)
+                    {
+                        _flashMessage.Warning("Student hasn't been assessed yet");
+                        return View(model);
+                    }
+
                     return View(model);
                 }
             }
@@ -369,7 +388,6 @@ namespace GestaoEscolarWeb.Controllers
             if (student == null)
             {
                 _flashMessage.Danger("Student not found.");
-                return View();
             }
 
             var model = new SearchViewModel<Evaluation>
@@ -379,7 +397,12 @@ namespace GestaoEscolarWeb.Controllers
                 IsSearchSuccessful = true
             };
 
-            return View("Grades", model); // Retorna a mesma View de inscrições com os resultados
+            if(student.Evaluations == null || student.Evaluations.Count == 0)
+            {
+                _flashMessage.Warning("Student hasn't been assessed yet");
+            }
+
+            return View("Grades", model); 
         }
 
 
