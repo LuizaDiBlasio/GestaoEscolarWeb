@@ -326,68 +326,39 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        /// <summary>
-        /// Displays the confirmation view for deleting an enrollment.
-        /// </summary>
-        /// <param name="id">The ID of the enrollment to delete.</param>
-        /// <returns>A view confirming the deletion, or a "Enrollment Not Found" view if the enrollment does not exist.</returns>
-        // GET: Enrollments/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new NotFoundViewResult("EnrollmentNotFound");
-            }
-
-            var enrollment = await _enrollmentRepository.GetByIdAsync(id.Value);
-
-            if (enrollment == null)
-            {
-                return new NotFoundViewResult("EnrollmentNotFound");
-            }
-
-            return View(enrollment);
-        }
-
 
         /// <summary>
-        /// Confirms and processes the deletion of an enrollment.
+        /// Confirms and processes the deletion of an enrollment via AJAX.
         /// </summary>
         /// <param name="id">The ID of the enrollment to be deleted.</param>
-        /// <returns>Redirects to the Index view on successful deletion, or returns an error view if deletion fails.</returns>
-        // POST: Enrollments/Delete/5
-        [HttpPost, ActionName("Delete")]
+        /// <returns>A JSON result indicating success or failure.</returns>
+        // POST: Enrollments/DeleteConfirmed/5 
+        [Authorize(Roles = "Employee")]
+        [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var enrollment = await _enrollmentRepository.GetByIdAsync(id);
 
             if (enrollment == null)
             {
-                return new NotFoundViewResult("EnrollmentNotFound");
+                return Json(new { success = false, message = "Enrollment not found." });
             }
 
             try
             {
                 await _enrollmentRepository.DeleteAsync(enrollment);
-
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
 
-                ViewBag.ErrorTitle = $"Failed to delete enrollment.";
-
                 string errorMessage = "An unexpected database error occurred.";
-
                 if (ex.InnerException != null)
                 {
                     errorMessage = ex.InnerException.Message;
                 }
-
-                ViewBag.ErrorMessage = errorMessage;
-
-                return View("Error");
-            }      
+                return Json(new { success = false, message = errorMessage });
+            }
         }
 
 

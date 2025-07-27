@@ -148,81 +148,44 @@ namespace GestaoEscolarWeb.Controllers
 
 
         /// <summary>
-        /// Displays the confirmation view for deleting a subject.
-        /// This action is accessible only by users with the 'Admin' role.
-        /// </summary>
-        /// <param name="id">The ID of the subject to delete.</param>
-        /// <returns>A view confirming the deletion, or a "Subject Not Found" view if the ID is null or the subject does not exist.</returns>
-        // GET: Subjects/Delete/5
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new NotFoundViewResult("SubjectNotFound");
-            }
-
-            var subject = await _subjectRepository.GetByIdAsync(id.Value);
-            if (subject == null)
-            {
-                return new NotFoundViewResult("SubjectNotFound");
-            }
-
-            return View(subject);   
-        }
-
-
-        /// <summary>
-        /// Confirms and processes the deletion of a subject.
-        /// Clears any associated courses before attempting to delete the subject.
-        /// Handles database exceptions during deletion.
-        /// This action is accessible only by users with the 'Admin' role.
+        /// Confirms and processes the deletion of a subject via AJAX.
         /// </summary>
         /// <param name="id">The ID of the subject to be deleted.</param>
-        /// <returns>Redirects to the Index view on successful deletion, or returns an error view if deletion fails.</returns>
-        // POST: Subjects/Delete/5
+        /// <returns>A JSON result indicating success or failure.</returns>
+        // POST: Subjects/DeleteConfirmed/5 
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-          
             var subject = await _subjectRepository.GetSubjectWithCoursesAsync(id);
 
             if (subject == null)
             {
-                return new NotFoundViewResult("SubjectNotFound");
+                return Json(new { success = false, message = "Subject not found." });
             }
 
             if (subject.SubjectCourses.Any())
             {
-                _flashMessage.Danger("Subject cannot be deleted, it belongs to a course");
-
-                return View("~/Views/Subjects/Delete.cshtml", subject);
+                
+                return Json(new { success = false, message = "Subject cannot be deleted, it belongs to a course." });
             }
 
             try
             {
                 await _subjectRepository.DeleteAsync(subject);
-
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorTitle = $"Failed to delete subject {subject.Name}.";
 
                 string errorMessage = "An unexpected database error occurred.";
-
                 if (ex.InnerException != null)
                 {
                     errorMessage = ex.InnerException.Message;
                 }
-
-                ViewBag.ErrorMessage = errorMessage;
-
-                return View("Error");
+                return Json(new { success = false, message = errorMessage });
             }
         }
-
 
         /// <summary>
         /// Displays the "Subject Not Found" view when a requested subject cannot be located.

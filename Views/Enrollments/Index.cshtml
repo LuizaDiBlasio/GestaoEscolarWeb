@@ -55,10 +55,81 @@
                     </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-action-primary">Edit</a> 
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-action-danger">Delete</a>
+                        <a href="#" class="btn-action-danger delete-enrollment-btn" data-id="@item.Id">Delete</a>
                 </td>
             </tr>
     }
         </tbody>
     </table>
 </div>
+
+<div id="deleteDialog" class="modal fade">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <i class="fa fa-window-close"></i>
+                </button>
+                <h4 class="modal-title">Delete</h4>
+            </div>
+            <div class="modal-body">
+                <p>Do you want to delete this enrollment?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-action-danger" id="btnYesDelete">Delete</button>
+                <button type="button" class="btn btn-action-secondary" id="btnNoDelete">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var idToDelete = 0;
+
+            // Evento clique que abre a modal e captura o ID
+            $('a.delete-enrollment-btn').click(function () {
+                idToDelete = $(this).data('id'); // Captura o ID do atributo data-id
+                $("#deleteDialog").modal('show'); // Abre a janela modal
+            });
+
+            // Clique  "Não" dentro da modal
+            $("#btnNoDelete").click(function () {
+                $("#deleteDialog").modal('hide'); // Esconde a modal
+            });
+
+            // Clique "Delete" (Sim) dentro da modal
+            $("#btnYesDelete").click(function () {
+
+                $.ajax({
+                    url: '/Enrollments/DeleteConfirmed/' + idToDelete, // Usa o ID capturado
+                    type: 'POST',
+                    data: {
+                        id: idToDelete
+                    },
+                    success: function (response) {
+                        $("#deleteDialog").modal('hide'); // Esconde o modal
+
+                        if (response.success) {
+                            window.location.href = '/Enrollments/Index';
+                        } else {
+                            // Em caso de falha, exibe o erro
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $("#deleteDialog").modal('hide'); // Esconde o modal mesmo em caso de erro
+                        alert('An unexpected error occurred. Please try again.');
+                        console.error('AJAX Error:', status, error, xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

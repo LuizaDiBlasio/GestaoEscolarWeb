@@ -305,84 +305,47 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        /// <summary>
-        /// Displays the confirmation view for deleting a school class.
-        /// This action is accessible only by users with the 'Employee' role.
-        /// </summary>
-        /// <param name="id">The ID of the school class to delete.</param>
-        /// <returns>A view confirming the deletion, or a "School Class Not Found" view if the ID is null or the class does not exist.</returns>
-        // GET: SchoolClasses/Delete/5
-        [Authorize(Roles = "Employee")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new NotFoundViewResult("SchoolClassNotFound");
-            }
-
-            var schoolClass = await _schoolClassRepository.GetSchoolClassCourseAndStudentsAsync(id.Value);
-
-            if (schoolClass == null)
-            {
-                return new NotFoundViewResult("SchoolClassNotFound");
-            }
-
-            return View(schoolClass);
-        }
-
 
         /// <summary>
-        /// Confirms and processes the deletion of a school class.
-        /// Prevents deletion if the school class has associated students.
-        /// This action is accessible only by users with the 'Employee' role.
+        /// Confirms and processes the deletion of a school class via AJAX.
         /// </summary>
         /// <param name="id">The ID of the school class to be deleted.</param>
-        /// <returns>Redirects to the Index view on successful deletion, or returns the Delete view with an error message if the class has students, or an error view if deletion fails.</returns>
-        // POST: SchoolClasses/Delete/5
+        /// <returns>A JSON result indicating success or failure.</returns>
+        // POST: Evaluations/DeleteConfirmed/5 
         [Authorize(Roles = "Employee")]
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var schoolClass = await _schoolClassRepository.GetSchoolClassCourseAndStudentsAsync(id);
 
             if (schoolClass == null)
             {
-                return new NotFoundViewResult("SchoolClassNotFound");
+                return Json(new { success = false, message = "School class not found." });
             }
 
             if (schoolClass.Students != null && schoolClass.Students.Any()) //se a turma possuir alunos
             {
-                _flashMessage.Danger($"School class can't be deleted because it has students");
-                return View("Delete", schoolClass);
+                return Json(new { success = false, message = "School class can't be deleted because it has students" });
             }
 
             //desfazer relação com course
             schoolClass.Course = null;
 
-            //deletar
             try
             {
                 await _schoolClassRepository.DeleteAsync(schoolClass);
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
 
-                ViewBag.ErrorTitle = $"Failed to delete school class.";
-
                 string errorMessage = "An unexpected database error occurred.";
-
                 if (ex.InnerException != null)
                 {
                     errorMessage = ex.InnerException.Message;
                 }
-
-                ViewBag.ErrorMessage = errorMessage;
-
-                return View("Error");
+                return Json(new { success = false, message = errorMessage });
             }
-
-
         }
 
 

@@ -241,53 +241,29 @@ namespace GestaoEscolarWeb.Controllers
            
         }
 
+       
 
         /// <summary>
-        /// Displays the confirmation view for deleting a course.
-        /// This action is accessible only by users with the 'Admin' role.
-        /// </summary>
-        /// <param name="id">The ID of the course to delete.</param>
-        /// <returns>A view confirming the deletion, or a "Course Not Found" view if the course does not exist.</returns>
-        // GET: Courses/Delete/5
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        { 
-            if (id == null)
-            {
-                return new NotFoundViewResult("CourseNotFound");
-            }
-
-            var course = await _courseRepository?.GetCourseSubjectsAndSchoolClassesByIdAsync(id.Value);
-            if (course == null)
-            {
-                return new NotFoundViewResult("CourseNotFound");
-            }
-
-            return View(course);
-        }
-
-
-        /// <summary>
-        /// Confirms and processes the deletion of a course.
-        /// This action is accessible only by users with the 'Admin' role.
+        /// Confirms and processes the deletion of a course via AJAX.
         /// </summary>
         /// <param name="id">The ID of the course to be deleted.</param>
-        /// <returns>Redirects to the Index view on successful deletion, or returns an error view if deletion fails due to related entities.</returns>
-        // POST: Courses/Delete/5
+        /// <returns>A JSON result indicating success or failure.</returns>
+        // POST: Courses/DeleteConfirmed/5 
         [Authorize(Roles = "Admin")]
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var course = await _courseRepository.GetCourseSubjectsAndSchoolClassesByIdAsync(id);
 
             if (course == null)
             {
-                return new NotFoundViewResult("CourseNotFound");
+                return Json(new { success = false, message = "Course not found." });
             }
+
             if (course.SchoolClasses != null && course.SchoolClasses.Any())
             {
-                _flashMessage.Danger($"{course.Name} can't be deleted, school classes belong to this course.");
-                return RedirectToAction(nameof(Delete), new { id = course.Id });
+
+                return Json(new { success = false, message = "Course cannot be deleted, school classes belong to this course." });
             }
 
             if (course.CourseSubjects != null)
@@ -298,25 +274,18 @@ namespace GestaoEscolarWeb.Controllers
             try
             {
                 await _courseRepository.DeleteAsync(course);
-
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true });
             }
-            catch(Microsoft.EntityFrameworkCore.DbUpdateException ex)
+            catch (Exception ex)
             {
-                ViewBag.ErrorTitle = $"Failed to delete course '{course.Name}'.";
 
                 string errorMessage = "An unexpected database error occurred.";
-
                 if (ex.InnerException != null)
                 {
                     errorMessage = ex.InnerException.Message;
                 }
-
-                ViewBag.ErrorMessage = errorMessage;
-
-                return View("Error");
+                return Json(new { success = false, message = errorMessage });
             }
-           
         }
 
 

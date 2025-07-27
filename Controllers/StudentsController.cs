@@ -453,57 +453,39 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        /// <summary>
-        /// Displays the confirmation page for deleting a student.
-        /// Only accessible by users with the "Employee" role.
-        /// </summary>
-        /// <param name="id">The ID of the student to delete.</param>
-        /// <returns>A view displaying the student's details for deletion confirmation, or a "StudentNotFound" view if the student is not found.</returns>
-        // GET: Students/Delete/5
-        [Authorize(Roles = "Employee")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new NotFoundViewResult("StudentNotFound");
-            }
-
-            var student = await _studentRepository.GetByIdAsync(id.Value);
-            if (student == null)
-            {
-                return new NotFoundViewResult("StudentNotFound");
-            }
-
-            return View(student);
-        }
-
+      
 
         /// <summary>
-        /// Handles the POST request for confirming the deletion of a student.
-        /// Deletes the student and deactivates their associated user account.
-        /// Prevents deletion if the student has associated grades.
-        /// Only accessible by users with the "Employee" role.
+        /// Confirms and processes the deletion of a student via AJAX.
         /// </summary>
-        /// <param name="id">The ID of the student to delete.</param>
-        /// <returns>Redirects to the Index action on successful deletion, or returns the Delete view with an error message.</returns>
-        // POST: Students/Delete/5
+        /// <param name="id">The ID of the student to be deleted.</param>
+        /// <returns>A JSON result indicating success or failure.</returns>
+        // POST: Students/DeleteConfirmed/5 
         [Authorize(Roles = "Employee")]
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var student = await _studentRepository.GetStudentWithSchoolClassEnrollmentsAndEvaluationsAsync(id);
 
+            if (student == null)
+            {
+                return Json(new { success = false, message = "Student not found." });
+            }
+
+
             if (student.Evaluations != null && student.Evaluations.Any())
             {
-                _flashMessage.Danger("Student cannot be deleted. There are grades associated with this student.");
-                return View("Delete", student);
+                return Json(new { success = false, message = "Student cannot be deleted. There are grades associated with this student." });
             }
 
             //se não houver notas, desfazer relações e deletar
 
-            if(student.Enrollments != null && student.Enrollments.Any())
+            if (student.Enrollments != null && student.Enrollments.Any())
             {
-                student.Enrollments.Clear();
+                foreach (var enrollment in student.Enrollments)
+                {
+                    await _enrollmentRepository.DeleteAsync(enrollment);    
+                }
             }
 
             //anular a propriedade SchoolClass
@@ -520,31 +502,19 @@ namespace GestaoEscolarWeb.Controllers
             try
             {
                 await _studentRepository.DeleteAsync(student);
-
-               //fazer update do user após modificação
-                await _userHelper.UpdateUserAsync(userStudent);
-               
-
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorTitle = $"Failed to delete student '{student.FullName}'.";
 
                 string errorMessage = "An unexpected database error occurred.";
-
                 if (ex.InnerException != null)
                 {
                     errorMessage = ex.InnerException.Message;
                 }
-
-                ViewBag.ErrorMessage = errorMessage;
-
-                return View("Error");
+                return Json(new { success = false, message = errorMessage });
             }
-            
         }
-
 
         /// <summary>
         /// Retrieves the full name of a student by their ID.

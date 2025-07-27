@@ -162,9 +162,9 @@ namespace GestaoEscolarWeb.Controllers
         {
             try
             {
-                /*string apiUrl = "https://gestaoescolarweb20250722140011-dnb0f3b5d8hegqdk.canadacentral-01.azurewebsites.net/api/AccessApi/Login";*/  //Url de login na api apos publicado
+                string apiUrl = "https://gestaoescolarweb20250722140011-dnb0f3b5d8hegqdk.canadacentral-01.azurewebsites.net/api/AccessApi/Login";  //Url de login na api apos publicado
 
-                string apiUrl = "https://localhost:44385/api/AccessApi/Login"; //Para testar localmente
+                /*string apiUrl = "https://localhost:44385/api/AccessApi/Login";*/ //Para testar localmente
 
                 // Serializa o model do login para JSON
                 var jsonContent = JsonSerializer.Serialize(model);

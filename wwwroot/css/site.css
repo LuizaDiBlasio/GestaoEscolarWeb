@@ -384,13 +384,13 @@ footer {
 
     /*Imagem arredondada*/
     .table td img {
-        width: 100px; /* Desired display width */
-        height: 100px; /* Desired display height (making it square) */
-        object-fit: cover; /* ESSENTIAL: Scales image to cover container, maintaining aspect ratio */
-        border-radius: 50%; /* Makes images circular */
+        width: 100px;
+        height: 100px; 
+        object-fit: cover; /* faz scale */
+        border-radius: 50%; /* imagem circular */
         vertical-align: middle;
-        max-width: 100%; /* Ensures image doesn't break out of its cell */
-        display: block; /* Allows margin auto for centering */
+        max-width: 100%; 
+        display: block; 
         margin: 0 auto;
     }
 
@@ -401,12 +401,10 @@ footer {
         display: table-header-group;
     }
 
-        /* Regra MESTRE SIMPLIFICADA para linhas (TR) e células (TH, TD) */
         .table thead tr,
         .table tbody tr {
-            display: flex; /* ESSENCIAL: Transforma as linhas em contêineres flexíveis */
-            width: 100%; /* Garante que a linha ocupe 100% da largura da tabela */
-            /* Borda entre as linhas do corpo */
+            display: flex; /*contêineres flexíveis */
+            width: 100%; 
             border-top: 1px solid #dee2e6;
             transition: background-color 0.3s ease; /* Para o hover nas linhas */
         }
@@ -418,15 +416,14 @@ footer {
 
     .table th,
     .table td {
-        /* ESSENCIAL: Cada célula vai crescer e encolher igualmente */
-        flex-grow: 1; /* Permite que a célula cresça para preencher o espaço disponível */
-        flex-basis: 0; /* Base de tamanho inicial da célula antes de crescer/encolher */
-        flex-shrink: 1; /* Permite que a célula encolha se não houver espaço suficiente */
+        /*célula vai crescer e encolher igualmente */
+        flex-grow: 1; 
+        flex-basis: 0; 
+        flex-shrink: 1; 
 
-        padding: 12px 20px; /* Padding padrão para todas as células */
+        padding: 12px 20px; 
         vertical-align: middle;
-        text-align: left; /* Alinhamento padrão: esquerda */
-        /*white-space: nowrap;*/ /* Evita que o texto quebre por padrão, permitindo scroll horizontal se necessário */
+        text-align: left; 
     }
 
     /* Sobrescreve padding para THs para um pouco mais de altura */
@@ -437,21 +434,19 @@ footer {
         text-align: left;
     }
 
-        /* Ajuste o alinhamento de texto para colunas de ação ou ID se necessário */
-        /* Geralmente, IDs e botões de ação ficam melhor centralizados ou à direita */
-        /* Adapte esses seletores se suas colunas de ação não forem sempre a última, por exemplo */
+        
         .table th:first-child,
         .table td:first-child {
-            text-align: center; /* Exemplo: Centraliza a primeira coluna (geralmente Id) */
-            flex-grow: 0.5; /* Faz a primeira coluna crescer menos, se for um ID curto */
-            flex-shrink: 0; /* Evita que ela encolha muito */
-            min-width: 50px; /* Largura mínima para IDs */
+            text-align: center;
+            flex-grow: 0.5; 
+            flex-shrink: 0; 
+            min-width: 50px; 
             text-align: left;
         }
 
         .table th:last-child,
         .table td:last-child {
-            text-align: center; /* Exemplo: Centraliza a última coluna (geralmente ações) */
+            text-align: center; 
             flex-grow: 1; /* Permite que a última coluna cresça para acomodar botões */
             min-width: 120px; /* Largura mínima para botões de ação */
             text-align: left;
@@ -493,56 +488,54 @@ footer {
 
 /*Students table*/
 .students-table th:first-child,
-.students-table td:first-child { /* Id Column */
-    flex: 0 0 50px; /* Fixed width for ID, no grow/shrink */
+.students-table td:first-child { /* coluna Id  */
+    flex: 0 0 50px; /* largura fixa */
     text-align: center;
 }
 
 .students-table th:nth-child(2),
-.students-table td:nth-child(2) { /* Full Name Column */
-    flex: 1 1 150px; /* Allows growth, preferred 150px base */
+.students-table td:nth-child(2) { 
+    flex: 1 1 150px; /* pode crescer */
 }
 
 .students-table th:nth-child(3),
-.students-table td:nth-child(3) { /* Date of Birth Column */
-    flex: 0 0 120px; /* Fixed width for dates */
+.students-table td:nth-child(3) { 
+    flex: 0 0 120px; /* largura fixa */
     text-align: center;
 }
 
 .students-table th:nth-child(4),
-.students-table td:nth-child(4) { /* Email Column */
-    flex: 2 1 200px; /* Grows more, preferred 200px base */
+.students-table td:nth-child(4) {
+    flex: 2 1 200px; /* pode crescer */
 }
 
 .students-table th:nth-child(5),
-.students-table td:nth-child(5) { /* Profile Image Column */
+.students-table td:nth-child(5) {
     flex: 0 0 120px; /* Fixed width for the image column */
-    text-align: center;
-    overflow: visible; /* Allow image to be fully visible */
-    padding: 5px 10px; /* Reduced padding for image cell */
+    text-align: center; /* largura fixa */
+    overflow: visible; 
+    padding: 5px 10px; 
 }
 
-/* Specific image size for the students table (larger) */
+
 .students-table td img {
-    width: 100px; /* Larger image size for students table */
+    width: 100px; 
     height: 100px;
 }
 
 
 .students-table th:last-child,
-.students-table td:last-child { /* Actions Column */
-    flex: 0 0 250px; /* Fixed width for buttons on THIS table. ADJUST THIS VALUE! */
+.students-table td:last-child { 
+    flex: 0 0 250px; /* tamanho fixo */
     text-align: center;
-    white-space: normal; /* Allow buttons to wrap */
-    overflow: visible; /* Ensure buttons are not hidden */
-    text-overflow: clip; /* No ellipsis for buttons */
-    /* If your "Edit | Details | Delete | Enroll" links are not fitting on one line on large screens,
-       INCREASE the 250px above. If they are too spread out, DECREASE it. */
+    white-space: normal; /* wrap para os botoes*/
+    overflow: visible; 
+    text-overflow: clip; 
 }
 
 /* Estilos para a tabela de Enrollments  */
 .enrollments-table {
-    margin-top: 20px; /* Adiciona uma margem superior para espaçamento */
+    margin-top: 20px; /*  margem superior para espaçamento */
 }
 .enrollments-table th:nth-child(1),
 .enrollments-table td:nth-child(1) { /* Student Full Name Column */
@@ -584,8 +577,8 @@ footer {
 
 .enrollments-table th:last-child,
 .enrollments-table td:last-child { /* Actions Column (Edit | Delete) */
-    flex: 0 0 200px; /* Aumentado de 150px para 200px */
+    flex: 0 0 200px;
     text-align: center;
-    white-space: nowrap; /* Tenta manter "Edit | Delete" na mesma linha */
-    padding: 8px; /* Ajuste o padding se necessário para dar mais espaço interno */
+    white-space: nowrap; /*  "Edit | Delete" na mesma linha */
+    padding: 8px; 
 }

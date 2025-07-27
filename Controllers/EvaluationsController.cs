@@ -374,82 +374,47 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
-        /// <summary>
-        /// Displays the confirmation view for deleting an evaluation.
-        /// This action is accessible only by users with the 'Employee' role.
-        /// </summary>
-        /// <param name="id">The ID of the evaluation to delete.</param>
-        /// <returns>A view confirming the deletion, or a "Evaluation Not Found" view if the evaluation does not exist.</returns>
-        [Authorize(Roles = "Employee")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new NotFoundViewResult("EvaluationNotFound");
-            }
-
-            var evaluation = await _evaluationRepository.GetByIdAsync(id.Value); 
-            
-            if (evaluation == null)
-            {
-                return new NotFoundViewResult("EvaluationNotFound");
-            }
-
-            return View(evaluation);
-        }
-
+     
 
         /// <summary>
-        /// Confirms and processes the deletion of an evaluation.
-        /// Prevents deletion if the school year has ended.
-        /// This action is accessible only by users with the 'Employee' role.
+        /// Confirms and processes the deletion of an evaluation via AJAX.
         /// </summary>
         /// <param name="id">The ID of the evaluation to be deleted.</param>
-        /// <returns>Redirects to the Index view on successful deletion, or returns an error view if deletion fails.</returns>
-        // POST: Evaluations/Delete/5
+        /// <returns>A JSON result indicating success or failure.</returns>
+        // POST: Evaluations/DeleteConfirmed/5 
         [Authorize(Roles = "Employee")]
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var evaluation = await _evaluationRepository.GetByIdAsync(id);
 
             if (evaluation == null)
             {
-                return new NotFoundViewResult("EvaluationNotFound");
+                return Json(new { success = false, message = "Evaluation not found." });
             }
 
             var student = await _studentRepository.GetStudentWithSchoolClassAsync(evaluation.StudentId);
 
             if (student.SchoolClass.SchoolYear < DateTime.Now.Year)
             {
-                _flashMessage.Danger("Cannot delete evaluation after schoolyear end");
-                return View();
+                return Json(new { success = false, message = "Cannot delete evaluation after schoolyear end" });
             }
 
             try
             {
                 await _evaluationRepository.DeleteAsync(evaluation);
-
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
 
-                ViewBag.ErrorTitle = $"Failed to delete evaluation.";
-
                 string errorMessage = "An unexpected database error occurred.";
-
                 if (ex.InnerException != null)
                 {
                     errorMessage = ex.InnerException.Message;
                 }
-
-                ViewBag.ErrorMessage = errorMessage;
-
-                return View("Error");
+                return Json(new { success = false, message = errorMessage });
             }
-
-            
         }
 
         /// <summary>
