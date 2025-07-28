@@ -100,5 +100,10 @@ namespace GestaoEscolarWeb.Controllers
         }
 
 
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
     }
 }
