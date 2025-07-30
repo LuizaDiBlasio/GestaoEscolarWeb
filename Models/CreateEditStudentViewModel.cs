@@ -4,6 +4,7 @@ using System;
 using GestaoEscolarWeb.Data.Entities;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
+using GestaoEscolarWeb.ValidationAttributes;
 
 namespace GestaoEscolarWeb.Models
 {
@@ -49,6 +50,7 @@ namespace GestaoEscolarWeb.Models
 
 
         [Display(Name = "Profile Image")]
+        [MaxFileSize(5 * 1024 * 1024)]
         public IFormFile ImageFile { get; set; }
 
 

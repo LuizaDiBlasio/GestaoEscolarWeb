@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using GestaoEscolarWeb.ValidationAttributes;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,8 @@ namespace GestaoEscolarWeb.Models
 
 
         [Display(Name = "Profile Image")]
+        [MaxFileSize(5 * 1024 * 1024)]
+        [RequiredIfRoleIsStudent]
         public IFormFile ImageFile { get; set; }
 
 

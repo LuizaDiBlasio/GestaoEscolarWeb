@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System;
 using GestaoEscolarWeb.Data.Entities;
 using System.Collections.Specialized;
+using GestaoEscolarWeb.ValidationAttributes;
 
 namespace GestaoEscolarWeb.Models
 {
@@ -40,6 +41,7 @@ namespace GestaoEscolarWeb.Models
 
 
         [Display(Name = "Profile Image")]
+        [MaxFileSize(5 * 1024 * 1024)]
         public IFormFile ImageFile { get; set; }
 
 

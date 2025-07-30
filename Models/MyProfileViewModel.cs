@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using GestaoEscolarWeb.ValidationAttributes;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -38,6 +39,7 @@ namespace GestaoEscolarWeb.Models
 
 
         [Display(Name = "Profile Image")]
+        [MaxFileSize(5 * 1024 * 1024)]
         public IFormFile ImageFile { get; set; }
 
 
